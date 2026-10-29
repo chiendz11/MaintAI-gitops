@@ -107,6 +107,8 @@ def configuration(name, count):
         # Match the supplied PR15 bundle and the existing read-only models mount.
         # This explicit local prototype flag does not provide service authentication.
         env.update({"MAINTAI_LOCAL_ONLY": "1", "MODEL_DIR": "/local/models/logreg-baseline-v0"})
+    if name == "rag-service":
+        env.update(load("config/local/rag-runtime.json")["environment"])
     return env, bridge, secrets, mounts
 
 
@@ -131,6 +133,8 @@ def resources(name, spec, count, source_sha):
                  "KAFKA_BOOTSTRAP_SERVERS", "KAFKA_LOCAL_MODE", "KAFKA_SECURITY_PROTOCOL", "PRODUCER_GIT_SHA"}
     if forbidden.intersection(spec.get("env", {})):
         raise ValueError("Local override attempts to weaken a fixed runtime invariant")
+    if name == "rag-service" and any(key.startswith("OLLAMA_") or key in {"EMBEDDING_MODEL", "EMBEDDING_REVISION", "HF_HOME", "SENTENCE_TRANSFORMERS_HOME", "MODEL_LOCAL_FILES_ONLY"} for key in spec.get("env", {})):
+        raise ValueError("RAG embedding/cache/provider wiring belongs to the reviewed runtime selection")
     port = catalog["port"]
     primary = {"name": name, "image": "registry.invalid/maintai-local/" + name + ":NOT_BUILT", "imagePullPolicy": "Never",
                "envFrom": [{"configMapRef": {"name": name + "-config"}}] + [{"secretRef": {"name": value}} for value in secrets],
@@ -143,6 +147,13 @@ def resources(name, spec, count, source_sha):
         primary["command"] = ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000", "--serve-artifacts", "--artifacts-destination", "s3://maintai-mlflow/artifacts", "--allowed-hosts", "127.0.0.1:15000,localhost:15000,mlflow:5000,mlflow.maintai-local.svc.cluster.local:5000"]
     volumes = [{"name": "tmp", "emptyDir": {}}, {"name": "tls", "secret": {"secretName": "local-dev-tls", "defaultMode": 288}}]
     containers, init = [primary], []
+    if name == "rag-service":
+        rag = load("config/local/rag-runtime.json")
+        primary["env"] = [{"name": "GROQ_API_KEY", "valueFrom": {"secretKeyRef": {"name": rag["groq_secret"], "key": "GROQ_API_KEY"}}}]
+        volumes.append({"name": "embedding-cache", "persistentVolumeClaim": {"claimName": rag["cache_claim"]}})
+        primary["volumeMounts"].append({"name": "embedding-cache", "mountPath": rag["environment"]["SENTENCE_TRANSFORMERS_HOME"]})
+        primary["resources"] = {"requests": {"cpu": "250m", "memory": "512Mi"}, "limits": {"cpu": "2", "memory": "2Gi"}}
+        # Provider quota/network failures belong to readiness, not process startup.
     if name == "processing-worker":
         volumes.append({"name": "risk-policy", "configMap": {"name": POLICY_CONFIGMAP}})
         primary["volumeMounts"].append({"name": "risk-policy", "mountPath": POLICY_MOUNT, "readOnly": True})
@@ -189,6 +200,9 @@ def resources(name, spec, count, source_sha):
         primary["ports"] = [{"containerPort": port, "name": "http"}]
         for probe in ("startupProbe", "readinessProbe", "livenessProbe"):
             primary[probe] = {"httpGet": {"path": "/health" if name == "mlflow" else "/health/live" if probe == "livenessProbe" else "/health/ready", "port": port}, "periodSeconds": 5, "timeoutSeconds": 2, "failureThreshold": 60 if probe == "startupProbe" else 3}
+        if name == "rag-service":
+            primary["startupProbe"]["httpGet"]["path"] = "/health/live"
+            primary["readinessProbe"]["timeoutSeconds"] = 10
         deployment = {"apiVersion": "apps/v1", "kind": "Deployment", "metadata": metadata(name), "spec": {"replicas": 1,
                       "strategy": {"type": "Recreate"} if name in {"sensor", "ml-service", "mlflow"} else {"type": "RollingUpdate", "rollingUpdate": {"maxSurge": 1, "maxUnavailable": 0}},
                       "selector": {"matchLabels": {"app.kubernetes.io/name": name}}, "template": {"metadata": {"labels": labels}, "spec": pod}}}

@@ -179,3 +179,5 @@ cần nguồn/kiểm chứng tương ứng. Không xem Argo Synced hoặc broker
 CI authored kiểm source/contract/gates, Kustomize local và production; chưa được
 thực thi trong lượt này. Runbook kiểm chứng cần theo từng tầng và ghi rõ fixture
 so với provider thật. Xem `LOCAL_MIGRATION.md` để chuyển từ folder k3d cũ.
+
+Hướng dẫn mới: [Groq, model identity và knowledge preparation](LOCAL_DEMO_PREPARATION.md).

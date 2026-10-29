@@ -71,10 +71,15 @@ def check(app=None, companion=None):
         verify_application_source(app, load("config/local/app-source.lock.json"))
         from .risk_policy import read_policy
         read_policy(app)
+        embedding = json.loads((app / "rag-service/embedding-lock.json").read_text())
+        rag = load("config/local/rag-runtime.json")
+        if rag["environment"]["EMBEDDING_MODEL"] != embedding["model"] or rag["environment"]["EMBEDDING_REVISION"] != embedding["revision"]:
+            raise ValueError("RAG runtime embedding differs from the pinned application")
     if companion:
         for left, right in [("config/local/app-source.lock.json", "local/versions/app-source.lock.json"),
                             ("config/local/contract.json", "local/config/contract.json"), ("config/local/runtime-catalog.json", "local/config/runtime-catalog.json"),
-                            ("config/local/platform.lock.json", "local/versions/platform.lock.json"), ("config/local/buckets.json", "local/config/buckets.json")]:
+                            ("config/local/platform.lock.json", "local/versions/platform.lock.json"), ("config/local/buckets.json", "local/config/buckets.json"),
+                            ("config/local/rag-runtime.json", "local/config/rag-runtime.json")]:
             if (ROOT / left).read_bytes() != (companion / right).read_bytes():
                 raise ValueError("Local handoff bytes differ: " + left)
     print("Local source policy passed; images, providers, Argo sync and E2E remain separate evidence.")
