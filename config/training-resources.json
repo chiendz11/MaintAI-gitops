@@ -1,0 +1,12 @@
+{
+  "resources": [
+    "accounts.yaml",
+    "rbac.yaml",
+    "eventbus.yaml",
+    "eventsource.yaml",
+    "sensor.yaml",
+    "context.yaml",
+    "workflow-template.yaml",
+    "network-policy.yaml"
+  ]
+}

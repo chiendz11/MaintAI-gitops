@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensor-config-335af60157b8
+  namespace: maintai
+  labels:
+    app.kubernetes.io/name: sensor
+    app.kubernetes.io/part-of: maintai
+immutable: true
+data:
+  LOG_LEVEL: INFO
+  ENVIRONMENT: production
+  INGESTION_BASE_URL: http://ingestion-api:8000
+  SIM_DATASET_PATH: /data/ai4i2020.csv
+  SIM_INTERVAL_MS: '1000'
+  SIM_SPEED: '1'
+  SIM_MACHINE_COUNT: '5'
+  SIM_STATE_DIR: /state
+  SIM_CONTROL_AUTH_ENABLED: 'true'
+  OIDC_ISSUER: REPLACE_WITH_OIDC_ISSUER
+  OIDC_AUDIENCE: maintai-simulator
+  SIM_CONTROL_PERMISSION: simulator.control
+  SIMULATOR_PUBLIC_ORIGIN: REPLACE_WITH_SIMULATOR_ORIGIN

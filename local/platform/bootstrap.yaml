@@ -1,0 +1,141 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: local-postgres-bootstrap
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-10'
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 600
+  template:
+    spec:
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      containers:
+      - name: bootstrap
+        image: pgvector/pgvector:0.8.0-pg17@sha256:40b404964359299eefdd5f8518facf1886c562848cf4de13b6eaf91cb70c2b87
+        command:
+        - sh
+        - /bootstrap/postgres.sh
+        volumeMounts:
+        - name: bootstrap
+          mountPath: /bootstrap
+          readOnly: true
+        - name: credentials
+          mountPath: /secrets
+          readOnly: true
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+      volumes:
+      - name: bootstrap
+        configMap:
+          name: local-postgres-bootstrap
+      - name: credentials
+        secret:
+          secretName: local-postgres-bootstrap
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: local-minio-bootstrap
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-10'
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 600
+  template:
+    spec:
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      containers:
+      - name: bootstrap
+        image: registry.invalid/maintai-local/mc:NOT_BUILT
+        command:
+        - sh
+        - /bootstrap/minio.sh
+        volumeMounts:
+        - name: bootstrap
+          mountPath: /bootstrap
+          readOnly: true
+        - name: credentials
+          mountPath: /secrets
+          readOnly: true
+        - name: policies
+          mountPath: /policies
+          readOnly: true
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+        imagePullPolicy: Never
+      volumes:
+      - name: bootstrap
+        configMap:
+          name: local-minio-bootstrap
+      - name: credentials
+        secret:
+          secretName: local-minio-bootstrap
+      - name: policies
+        configMap:
+          name: local-minio-policies
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: local-kafka-topics
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-10'
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 600
+  template:
+    spec:
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      containers:
+      - name: bootstrap
+        image: apache/kafka:4.0.0@sha256:3f7b939115cd4872e9cee9369d80bd69712fde55f9902f46d793f64848dedc75
+        command:
+        - bash
+        - /bootstrap/topics.sh
+        volumeMounts:
+        - name: bootstrap
+          mountPath: /bootstrap
+          readOnly: true
+        - name: credentials
+          mountPath: /secrets
+          readOnly: true
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+      volumes:
+      - name: bootstrap
+        configMap:
+          name: local-kafka-topics
+      - name: credentials
+        secret:
+          secretName: local-kafka

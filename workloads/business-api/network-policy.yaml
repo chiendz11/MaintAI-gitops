@@ -1,0 +1,41 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: business-api
+  namespace: maintai
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: business-api
+      app.kubernetes.io/part-of: maintai
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+    ports:
+    - protocol: TCP
+      port: 8003
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: processing-read-api
+    ports:
+    - protocol: TCP
+      port: 8004
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: rag-service
+    ports:
+    - protocol: TCP
+      port: 8002

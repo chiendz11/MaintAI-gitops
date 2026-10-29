@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rag-service-config-571180f5dd17
+  namespace: maintai
+  labels:
+    app.kubernetes.io/name: rag-service
+    app.kubernetes.io/part-of: maintai
+immutable: true
+data:
+  LOG_LEVEL: INFO
+  ENVIRONMENT: production
+  AUTH_ENABLED: 'true'
+  LLM_PROVIDER: REPLACE_WITH_PROVIDER
+  EMBEDDING_PROVIDER: REPLACE_WITH_PROVIDER
+  S3_DOCUMENTS_BUCKET: REPLACE_WITH_KNOWLEDGE_BUCKET
+  REQUIRE_ACTION_CITATIONS: 'true'

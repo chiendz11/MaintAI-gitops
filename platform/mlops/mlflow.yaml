@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow
+  namespace: maintai
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mlflow
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mlflow
+    spec:
+      serviceAccountName: mlflow
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: mlflow
+        image: registry.invalid/maintai/mlflow:UNCONFIGURED
+        command:
+        - mlflow
+        - server
+        args:
+        - --host
+        - 0.0.0.0
+        - --port
+        - '5000'
+        - --backend-store-uri
+        - $(MLFLOW_BACKEND_STORE_URI)
+        - --serve-artifacts
+        - --artifacts-destination
+        - s3://REPLACE_WITH_ARTIFACTS_BUCKET/mlflow
+        - --allowed-hosts
+        - mlflow,mlflow.maintai,mlflow.maintai.svc,mlflow.maintai.svc.cluster.local
+        env:
+        - name: MLFLOW_BACKEND_STORE_URI
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-database
+              key: url
+        - name: PGSSLROOTCERT
+          value: /etc/rds-ca/global-bundle.pem
+        ports:
+        - name: http
+          containerPort: 5000
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 15
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: '2'
+            memory: 2Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: rds-ca
+          mountPath: /etc/rds-ca
+          readOnly: true
+      volumes:
+      - name: rds-ca
+        configMap:
+          name: aws-rds-ca

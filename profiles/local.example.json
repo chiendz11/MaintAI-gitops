@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0.0",
+  "namespace": "maintai-local",
+  "machine_count": 5,
+  "components": {
+    "ingestion-api": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "processing-worker": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "processing-read-api": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "processing-outbox-relay": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "business-api": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "business-consumer": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "storage-consumer": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "sensor": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "frontend": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "simulator-ui": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "ml-service": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "rag-service": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "drift-worker": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false,
+      "schedule_enabled": false
+    },
+    "mlflow": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    },
+    "training": {
+      "enabled": false,
+      "image": null,
+      "receipt": null,
+      "env": {},
+      "files": {},
+      "runtime_reviewed": false
+    }
+  },
+  "evidence": {
+    "owner_migrations_applied": false,
+    "runtime_grants_applied": false,
+    "machines_provisioned": false,
+    "ordering_activated": false,
+    "model_identity_reviewed": false,
+    "dataset_reviewed": false,
+    "mlflow_compatibility_reviewed": false
+  },
+  "notes": "Copy to a reviewed local release profile. Enable only actual images/providers; this file does not start workloads."
+}

@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: maintai-kafka
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+    - maintai
+  selector:
+    matchLabels:
+      strimzi.io/cluster: maintai-kafka
+  podMetricsEndpoints:
+  - port: tcp-prometheus
+    path: /metrics
+    interval: 30s

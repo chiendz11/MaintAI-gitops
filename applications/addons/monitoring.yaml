@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: maintai-monitoring
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '-40'
+spec:
+  project: maintai-production
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 88.5.3
+    helm:
+      releaseName: monitoring
+      valuesObject:
+        grafana:
+          enabled: true
+          ingress:
+            enabled: false
+        prometheus:
+          prometheusSpec:
+            retention: 7d
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelectorNilUsesHelmValues: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    syncOptions:
+    - ServerSideApply=true
+    retry:
+      limit: 5

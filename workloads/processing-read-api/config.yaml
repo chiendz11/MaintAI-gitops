@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: processing-read-api-config-7df9d78958ec
+  namespace: maintai
+  labels:
+    app.kubernetes.io/name: processing-read-api
+    app.kubernetes.io/part-of: maintai
+immutable: true
+data:
+  LOG_LEVEL: INFO
+  ENVIRONMENT: production
+  AUTH_ENABLED: 'true'

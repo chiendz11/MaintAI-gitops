@@ -1,0 +1,95 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: maintai-database-bootstrap-v1
+  namespace: maintai
+  annotations:
+    maintai.io/execution: manual-operation-only
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 600
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: bootstrap
+        image: registry.invalid/maintai/automation:UNCONFIGURED
+        command:
+        - python
+        - -m
+        - platform_runtime.database
+        env:
+        - name: ALLOW_DATABASE_BOOTSTRAP
+          value: 'false'
+        - name: PGHOST
+          value: REPLACE_WITH_RDS_HOST
+        - name: PGPORT
+          value: '5432'
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-bootstrap-admin
+              key: username
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-bootstrap-admin
+              key: password
+        - name: PGSSLROOTCERT
+          value: /etc/rds-ca/global-bundle.pem
+        - name: PGVECTOR_VERSION
+          value: REPLACE_WITH_PINNED_VECTOR_VERSION
+        - name: PROCESSING_DATABASE_CREDENTIAL
+          valueFrom:
+            secretKeyRef:
+              name: processing-database
+              key: credential_json
+        - name: BUSINESS_DATABASE_CREDENTIAL
+          valueFrom:
+            secretKeyRef:
+              name: business-database
+              key: credential_json
+        - name: DRIFT_DATABASE_CREDENTIAL
+          valueFrom:
+            secretKeyRef:
+              name: drift-database
+              key: credential_json
+        - name: MLFLOW_DATABASE_CREDENTIAL
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-database
+              key: credential_json
+        - name: KNOWLEDGE_DATABASE_CREDENTIAL
+          valueFrom:
+            secretKeyRef:
+              name: knowledge-database
+              key: credential_json
+        volumeMounts:
+        - name: rds-ca
+          mountPath: /etc/rds-ca
+          readOnly: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: '1'
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: rds-ca
+        configMap:
+          name: aws-rds-ca
+    metadata:
+      labels:
+        app.kubernetes.io/name: database-bootstrap

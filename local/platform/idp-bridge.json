@@ -1,0 +1,12 @@
+{
+  "environment": "local-k3d",
+  "http": [
+    {
+      "bind": "0.0.0.0",
+      "port": 18490,
+      "target_host": "keycloak",
+      "target_port": 8080,
+      "tls": true
+    }
+  ]
+}

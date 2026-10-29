@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-consumer
+  namespace: maintai
+  labels: &id001
+    app.kubernetes.io/name: storage-consumer
+    app.kubernetes.io/part-of: maintai
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels: *id001
+  template:
+    metadata:
+      labels: *id001
+      annotations:
+        maintai.io/config-sha256: 6e8348363e6f49a7939e20b0833a3d427d67f83e79212b02176b01c1ba486085
+        maintai.io/architecture-revision: maintai-1.3.1+simulator-ui.1
+    spec:
+      serviceAccountName: storage-consumer
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 90
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: storage-consumer
+        image: registry.invalid/maintai/storage-consumer:UNCONFIGURED
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: '1'
+            memory: 1Gi
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: kafka-ca
+          mountPath: /etc/kafka/ca
+          readOnly: true
+        command:
+        - python
+        - -m
+        - maintai_storage.consumer
+        envFrom:
+        - configMapRef:
+            name: storage-consumer-config-6e8348363e6f
+        env:
+        - name: KAFKA_SASL_USERNAME
+          value: maintai-storage
+        - name: KAFKA_SASL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: maintai-storage
+              key: password
+        ports:
+        - name: http
+          containerPort: 9100
+        startupProbe:
+          httpGet:
+            path: /health/ready
+            port: http
+          failureThreshold: 60
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 2
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 2
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: kafka-ca
+        secret:
+          secretName: maintai-kafka-cluster-ca-cert

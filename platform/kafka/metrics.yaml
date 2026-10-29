@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-metrics
+  namespace: maintai
+data:
+  kafka-metrics-config.yml: "lowercaseOutputName: true\nrules:\n  - pattern: \"kafka.server<type=(.+),\
+    \ name=(.+)><>Value\"\n    name: \"kafka_server_$1_$2\"\n  - pattern: \"kafka.server<type=(.+),\
+    \ name=(.+), topic=(.+)><>Count\"\n    name: \"kafka_server_$1_$2\"\n    labels:\n\
+    \      topic: \"$3\"\n"

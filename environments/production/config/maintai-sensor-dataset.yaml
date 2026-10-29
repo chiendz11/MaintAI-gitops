@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maintai-sensor-dataset
+  namespace: maintai
+data:
+  dataset.json: '{"object": null, "schema_version": "1.0.0", "status": "unconfigured"}'

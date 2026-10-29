@@ -1,0 +1,5 @@
+{
+  "schema_version": "1.0.0",
+  "python_base_image": null,
+  "note": "GitOps automation image only. MLflow base/server pins now belong to MaintAI/ml-service/mlflow/image-lock.json. Supply a verified automation base digest before publication."
+}

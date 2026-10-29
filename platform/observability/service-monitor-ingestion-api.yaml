@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ingestion-api
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+    - maintai
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingestion-api
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s

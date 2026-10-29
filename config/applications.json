@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "children": [
+    "addons/argo-workflows.yaml",
+    "addons/argo-events.yaml",
+    "addons/external-secrets.yaml",
+    "addons/external-dns.yaml",
+    "addons/load-balancer.yaml",
+    "addons/monitoring.yaml",
+    "addons/strimzi.yaml",
+    "namespaces.yaml",
+    "storage.yaml",
+    "network.yaml",
+    "secret-store.yaml",
+    "kafka.yaml",
+    "observability.yaml",
+    "configuration.yaml",
+    "workloads.yaml",
+    "edge.yaml",
+    "training.yaml",
+    "mlops.yaml"
+  ],
+  "automatic_sync": false,
+  "note": "Enable auto-sync in a reviewed infrastructure/platform handoff PR after credentials and pins are configured."
+}

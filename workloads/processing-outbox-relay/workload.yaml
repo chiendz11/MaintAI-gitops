@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processing-outbox-relay
+  namespace: maintai
+  labels: &id001
+    app.kubernetes.io/name: processing-outbox-relay
+    app.kubernetes.io/part-of: maintai
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels: *id001
+  template:
+    metadata:
+      labels: *id001
+      annotations:
+        maintai.io/config-sha256: 80c781fdee68285b7b4baec342ae2695097162cd59a55e2a73738f9b59085e72
+        maintai.io/architecture-revision: maintai-1.3.1+simulator-ui.1
+    spec:
+      serviceAccountName: processing-outbox-relay
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 90
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: processing-outbox-relay
+        image: registry.invalid/maintai/processing:UNCONFIGURED
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: '1'
+            memory: 1Gi
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: kafka-ca
+          mountPath: /etc/kafka/ca
+          readOnly: true
+        - name: rds-ca
+          mountPath: /etc/rds-ca
+          readOnly: true
+        command:
+        - python
+        - -m
+        - maintai_processing.outbox_relay
+        envFrom:
+        - configMapRef:
+            name: processing-outbox-relay-config-80c781fdee68
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: processing-database
+              key: url
+        - name: PRODUCER_GIT_SHA
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['maintai.io/source-sha']
+        - name: KAFKA_SASL_USERNAME
+          value: maintai-outbox
+        - name: KAFKA_SASL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: maintai-outbox
+              key: password
+        ports:
+        - name: http
+          containerPort: 9100
+        startupProbe:
+          httpGet:
+            path: /health/ready
+            port: http
+          failureThreshold: 60
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 2
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 2
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: kafka-ca
+        secret:
+          secretName: maintai-kafka-cluster-ca-cert
+      - name: rds-ca
+        configMap:
+          name: aws-rds-ca

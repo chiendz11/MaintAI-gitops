@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ml-service-config-a6b29fe84a7a
+  namespace: maintai
+  labels:
+    app.kubernetes.io/name: ml-service
+    app.kubernetes.io/part-of: maintai
+immutable: true
+data:
+  LOG_LEVEL: INFO
+  ENVIRONMENT: production
+  MODEL_DIR: /models/current
+  AUTH_ENABLED: 'true'

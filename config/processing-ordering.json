@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "decision_id": "PROC-ORDER-01",
+  "decision_revision": "1.0.0",
+  "activation_status": "NOT_ACTIVATED",
+  "runtime_config_version": "3.0.0",
+  "schemas": {
+    "processing-worker": {
+      "path": "contracts/runtime-config/processing-worker-3.0.0.schema.json",
+      "sha256": "04c1e64dae698d114762c2a5e5b4906757cc1bc96c15679bda1408efc6db449c"
+    },
+    "processing-outbox-relay": {
+      "path": "contracts/runtime-config/processing-outbox-relay-3.0.0.schema.json",
+      "sha256": "1b730eb6004ab4b740690fe954156ecb41430a96e1d61decb26312ae75c40254"
+    }
+  },
+  "app_sdk_version": "0.2.0",
+  "kafka_bundle_version": "1.1.0",
+  "required_owner_migrations": [
+    "001_messaging.sql",
+    "002_processing_ordering.sql"
+  ],
+  "pending_inputs": [
+    "reviewed app commit/image digest",
+    "real DQ/ML preparation and persistence callbacks",
+    "owner DB migration and explicit activation evidence",
+    "runtime-config3 receiver/publisher cutover",
+    "health/metrics server and deployment review",
+    "capacity and rolling update evidence"
+  ],
+  "notes": "This profile is inert. Active release automation and state remain config2.0.0. Do not add new keys to frozen2.0 schemas or enable workloads from this file."
+}

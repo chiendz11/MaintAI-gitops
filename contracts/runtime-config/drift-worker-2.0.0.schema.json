@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://maintai.invalid/runtime-config/drift-worker/2.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "LOG_LEVEL",
+    "ENVIRONMENT",
+    "PROCESSING_READ_BASE_URL",
+    "DRIFT_REFERENCE_PATH",
+    "DRIFT_WINDOW_SIZE",
+    "DRIFT_MINIMUM_SAMPLES",
+    "DRIFT_PUSHGATEWAY_URL",
+    "DRIFT_REPORT_BUCKET",
+    "DRIFT_REPORT_PREFIX",
+    "DRIFT_WORKER_NAME"
+  ],
+  "properties": {
+    "LOG_LEVEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ENVIRONMENT": {
+      "type": "string",
+      "minLength": 1
+    },
+    "PROCESSING_READ_BASE_URL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DRIFT_REFERENCE_PATH": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DRIFT_WINDOW_SIZE": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DRIFT_MINIMUM_SAMPLES": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DRIFT_PUSHGATEWAY_URL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DRIFT_REPORT_BUCKET": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DRIFT_REPORT_PREFIX": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DRIFT_WORKER_NAME": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

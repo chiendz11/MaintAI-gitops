@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: approved-dataset-sqs
+  namespace: argo-events
+spec:
+  eventBusName: default
+  template:
+    serviceAccountName: sqs-eventsource
+  sqs:
+    approved-datasets:
+      jsonBody: true
+      region: REPLACE_WITH_REGION
+      queue: REPLACE_WITH_APPROVED_DATASET_QUEUE
+      waitTimeSeconds: 20

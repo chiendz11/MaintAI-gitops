@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "sha256": {
+    "dataset-manifest-v1.schema.json": "f0305a51f2f35e5ce59807e6262211de4222e227bccdc6ade5407f300370c86d",
+    "model-release-v1.schema.json": "586d7cefeee92d1b7b684a4bcde56f50b1393735e1c0e4902001b8c5fe2eff69",
+    "model-result-v1.schema.json": "26ceb5b70fc4a132a23a9cddd6f99e793150912a3d43d780090e2f187f86ba80",
+    "platform-contract-v2.schema.json": "51be0091b05b92eeaf77dab1695708f77133084c4eed4c5e6e344699341f6521",
+    "recovery-v1.schema.json": "46221336d12cefdec2b9813b663fdd683dd94f3650b97a60d131f4fa2592c599",
+    "runtime-config/business-api-2.0.0.schema.json": "c215be1126ae5d88448d75663ba78b06bb1688f68a47ac475cb148181ae3749f",
+    "runtime-config/business-consumer-2.0.0.schema.json": "ca94e78292a53ba718dc2e7a58b5a4b7dececc3fdccbf21075fe977b4cf05f3e",
+    "runtime-config/drift-worker-2.0.0.schema.json": "b0a3fd875dcd7ac0e39f9538acda2df2d8eabd551afd8c833bbe500a54bbfbd9",
+    "runtime-config/frontend-2.0.0.schema.json": "68a2db545607f1d4b933c3d9841a47c170c3af6706ff6368decd263eb586e4d5",
+    "runtime-config/ingestion-api-2.0.0.schema.json": "4fdbe238c576f84a06b73ff6d8960aa685522b39cbec5896066849f6d06f4b56",
+    "runtime-config/ml-service-2.0.0.schema.json": "d55a77c9ade1183d9fdb46a94d248964fa1a745350157a7eb3d78253fe03025a",
+    "runtime-config/processing-outbox-relay-2.0.0.schema.json": "e7e695872f989a4d41366d106754ef1bf674445773fbe9901f465a93bc1808e9",
+    "runtime-config/processing-read-api-2.0.0.schema.json": "db0bc9b64d41f07a53c5992abedad9ec4715cb0eba7840705fb720062b834628",
+    "runtime-config/processing-worker-2.0.0.schema.json": "14da7ccebf6b783f6c74ebaafa73dc2dfde33ff7406efc454afe85a718b7a981",
+    "runtime-config/rag-service-2.0.0.schema.json": "4d554309c0faedd41713715a2912ba4baf84466d55a5eb3207a3f3e988cbbb66",
+    "runtime-config/sensor-2.0.0.schema.json": "69337825a88bec2b3611abd84721a0d2313b53291246561fde726ff57deb28bf",
+    "runtime-config/simulator-ui-2.0.0.schema.json": "286a03e2f0c3febbeb4775ea90177be34d682def5520fa435f548e330f8bdc7a",
+    "runtime-config/storage-consumer-2.0.0.schema.json": "a3586fde53da32e7e644f42e09512dbf739b483039b0333d9273053eb2a9befe",
+    "s3-object-v1.schema.json": "543569f0c0b14b8cefc507a734768bf17838439f088aa4f1bb3692f7670dcddc",
+    "workload-release-v1.schema.json": "35c124a3828d56e2556681d19fe35d33cef222ce7be46c585614086b5da93032",
+    "runtime-config/processing-worker-3.0.0.schema.json": "04c1e64dae698d114762c2a5e5b4906757cc1bc96c15679bda1408efc6db449c",
+    "runtime-config/processing-outbox-relay-3.0.0.schema.json": "1b730eb6004ab4b740690fe954156ecb41430a96e1d61decb26312ae75c40254"
+  }
+}

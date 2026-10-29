@@ -1,0 +1,17 @@
+{
+  "schema_version": "2.0.0",
+  "environment": "production",
+  "status": "unconfigured",
+  "architecture_revision": "maintai-1.3.1+simulator-ui.1",
+  "aws": null,
+  "cluster": null,
+  "database": null,
+  "storage": null,
+  "kms_key_arn": null,
+  "training": null,
+  "roles": {},
+  "publishers": {},
+  "images": {},
+  "secrets": {},
+  "ingress": null
+}

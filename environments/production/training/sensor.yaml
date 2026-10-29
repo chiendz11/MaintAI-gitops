@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: approved-dataset-training
+  namespace: argo-events
+spec:
+  eventBusName: default
+  template:
+    serviceAccountName: dataset-sensor
+  dependencies:
+  - name: approved-manifest
+    eventSourceName: approved-dataset-sqs
+    eventName: approved-datasets
+  triggers:
+  - template:
+      name: submit-approved-dataset
+      k8s:
+        operation: create
+        source:
+          resource:
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: maintai-training-
+              namespace: argo
+            spec:
+              workflowTemplateRef:
+                name: maintai-approved-dataset-training
+              arguments:
+                parameters:
+                - name: event-body
+                  value: '{}'
+        parameters:
+        - src:
+            dependencyName: approved-manifest
+            dataTemplate: '{{ .Input.body | toJson }}'
+          dest: spec.arguments.parameters.0.value

@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://maintai.invalid/contracts/dataset-manifest-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "dataset_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset_name": {
+      "const": "AI4I-2020"
+    },
+    "approved": {
+      "const": true
+    },
+    "approved_by": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "bucket",
+        "key",
+        "version_id",
+        "sha256"
+      ]
+    },
+    "evaluation_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "bucket",
+        "key",
+        "version_id",
+        "sha256"
+      ]
+    },
+    "feature_columns": {
+      "const": [
+        "product_type",
+        "air_temperature_k",
+        "process_temperature_k",
+        "rotational_speed_rpm",
+        "torque_nm",
+        "tool_wear_min"
+      ]
+    },
+    "target_column": {
+      "const": "Machine failure"
+    },
+    "training_code_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "training_image": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9./_-]+@sha256:[0-9a-f]{64}$"
+    },
+    "training_context_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "schema_version",
+    "dataset_version",
+    "dataset_name",
+    "approved",
+    "approved_by",
+    "approved_at",
+    "data",
+    "evaluation_protocol",
+    "feature_columns",
+    "target_column",
+    "training_code_sha",
+    "training_image",
+    "training_context_sha256"
+  ]
+}

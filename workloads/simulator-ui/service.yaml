@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simulator-ui
+  namespace: maintai
+  labels: &id001
+    app.kubernetes.io/name: simulator-ui
+    app.kubernetes.io/part-of: maintai
+spec:
+  selector: *id001
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http

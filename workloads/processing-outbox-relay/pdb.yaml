@@ -1,0 +1,11 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: processing-outbox-relay
+  namespace: maintai
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: processing-outbox-relay
+      app.kubernetes.io/part-of: maintai

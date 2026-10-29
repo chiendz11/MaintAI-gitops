@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: maintai-local
+resources:
+- resources.yaml
+configMapGenerator:
+- name: local-prometheus
+  files:
+  - prometheus.yaml
+- name: local-grafana-datasources
+  files:
+  - datasources.yaml
+- name: local-grafana-providers
+  files:
+  - dashboards.yaml
+- name: local-grafana-dashboards
+  files:
+  - maintai-local.json

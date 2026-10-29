@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0.0",
+  "groups": {
+    "ingestion-api": {
+      "source_repository": "chiendz11/MaintAI",
+      "dockerfile": "ingestion-api/Dockerfile",
+      "build_context": ".",
+      "runtimes": [
+        "ingestion-api"
+      ],
+      "status": "entrypoint_unverified"
+    },
+    "processing": {
+      "source_repository": "chiendz11/MaintAI",
+      "dockerfile": "processing/worker/Dockerfile",
+      "build_context": ".",
+      "runtimes": [
+        "processing-worker",
+        "processing-read-api",
+        "processing-outbox-relay"
+      ],
+      "status": "entrypoint_unverified"
+    },
+    "business-backend": {
+      "source_repository": "chiendz11/MaintAI",
+      "dockerfile": "backend/business-api/Dockerfile",
+      "build_context": ".",
+      "runtimes": [
+        "business-api",
+        "business-consumer"
+      ],
+      "status": "entrypoint_unverified"
+    },
+    "storage-consumer": {
+      "source_repository": "chiendz11/MaintAI",
+      "dockerfile": "storage-consumer/Dockerfile",
+      "build_context": ".",
+      "runtimes": [
+        "storage-consumer"
+      ],
+      "status": "entrypoint_unverified"
+    },
+    "ml-service": {
+      "source_repository": "chiendz11/MaintAI",
+      "dockerfile": "ml-service/inference/Dockerfile",
+      "build_context": ".",
+      "runtimes": [
+        "ml-service"
+      ],
+      "status": "entrypoint_unverified"
+    },
+    "training": {
+      "source_repository": "chiendz11/MaintAI",
+      "dockerfile": "ml-service/training/Dockerfile",
+      "build_context": ".",
+      "runtimes": [],
+      "status": "entrypoint_unverified"
+    },
+    "rag-service": {
+      "source_repository": "chiendz11/MaintAI",
+      "dockerfile": "rag-service/Dockerfile",
+      "build_context": ".",
+      "runtimes": [
+        "rag-service"
+      ],
+      "status": "entrypoint_unverified"
+    },
+    "frontend": {
+      "source_repository": "chiendz11/MaintAI",
+      "dockerfile": "frontend/Dockerfile",
+      "build_context": ".",
+      "runtimes": [
+        "frontend"
+      ],
+      "status": "entrypoint_unverified"
+    },
+    "simulator-ui": {
+      "source_repository": "chiendz11/MaintAI",
+      "dockerfile": "simulator-ui/Dockerfile",
+      "build_context": ".",
+      "runtimes": [
+        "simulator-ui"
+      ],
+      "status": "source_missing"
+    },
+    "sensor": {
+      "source_repository": "chiendz11/MaintAI",
+      "dockerfile": "sensor/Dockerfile",
+      "build_context": ".",
+      "runtimes": [
+        "sensor"
+      ],
+      "status": "entrypoint_unverified"
+    },
+    "drift-worker": {
+      "source_repository": "chiendz11/MaintAI",
+      "dockerfile": "drift-worker/Dockerfile",
+      "build_context": ".",
+      "runtimes": [
+        "drift-worker"
+      ],
+      "status": "entrypoint_unverified"
+    },
+    "automation": {
+      "source_repository": "chiendz11/MaintAI-gitops",
+      "dockerfile": "runtime/Dockerfile",
+      "build_context": ".",
+      "runtimes": [],
+      "status": "entrypoint_unverified"
+    },
+    "mlflow": {
+      "source_repository": "chiendz11/MaintAI",
+      "dockerfile": "ml-service/mlflow/Dockerfile",
+      "build_context": "ml-service/mlflow",
+      "publisher_workflow": "maintai-publish.yml",
+      "signature_annotations": ["git_sha", "image_group", "source_repository"],
+      "runtimes": [],
+      "status": "app_owned_image_platform_deployment_unverified"
+    }
+  }
+}

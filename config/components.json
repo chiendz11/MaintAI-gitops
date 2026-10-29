@@ -1,0 +1,123 @@
+{
+  "schema_version": "2.0.0",
+  "architecture_revision": "maintai-1.3.1+simulator-ui.1",
+  "components": {
+    "ingestion-api": {
+      "image_group": "ingestion-api",
+      "kind": "Deployment",
+      "port": 8000,
+      "module": "maintai_ingestion.api",
+      "logical_database": null,
+      "replicas": 2,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    },
+    "processing-worker": {
+      "image_group": "processing",
+      "kind": "Deployment",
+      "port": 9100,
+      "module": "maintai_processing.worker",
+      "logical_database": "processing_db",
+      "replicas": 2,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    },
+    "processing-read-api": {
+      "image_group": "processing",
+      "kind": "Deployment",
+      "port": 8004,
+      "module": "maintai_processing.read_api",
+      "logical_database": "processing_db",
+      "replicas": 2,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    },
+    "processing-outbox-relay": {
+      "image_group": "processing",
+      "kind": "Deployment",
+      "port": 9100,
+      "module": "maintai_processing.outbox_relay",
+      "logical_database": "processing_db",
+      "replicas": 2,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    },
+    "storage-consumer": {
+      "image_group": "storage-consumer",
+      "kind": "Deployment",
+      "port": 9100,
+      "module": "maintai_storage.consumer",
+      "logical_database": null,
+      "replicas": 2,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    },
+    "business-api": {
+      "image_group": "business-backend",
+      "kind": "Deployment",
+      "port": 8003,
+      "module": "maintai_business.api",
+      "logical_database": "business_db",
+      "replicas": 2,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    },
+    "business-consumer": {
+      "image_group": "business-backend",
+      "kind": "Deployment",
+      "port": 9100,
+      "module": "maintai_business.consumer",
+      "logical_database": "business_db",
+      "replicas": 2,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    },
+    "ml-service": {
+      "image_group": "ml-service",
+      "kind": "Deployment",
+      "port": 8001,
+      "module": "maintai_ml.inference",
+      "logical_database": null,
+      "replicas": 2,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    },
+    "rag-service": {
+      "image_group": "rag-service",
+      "kind": "Deployment",
+      "port": 8002,
+      "module": "maintai_rag.api",
+      "logical_database": "knowledge_db",
+      "replicas": 2,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    },
+    "frontend": {
+      "image_group": "frontend",
+      "kind": "Deployment",
+      "port": 8080,
+      "module": null,
+      "logical_database": null,
+      "replicas": 2,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    },
+    "simulator-ui": {
+      "image_group": "simulator-ui",
+      "kind": "Deployment",
+      "port": 8080,
+      "module": null,
+      "logical_database": null,
+      "replicas": 2,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    },
+    "sensor": {
+      "image_group": "sensor",
+      "kind": "Deployment",
+      "port": 8005,
+      "module": "maintai_sensor.controller",
+      "logical_database": null,
+      "replicas": 1,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    },
+    "drift-worker": {
+      "image_group": "drift-worker",
+      "kind": "CronJob",
+      "port": null,
+      "module": "maintai_drift.run",
+      "logical_database": "drift_db",
+      "replicas": 2,
+      "health_contract": "HTTP /health/live, /health/ready, /metrics on declared port; worker health server must be implemented"
+    }
+  }
+}

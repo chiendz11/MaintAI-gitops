@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "enabled": false,
+  "workflow_template": "maintai-approved-dataset-training",
+  "dataset_prefix": "datasets/approved/",
+  "dataset_suffix": ".manifest.json",
+  "quality_gate": {
+    "version": "maintai-quality-gate-1.0.0",
+    "recall_failure_min": 0.85,
+    "precision_failure_min": 0.5,
+    "require_baseline_comparison": true,
+    "require_rule_baseline": true
+  },
+  "approved_dataset_schema": "contracts/dataset-manifest-v1.schema.json",
+  "training_entrypoint": [
+    "python",
+    "-m",
+    "maintai_training",
+    "--context",
+    "/workspace/context.json",
+    "--output",
+    "/workspace/model-result.json"
+  ],
+  "training_entrypoint_status": "application_contract_to_implement",
+  "automatic_merge": false,
+  "automatic_champion_promotion": false
+}

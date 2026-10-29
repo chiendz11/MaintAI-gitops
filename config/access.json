@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "oidc_issuer": null,
+  "business_audience": "maintai-business-api",
+  "simulator_audience": "maintai-simulator",
+  "simulator_public_client_id": null,
+  "simulator_operator_cidrs": [],
+  "main_frontend_simulator_controls": false,
+  "authentication_mode": "external-issuer-local-verification",
+  "note": "No Auth Server is deployed by this blueprint. Wire a reviewed issuer and implement auth in Business/Sensor before enabling.",
+  "business_public_client_id": null
+}

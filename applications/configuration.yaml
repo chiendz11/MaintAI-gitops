@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: maintai-configuration
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '0'
+spec:
+  project: maintai-production
+  source:
+    repoURL: https://github.com/chiendz11/MaintAI-gitops.git
+    targetRevision: main
+    path: environments/production/config
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: maintai
+  syncPolicy:
+    syncOptions:
+    - ServerSideApply=true
+    retry:
+      limit: 5

@@ -1,0 +1,46 @@
+name: publish-platform-images
+'on':
+  workflow_dispatch:
+    inputs:
+      image_group:
+        type: choice
+        options:
+        - automation
+        required: true
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: maintai-platform-image-${{ inputs.image_group }}
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main' && vars.ENABLE_IMAGE_PUBLICATION == 'true'
+    runs-on: ubuntu-24.04
+    environment: prod
+    timeout-minutes: 30
+    env:
+      SOURCE_SHA: ${{ github.sha }}
+      IMAGE_GROUP: ${{ inputs.image_group }}
+      IMAGE_REPOSITORIES_JSON: ${{ vars.IMAGE_REPOSITORIES_JSON }}
+      PYTHON_BASE_IMAGE: ${{ vars.PYTHON_BASE_IMAGE }}
+      GITHUB_APP_ID: ${{ vars.AUTOMATION_PUBLISHER_APP_ID }}
+      GITHUB_APP_INSTALLATION_ID: ${{ vars.AUTOMATION_PUBLISHER_INSTALLATION_ID }}
+      GITHUB_APP_PRIVATE_KEY: ${{ secrets.AUTOMATION_PUBLISHER_PRIVATE_KEY }}
+      GITHUB_TARGET_REPOSITORY: ${{ github.repository }}
+    steps:
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+      with:
+        python-version: '3.12'
+    - run: pip install -r runtime/requirements.txt
+    - uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a
+      with:
+        role-to-assume: ${{ vars.GITOPS_IMAGE_PUBLISHER_ROLE_ARN }}
+        aws-region: ${{ vars.AWS_REGION }}
+    - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+    - run: python -m automation.publish_image --group "$IMAGE_GROUP"
+    - run: python -m automation.dispatch_intent --file "$RUNNER_TEMP/workload-intent.json"

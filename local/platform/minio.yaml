@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-40'
+spec:
+  selector:
+    app: minio
+  ports:
+  - name: http
+    port: 9000
+    targetPort: 9000
+    nodePort: 30990
+  - name: console
+    port: 9001
+    targetPort: 9001
+    nodePort: 30991
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-30'
+spec:
+  serviceName: minio
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+        app.kubernetes.io/part-of: maintai-local
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: minio
+        image: registry.invalid/maintai-local/minio:NOT_BUILT
+        imagePullPolicy: Never
+        args:
+        - server
+        - /data
+        - --console-address
+        - :9001
+        env:
+        - name: MINIO_ROOT_USER
+          valueFrom:
+            secretKeyRef:
+              name: local-minio-admin
+              key: access_key
+        - name: MINIO_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: local-minio-admin
+              key: secret_key
+        ports:
+        - containerPort: 9000
+        - containerPort: 9001
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        readinessProbe:
+          httpGet:
+            path: /minio/health/ready
+            port: 9000
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+      volumes: []
+      securityContext:
+        fsGroup: 1000
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: local-path
+      resources:
+        requests:
+          storage: 5Gi

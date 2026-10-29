@@ -1,0 +1,11 @@
+processing_owner	processing_db
+business_owner	business_db
+drift_owner	drift_db
+knowledge_owner	knowledge_db
+mlflow_owner	mlflow_db
+processing_worker	processing_db
+processing_relay	processing_db
+processing_reader	processing_db
+business_consumer	business_db
+business_api	business_db
+business_reader	business_db

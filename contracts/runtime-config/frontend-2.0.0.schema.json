@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://maintai.invalid/runtime-config/frontend/2.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "BUSINESS_API_BASE_URL",
+    "ENVIRONMENT",
+    "LOG_LEVEL",
+    "SIMULATOR_CONTROL_ENABLED",
+    "OIDC_ISSUER",
+    "OIDC_AUDIENCE",
+    "OIDC_CLIENT_ID"
+  ],
+  "properties": {
+    "BUSINESS_API_BASE_URL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ENVIRONMENT": {
+      "type": "string",
+      "minLength": 1
+    },
+    "LOG_LEVEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "SIMULATOR_CONTROL_ENABLED": {
+      "const": "false"
+    },
+    "OIDC_ISSUER": {
+      "type": "string",
+      "minLength": 1
+    },
+    "OIDC_AUDIENCE": {
+      "type": "string",
+      "minLength": 1
+    },
+    "OIDC_CLIENT_ID": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

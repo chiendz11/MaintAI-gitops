@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: maintai-load-balancer
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '-40'
+spec:
+  project: maintai-production
+  source:
+    repoURL: https://aws.github.io/eks-charts
+    chart: aws-load-balancer-controller
+    targetRevision: 1.14.0
+    helm:
+      releaseName: load-balancer
+      valuesObject:
+        clusterName: REPLACE_WITH_CLUSTER_NAME
+        region: REPLACE_WITH_REGION
+        vpcId: REPLACE_WITH_VPC_ID
+        serviceAccount:
+          create: true
+          name: aws-load-balancer-controller
+          annotations:
+            eks.amazonaws.com/role-arn: REPLACE_WITH_LOAD_BALANCER_ROLE
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    syncOptions:
+    - ServerSideApply=true
+    retry:
+      limit: 5

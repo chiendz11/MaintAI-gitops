@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.1.0",
+  "sensor_event_contract": "1.3.0",
+  "inference_results_schema_version": "1.4.0",
+  "blocked_reason": "SDK keyed/ordered adapters have local test evidence; app callbacks, health/image/source SHA, owner migrations and config3 release cutover are unreviewed. Workloads stay disabled.",
+  "drift_report_read_interface": null,
+  "brief_job_executor": null,
+  "database_bootstrap_reviewed": false,
+  "owner_migrations_reviewed": false,
+  "target_application_contract": "1.4.0",
+  "sensor_rejected_schema_version": "1.4.0",
+  "inference_results_reader_versions": [
+    "1.4.0",
+    "2.0.0"
+  ],
+  "alert_signals_schema_version": "1.0.0",
+  "kafka_contract_bundle_version": "1.1.0",
+  "kafka_contract_manifest_sha256": "27d0187dd2aa1ff785bc39bd1167243516a6c6bc8d3d966320fd0d21c1e749c7"
+}

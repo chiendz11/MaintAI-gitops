@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: maintai-training-pods
+  namespace: argo
+spec:
+  podSelector:
+    matchExpressions:
+    - key: workflows.argoproj.io/workflow
+      operator: Exists
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress: []
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+    ports:
+    - protocol: TCP
+      port: 443
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: maintai
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: mlflow
+    ports:
+    - protocol: TCP
+      port: 5000

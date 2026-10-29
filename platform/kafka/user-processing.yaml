@@ -1,0 +1,27 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: maintai-processing
+  namespace: maintai
+  labels:
+    strimzi.io/cluster: maintai-kafka
+spec:
+  authentication:
+    type: scram-sha-512
+  authorization:
+    type: simple
+    acls:
+    - resource:
+        type: topic
+        name: sensor.readings
+        patternType: literal
+      operations:
+      - Read
+      - Describe
+    - resource:
+        type: group
+        name: processing-v1
+        patternType: literal
+      operations:
+      - Read
+      - Describe

@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "enabled": false,
+  "pushgateway_image": null,
+  "metric_contract_status": "App instrumentation must be implemented; KafkaExporter/PodMonitor are authored but unvalidated",
+  "required_metrics": [
+    "maintai_outbox_oldest_pending_age_seconds",
+    "maintai_event_to_alert_visible_duration_seconds_bucket",
+    "maintai_drift_worker_last_success_timestamp_seconds",
+    "kafka_consumergroup_lag"
+  ]
+}

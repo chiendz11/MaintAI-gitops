@@ -1,0 +1,5 @@
+{
+  "schema_version": "1.0.0",
+  "rds_ca_bundle_sha256": null,
+  "source": "https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem"
+}

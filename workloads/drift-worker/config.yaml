@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: drift-worker-config-0f40d0925b69
+  namespace: maintai
+  labels:
+    app.kubernetes.io/name: drift-worker
+    app.kubernetes.io/part-of: maintai
+immutable: true
+data:
+  LOG_LEVEL: INFO
+  ENVIRONMENT: production
+  PROCESSING_READ_BASE_URL: http://processing-read-api:8004
+  DRIFT_REFERENCE_PATH: /models/current/drift_reference.json
+  DRIFT_WINDOW_SIZE: '500'
+  DRIFT_MINIMUM_SAMPLES: '200'
+  DRIFT_PUSHGATEWAY_URL: http://pushgateway:9091
+  DRIFT_REPORT_BUCKET: REPLACE_WITH_ARTIFACTS_BUCKET
+  DRIFT_REPORT_PREFIX: drift-reports/
+  DRIFT_WORKER_NAME: maintai-drift-worker

@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: maintai-simulator
+  namespace: maintai
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: REPLACE_WITH_CERTIFICATE_ARN
+    alb.ingress.kubernetes.io/healthcheck-path: /health/ready
+    alb.ingress.kubernetes.io/success-codes: '200'
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=300
+    external-dns.alpha.kubernetes.io/hostname: simulator.REPLACE_WITH_DOMAIN
+    alb.ingress.kubernetes.io/inbound-cidrs: REPLACE_WITH_OPERATOR_CIDRS
+spec:
+  ingressClassName: alb
+  rules:
+  - host: simulator.REPLACE_WITH_DOMAIN
+    http:
+      paths:
+      - path: /api/v1/simulator
+        pathType: Prefix
+        backend:
+          service:
+            name: sensor
+            port:
+              number: 8005
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: simulator-ui
+            port:
+              number: 8080

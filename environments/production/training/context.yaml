@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maintai-training-context
+  namespace: argo
+data:
+  context.json: '{"status":"unconfigured"}'

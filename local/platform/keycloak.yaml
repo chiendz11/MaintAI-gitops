@@ -1,0 +1,139 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-40'
+spec:
+  selector:
+    app: keycloak
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keycloak
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-30'
+spec:
+  serviceName: keycloak
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+        app.kubernetes.io/part-of: maintai-local
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:26.4.0@sha256:5f3fb534cde6bf006d79f5912473e5d2c828c707cdfc52e16972803aca9d43dd
+        args:
+        - start-dev
+        - --import-realm
+        env:
+        - name: KC_HOSTNAME
+          value: https://127.0.0.1:18490
+        - name: KC_HTTP_ENABLED
+          value: 'true'
+        - name: KC_HEALTH_ENABLED
+          value: 'true'
+        - name: KC_BOOTSTRAP_ADMIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: local-keycloak-admin
+              key: username
+        - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: local-keycloak-admin
+              key: password
+        - name: VIEWER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: local-idp-users
+              key: viewer
+        - name: TECHNICIAN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: local-idp-users
+              key: technician
+        - name: ADMINISTRATOR_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: local-idp-users
+              key: administrator
+        - name: REGISTRY_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: local-oidc-registry
+              key: client_secret
+        - name: PROCESSING_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: local-oidc-processing
+              key: client_secret
+        - name: SENSOR_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: local-oidc-sensor
+              key: client_secret
+        - name: ML_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: local-oidc-ml
+              key: client_secret
+        ports:
+        - containerPort: 8080
+        - containerPort: 9000
+        volumeMounts:
+        - name: data
+          mountPath: /opt/keycloak/data
+        - name: realm
+          mountPath: /opt/keycloak/data/import
+          readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 9000
+          periodSeconds: 5
+        startupProbe:
+          httpGet:
+            path: /health/started
+            port: 9000
+          periodSeconds: 5
+          failureThreshold: 60
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            memory: 1Gi
+      volumes:
+      - name: realm
+        configMap:
+          name: local-keycloak-realm
+      securityContext:
+        fsGroup: 1000
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: local-path
+      resources:
+        requests:
+          storage: 1Gi

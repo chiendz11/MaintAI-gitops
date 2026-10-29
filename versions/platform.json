@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "kubernetes": "1.33",
+  "kafka": "4.0.0",
+  "kafka_metadata": "4.0",
+  "charts": {
+    "argo-workflows": {
+      "repository": "https://argoproj.github.io/argo-helm",
+      "chart": "argo-workflows",
+      "version": "2.0.2",
+      "namespace": "argo"
+    },
+    "argo-events": {
+      "repository": "https://argoproj.github.io/argo-helm",
+      "chart": "argo-events",
+      "version": "2.4.24",
+      "namespace": "argo-events"
+    },
+    "external-secrets": {
+      "repository": "https://charts.external-secrets.io",
+      "chart": "external-secrets",
+      "version": "2.9.0",
+      "namespace": "external-secrets"
+    },
+    "external-dns": {
+      "repository": "https://kubernetes-sigs.github.io/external-dns/",
+      "chart": "external-dns",
+      "version": "1.21.1",
+      "namespace": "external-dns"
+    },
+    "load-balancer": {
+      "repository": "https://aws.github.io/eks-charts",
+      "chart": "aws-load-balancer-controller",
+      "version": "1.14.0",
+      "namespace": "kube-system"
+    },
+    "monitoring": {
+      "repository": "https://prometheus-community.github.io/helm-charts",
+      "chart": "kube-prometheus-stack",
+      "version": "88.5.3",
+      "namespace": "monitoring"
+    },
+    "strimzi": {
+      "repository": "https://strimzi.io/charts/",
+      "chart": "strimzi-kafka-operator",
+      "version": "0.47.0",
+      "namespace": "strimzi"
+    }
+  },
+  "third_party_images": {
+    "pushgateway": null,
+    "postgres_tools": null
+  },
+  "note": "Exact reviewed chart versions. No version availability/compatibility tests were run. Argo CD is owned by infrastructure."
+}

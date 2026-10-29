@@ -1,0 +1,402 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://maintai.invalid/contracts/model-release-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "change_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{7,63}$"
+    },
+    "model_result": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://maintai.invalid/contracts/model-result-v1.schema.json",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "release_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{7,63}$"
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "training_image": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9./_-]+@sha256:[0-9a-f]{64}$"
+        },
+        "artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "model": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "bucket": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "key": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "version_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "bucket",
+                "key",
+                "version_id",
+                "sha256"
+              ]
+            },
+            "preprocessor": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "bucket": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "key": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "version_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "bucket",
+                "key",
+                "version_id",
+                "sha256"
+              ]
+            },
+            "drift_reference": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "bucket": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "key": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "version_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "bucket",
+                "key",
+                "version_id",
+                "sha256"
+              ]
+            },
+            "metadata": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "bucket": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "key": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "version_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "bucket",
+                "key",
+                "version_id",
+                "sha256"
+              ]
+            }
+          },
+          "required": [
+            "model",
+            "preprocessor",
+            "drift_reference",
+            "metadata"
+          ]
+        },
+        "evaluation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "protocol_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "test_set_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "threshold_source": {
+              "const": "validation"
+            },
+            "candidate": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "recall_failure": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "precision_failure": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "f1": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "pr_auc": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "false_negative_rate": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "recall_failure",
+                "precision_failure",
+                "f1",
+                "pr_auc",
+                "false_negative_rate"
+              ]
+            },
+            "baseline": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "recall_failure": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "precision_failure": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "f1": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "pr_auc": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "false_negative_rate": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "recall_failure",
+                "precision_failure",
+                "f1",
+                "pr_auc",
+                "false_negative_rate"
+              ]
+            },
+            "rule_based": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "recall_failure": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "precision_failure": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "f1": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "pr_auc": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "false_negative_rate": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "recall_failure",
+                "precision_failure",
+                "f1",
+                "pr_auc",
+                "false_negative_rate"
+              ]
+            },
+            "false_alarms_per_1000_valid": {
+              "type": "number",
+              "minimum": 0
+            },
+            "human_review_ratio": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "protocol_sha256",
+            "test_set_sha256",
+            "threshold_source",
+            "candidate",
+            "baseline",
+            "rule_based",
+            "false_alarms_per_1000_valid",
+            "human_review_ratio"
+          ]
+        },
+        "evaluation_report": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bucket": {
+              "type": "string",
+              "minLength": 1
+            },
+            "key": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "bucket",
+            "key",
+            "version_id",
+            "sha256"
+          ]
+        },
+        "mlflow_run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quality_gate_version": {
+          "const": "maintai-quality-gate-1.0.0"
+        }
+      },
+      "required": [
+        "schema_version",
+        "release_id",
+        "model_version",
+        "dataset_version",
+        "source_sha",
+        "training_image",
+        "artifacts",
+        "evaluation",
+        "evaluation_report",
+        "mlflow_run_id",
+        "quality_gate_version"
+      ]
+    },
+    "model_result_object": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "bucket",
+        "key",
+        "version_id",
+        "sha256"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "change_id",
+    "model_result",
+    "model_result_object"
+  ]
+}

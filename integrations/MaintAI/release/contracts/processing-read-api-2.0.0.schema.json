@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://maintai.invalid/runtime-config/processing-read-api/2.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "LOG_LEVEL",
+    "ENVIRONMENT",
+    "AUTH_ENABLED"
+  ],
+  "properties": {
+    "LOG_LEVEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ENVIRONMENT": {
+      "type": "string",
+      "minLength": 1
+    },
+    "AUTH_ENABLED": {
+      "const": "true"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- nodepool.yaml
+- kafka.yaml
+- metrics.yaml
+- network-policy.yaml
+- topic-sensor-readings.yaml
+- topic-sensor-rejected.yaml
+- topic-inference-results.yaml
+- topic-alert-signals.yaml
+- user-ingestion.yaml
+- user-processing.yaml
+- user-outbox.yaml
+- user-storage.yaml
+- user-business.yaml

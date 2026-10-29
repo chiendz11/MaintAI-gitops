@@ -1,0 +1,290 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: maintai-approved-dataset-training
+  namespace: argo
+spec:
+  serviceAccountName: maintai-training
+  entrypoint: envelope
+  onExit: release-failed
+  parallelism: 1
+  activeDeadlineSeconds: 7200
+  ttlStrategy:
+    secondsAfterCompletion: 604800
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    fsGroup: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  arguments:
+    parameters:
+    - name: event-body
+      value: '{}'
+    - name: retry-release
+      value: 'false'
+  volumes:
+  - name: context
+    configMap:
+      name: maintai-training-context
+  volumeClaimTemplates:
+  - metadata:
+      name: workspace
+    spec:
+      storageClassName: maintai-training-gp3
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+  volumeClaimGC:
+    strategy: OnWorkflowCompletion
+  templates:
+  - name: envelope
+    steps:
+    - - name: normalize
+        template: normalize
+    - - name: dataset
+        template: dataset
+        withParam: '{{steps.normalize.outputs.parameters.records}}'
+        arguments:
+          parameters:
+          - name: slot
+            value: '{{item.slot}}'
+          - name: record
+            value: '{{item}}'
+  - name: normalize
+    container:
+      image: registry.invalid/maintai/automation:UNCONFIGURED
+      command: &id001
+      - python
+      - -m
+      - platform_runtime.lifecycle
+      args:
+      - normalize
+      - --event-body
+      - '{{workflow.parameters.event-body}}'
+      - --output
+      - /tmp/records.json
+      resources: &id002
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: '1'
+          memory: 1Gi
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+    outputs:
+      parameters:
+      - name: records
+        valueFrom:
+          path: /tmp/records.json
+  - name: dataset
+    inputs:
+      parameters:
+      - name: slot
+      - name: record
+    steps:
+    - - name: prepare
+        template: prepare
+        arguments:
+          parameters:
+          - name: slot
+            value: '{{inputs.parameters.slot}}'
+          - name: record
+            value: '{{inputs.parameters.record}}'
+    - - name: train
+        template: train
+        when: '''{{steps.prepare.outputs.parameters.train-required}}'' == ''true'''
+        arguments:
+          parameters:
+          - name: slot
+            value: '{{inputs.parameters.slot}}'
+    - - name: save
+        template: save-result
+        when: '''{{steps.prepare.outputs.parameters.train-required}}'' == ''true'''
+        arguments:
+          parameters:
+          - name: slot
+            value: '{{inputs.parameters.slot}}'
+    - - name: publish
+        template: publish
+        when: '''{{steps.prepare.outputs.parameters.publish-required}}'' == ''true'''
+        arguments:
+          parameters:
+          - name: slot
+            value: '{{inputs.parameters.slot}}'
+  - name: prepare
+    inputs:
+      parameters:
+      - name: slot
+      - name: record
+    retryStrategy:
+      limit: '2'
+      retryPolicy: Always
+    outputs:
+      parameters:
+      - name: train-required
+        valueFrom:
+          path: /workspace/{{inputs.parameters.slot}}/train-required.txt
+      - name: publish-required
+        valueFrom:
+          path: /workspace/{{inputs.parameters.slot}}/publish-required.txt
+    container:
+      image: registry.invalid/maintai/automation:UNCONFIGURED
+      command: *id001
+      args:
+      - prepare
+      - --record
+      - '{{inputs.parameters.record}}'
+      - --context
+      - /release/context.json
+      - --owner
+      - '{{workflow.uid}}'
+      - --directory
+      - /workspace/{{inputs.parameters.slot}}
+      - --retry-release
+      - '{{workflow.parameters.retry-release}}'
+      resources: *id002
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: workspace
+        mountPath: /workspace
+      - name: context
+        mountPath: /release
+        readOnly: true
+  - name: train
+    inputs:
+      parameters:
+      - name: slot
+    container:
+      image: registry.invalid/maintai/training:UNCONFIGURED
+      command:
+      - python
+      - -m
+      - maintai_training
+      args:
+      - --context
+      - /workspace/{{inputs.parameters.slot}}/context.json
+      - --output
+      - /workspace/{{inputs.parameters.slot}}/model-result.json
+      resources:
+        requests:
+          cpu: '1'
+          memory: 1Gi
+        limits:
+          cpu: '4'
+          memory: 6Gi
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: workspace
+        mountPath: /workspace
+      - name: context
+        mountPath: /release
+        readOnly: true
+  - name: save-result
+    inputs:
+      parameters:
+      - name: slot
+    retryStrategy:
+      limit: '2'
+      retryPolicy: Always
+    container:
+      image: registry.invalid/maintai/automation:UNCONFIGURED
+      command: *id001
+      args:
+      - save-result
+      - --directory
+      - /workspace/{{inputs.parameters.slot}}
+      resources: *id002
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: workspace
+        mountPath: /workspace
+      - name: context
+        mountPath: /release
+        readOnly: true
+  - name: publish
+    inputs:
+      parameters:
+      - name: slot
+    retryStrategy:
+      limit: '3'
+      retryPolicy: Always
+      backoff:
+        duration: 15s
+        factor: 2
+        maxDuration: 2m
+    container:
+      image: registry.invalid/maintai/automation:UNCONFIGURED
+      command: *id001
+      args:
+      - dispatch
+      - --directory
+      - /workspace/{{inputs.parameters.slot}}
+      resources: *id002
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: workspace
+        mountPath: /workspace
+      - name: context
+        mountPath: /release
+        readOnly: true
+      env:
+      - name: GITHUB_APP_ID
+        valueFrom:
+          secretKeyRef:
+            name: model-release-publisher
+            key: app_id
+      - name: GITHUB_APP_INSTALLATION_ID
+        valueFrom:
+          secretKeyRef:
+            name: model-release-publisher
+            key: installation_id
+      - name: GITHUB_APP_PRIVATE_KEY
+        valueFrom:
+          secretKeyRef:
+            name: model-release-publisher
+            key: private_key
+  - name: release-failed
+    container:
+      image: registry.invalid/maintai/automation:UNCONFIGURED
+      command: *id001
+      args:
+      - release-failed
+      - --directory
+      - /workspace
+      - --owner
+      - '{{workflow.uid}}'
+      resources: *id002
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: workspace
+        mountPath: /workspace
+      - name: context
+        mountPath: /release
+        readOnly: true

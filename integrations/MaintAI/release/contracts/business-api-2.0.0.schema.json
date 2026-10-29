@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://maintai.invalid/runtime-config/business-api/2.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "LOG_LEVEL",
+    "ENVIRONMENT",
+    "AUTH_ENABLED",
+    "OIDC_ISSUER",
+    "OIDC_AUDIENCE",
+    "PROCESSING_READ_BASE_URL",
+    "RAG_BASE_URL",
+    "SSE_FANOUT",
+    "DRIFT_READ_MODE"
+  ],
+  "properties": {
+    "LOG_LEVEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ENVIRONMENT": {
+      "type": "string",
+      "minLength": 1
+    },
+    "AUTH_ENABLED": {
+      "const": "true"
+    },
+    "OIDC_ISSUER": {
+      "type": "string",
+      "minLength": 1
+    },
+    "OIDC_AUDIENCE": {
+      "type": "string",
+      "minLength": 1
+    },
+    "PROCESSING_READ_BASE_URL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "RAG_BASE_URL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "SSE_FANOUT": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DRIFT_READ_MODE": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

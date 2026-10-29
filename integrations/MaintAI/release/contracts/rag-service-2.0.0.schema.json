@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://maintai.invalid/runtime-config/rag-service/2.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "LOG_LEVEL",
+    "ENVIRONMENT",
+    "AUTH_ENABLED",
+    "LLM_PROVIDER",
+    "EMBEDDING_PROVIDER",
+    "S3_DOCUMENTS_BUCKET",
+    "REQUIRE_ACTION_CITATIONS"
+  ],
+  "properties": {
+    "LOG_LEVEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ENVIRONMENT": {
+      "type": "string",
+      "minLength": 1
+    },
+    "AUTH_ENABLED": {
+      "const": "true"
+    },
+    "LLM_PROVIDER": {
+      "type": "string",
+      "minLength": 1
+    },
+    "EMBEDDING_PROVIDER": {
+      "type": "string",
+      "minLength": 1
+    },
+    "S3_DOCUMENTS_BUCKET": {
+      "type": "string",
+      "minLength": 1
+    },
+    "REQUIRE_ACTION_CITATIONS": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

@@ -1,0 +1,55 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: processing-worker
+  namespace: maintai
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: processing-worker
+      app.kubernetes.io/part-of: maintai
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: maintai
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: argo
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9100
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          strimzi.io/cluster: maintai-kafka
+    ports:
+    - protocol: TCP
+      port: 9093
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ml-service
+    ports:
+    - protocol: TCP
+      port: 8001
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: business-api
+    ports:
+    - protocol: TCP
+      port: 8003

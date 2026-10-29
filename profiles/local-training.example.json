@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "runtime_reviewed": false,
+  "approved_dataset_version": null,
+  "dataset_manifest_sha256": null,
+  "command": [],
+  "env": {},
+  "note": "Manual opt-in Job. Fill real training entrypoint and approved dataset manifest; no automatic promotion or drift trigger.",
+  "approved_dataset_manifest": {
+    "bucket": "maintai-approved",
+    "key": null,
+    "version_id": null,
+    "sha256": null
+  }
+}

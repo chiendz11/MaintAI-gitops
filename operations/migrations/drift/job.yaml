@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: maintai-drift-migration-v1
+  namespace: maintai
+  annotations:
+    maintai.io/execution: manual-reviewed-owner-migration
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 900
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: drift-worker
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: migration
+        image: registry.invalid/maintai/owner-migration:UNCONFIGURED
+        command:
+        - python
+        - -m
+        - maintai_drift.migrations
+        args:
+        - upgrade
+        - head
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: drift-database
+              key: url
+        volumeMounts:
+        - name: rds-ca
+          mountPath: /etc/rds-ca
+          readOnly: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: '1'
+            memory: 1Gi
+      volumes:
+      - name: rds-ca
+        configMap:
+          name: aws-rds-ca

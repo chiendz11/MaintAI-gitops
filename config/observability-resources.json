@@ -1,0 +1,21 @@
+{
+  "resources": [
+    "pushgateway.yaml",
+    "pushgateway-service.yaml",
+    "pushgateway-network.yaml",
+    "pushgateway-monitor.yaml",
+    "rules.yaml",
+    "dashboard.yaml",
+    "service-monitor-ingestion-api.yaml",
+    "service-monitor-processing-worker.yaml",
+    "service-monitor-processing-read-api.yaml",
+    "service-monitor-processing-outbox-relay.yaml",
+    "service-monitor-storage-consumer.yaml",
+    "service-monitor-business-api.yaml",
+    "service-monitor-business-consumer.yaml",
+    "service-monitor-ml-service.yaml",
+    "service-monitor-rag-service.yaml",
+    "service-monitor-sensor.yaml",
+    "kafka-monitor.yaml"
+  ]
+}

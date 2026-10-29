@@ -1,0 +1,62 @@
+name: recovery
+'on':
+  workflow_dispatch:
+    inputs:
+      intent:
+        description: Versioned JSON intent; receiver only opens a PR
+        required: true
+        type: string
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: maintai-production-desired-state
+  cancel-in-progress: false
+jobs:
+  propose:
+    if: github.ref == 'refs/heads/main' && vars.ENABLE_GITOPS_AUTOMATION == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      DISPATCH_ACTOR: ${{ github.actor }}
+      APP_ALLOWED_ACTOR: ${{ vars.APP_RELEASE_ALLOWED_ACTOR }}
+      AUTOMATION_ALLOWED_ACTOR: ${{ vars.AUTOMATION_RELEASE_ALLOWED_ACTOR }}
+      MODEL_ALLOWED_ACTOR: ${{ vars.MODEL_RELEASE_ALLOWED_ACTOR }}
+      PLATFORM_ALLOWED_ACTOR: ${{ vars.PLATFORM_RELEASE_ALLOWED_ACTOR }}
+      RECOVERY_ALLOWED_ACTOR: ${{ vars.RECOVERY_ALLOWED_ACTOR }}
+      AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
+    steps:
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      with:
+        ref: main
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+      with:
+        python-version: '3.12'
+    - name: Install pinned proposal dependencies
+      run: pip install -r runtime/requirements.txt
+    - name: Save input without shell interpolation
+      env:
+        INTENT_JSON: ${{ inputs.intent }}
+      run: printf '%s' "$INTENT_JSON" > "$RUNNER_TEMP/intent.json"
+    - name: Assume read-only artifact verification role
+      uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a
+      with:
+        role-to-assume: ${{ vars.GITOPS_READER_ROLE_ARN }}
+        aws-region: ${{ vars.AWS_REGION }}
+    - name: Prepare desired state
+      run: python -m automation.release recovery --intent "$RUNNER_TEMP/intent.json"
+        > "$RUNNER_TEMP/proposal.json"
+    - name: Mint repository-scoped GitOps App token
+      env:
+        GITHUB_APP_ID: ${{ vars.GITOPS_APP_ID }}
+        GITHUB_APP_INSTALLATION_ID: ${{ vars.GITOPS_APP_INSTALLATION_ID }}
+        GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITOPS_APP_PRIVATE_KEY }}
+        GITHUB_TARGET_REPOSITORY: ${{ github.repository }}
+      run: python -m automation.github_app
+    - name: Open reviewable PR
+      env:
+        PROPOSAL_KIND: recovery
+      run: python -m automation.open_pr --kind "$PROPOSAL_KIND" --change-id "$(python
+        -c 'import json,os; print(json.load(open(os.environ["RUNNER_TEMP"]+"/proposal.json"))["change_id"])')"

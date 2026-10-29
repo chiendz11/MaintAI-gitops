@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: drift-worker
+  namespace: maintai
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: drift-worker
+      app.kubernetes.io/part-of: maintai
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress: []
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: processing-read-api
+    ports:
+    - protocol: TCP
+      port: 8004
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: pushgateway
+    ports:
+    - protocol: TCP
+      port: 9091

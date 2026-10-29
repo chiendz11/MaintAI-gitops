@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: idp-gateway
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-40'
+spec:
+  selector:
+    app: idp-gateway
+  ports:
+  - name: http
+    port: 18490
+    targetPort: 18490
+    nodePort: 30490
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: idp-gateway
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-20'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: idp-gateway
+  template:
+    metadata:
+      labels:
+        app: idp-gateway
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        runAsNonRoot: true
+      containers:
+      - name: gateway
+        image: registry.invalid/maintai-local/dev-tools:NOT_BUILT
+        imagePullPolicy: Never
+        args:
+        - serve
+        volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: true
+        - name: tls
+          mountPath: /tls
+          readOnly: true
+        ports:
+        - containerPort: 18490
+        readinessProbe:
+          tcpSocket:
+            port: 18490
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+      volumes:
+      - name: config
+        configMap:
+          name: local-idp-bridge
+      - name: tls
+        secret:
+          secretName: local-dev-tls
+          defaultMode: 288

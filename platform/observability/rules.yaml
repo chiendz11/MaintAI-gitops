@@ -1,0 +1,53 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: maintai-runtime
+  namespace: monitoring
+spec:
+  groups:
+  - name: maintai-runtime
+    rules:
+    - alert: MaintAIOutboxBacklog
+      expr: maintai_outbox_oldest_pending_age_seconds > 30
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Processing results are waiting in outbox
+    - alert: MaintAIAlertVisibilityLatency
+      expr: histogram_quantile(0.95, sum by (le) (rate(maintai_event_to_alert_visible_duration_seconds_bucket[5m])))
+        > 2
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: End-to-end alert visibility p95 exceeds the demo objective
+    - alert: MaintAIDriftWorkerStale
+      expr: time() - maintai_drift_worker_last_success_timestamp_seconds > 1800
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Drift checkpoint is stale; do not infer STABLE
+    - alert: MaintAIKafkaConsumerLag
+      expr: sum by (consumergroup) (kafka_consumergroup_lag) > 1000
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kafka backlog requires investigation
+    - alert: MaintAITrainingWorkflowFailed
+      expr: increase(argo_workflows_count{status="Failed"}[15m]) > 0
+      labels:
+        severity: warning
+      annotations:
+        summary: SQS dispatch success is not training success; inspect failed Workflow
+          and ledger
+    - alert: MaintAIMetricsMissing
+      expr: absent(maintai_processing_events_total)
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: Required app metrics are missing; healthy monitoring alone proves
+          nothing

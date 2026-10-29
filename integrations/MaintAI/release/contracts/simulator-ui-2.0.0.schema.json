@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://maintai.invalid/runtime-config/simulator-ui/2.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ENVIRONMENT",
+    "LOG_LEVEL",
+    "OIDC_AUDIENCE",
+    "OIDC_CLIENT_ID",
+    "OIDC_ISSUER",
+    "SIMULATOR_API_BASE_URL"
+  ],
+  "properties": {
+    "ENVIRONMENT": {
+      "type": "string",
+      "minLength": 1
+    },
+    "LOG_LEVEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "OIDC_AUDIENCE": {
+      "type": "string",
+      "minLength": 1
+    },
+    "OIDC_CLIENT_ID": {
+      "type": "string",
+      "minLength": 1
+    },
+    "OIDC_ISSUER": {
+      "type": "string",
+      "minLength": 1
+    },
+    "SIMULATOR_API_BASE_URL": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

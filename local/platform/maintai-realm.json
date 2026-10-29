@@ -1,0 +1,488 @@
+{
+  "realm": "maintai",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 3600,
+  "roles": {
+    "realm": [
+      {
+        "name": "VIEWER"
+      },
+      {
+        "name": "TECHNICIAN"
+      },
+      {
+        "name": "ADMIN"
+      },
+      {
+        "name": "SIMULATOR_OPERATOR"
+      },
+      {
+        "name": "SENSOR_SERVICE"
+      },
+      {
+        "name": "BUSINESS_SERVICE"
+      },
+      {
+        "name": "INFERENCE_SERVICE"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "maintai-business-ui",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "machines",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "machine_ids",
+            "claim.value": "[\"M-001\", \"M-002\", \"M-003\", \"M-004\", \"M-005\", \"M-006\", \"M-007\", \"M-008\", \"M-009\", \"M-010\", \"M-011\", \"M-012\", \"M-013\", \"M-014\", \"M-015\", \"M-016\", \"M-017\", \"M-018\", \"M-019\", \"M-020\", \"M-021\", \"M-022\", \"M-023\", \"M-024\", \"M-025\", \"M-026\", \"M-027\", \"M-028\", \"M-029\", \"M-030\", \"M-031\", \"M-032\", \"M-033\", \"M-034\", \"M-035\", \"M-036\", \"M-037\", \"M-038\", \"M-039\", \"M-040\", \"M-041\", \"M-042\", \"M-043\", \"M-044\", \"M-045\", \"M-046\", \"M-047\", \"M-048\", \"M-049\", \"M-050\", \"M-051\", \"M-052\", \"M-053\", \"M-054\", \"M-055\", \"M-056\", \"M-057\", \"M-058\", \"M-059\", \"M-060\", \"M-061\", \"M-062\", \"M-063\", \"M-064\", \"M-065\", \"M-066\", \"M-067\", \"M-068\", \"M-069\", \"M-070\", \"M-071\", \"M-072\", \"M-073\", \"M-074\", \"M-075\", \"M-076\", \"M-077\", \"M-078\", \"M-079\", \"M-080\", \"M-081\", \"M-082\", \"M-083\", \"M-084\", \"M-085\", \"M-086\", \"M-087\", \"M-088\", \"M-089\", \"M-090\", \"M-091\", \"M-092\", \"M-093\", \"M-094\", \"M-095\", \"M-096\", \"M-097\", \"M-098\", \"M-099\", \"M-100\"]",
+            "jsonType.label": "JSON",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "maintai-business-local",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "redirectUris": [
+        "http://127.0.0.1:18080/*",
+        "http://localhost:18080/*"
+      ],
+      "webOrigins": [
+        "http://127.0.0.1:18080",
+        "http://localhost:18080"
+      ],
+      "defaultClientScopes": [
+        "profile"
+      ],
+      "optionalClientScopes": []
+    },
+    {
+      "clientId": "maintai-simulator-ui",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "machines",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "machine_ids",
+            "claim.value": "[\"M-001\", \"M-002\", \"M-003\", \"M-004\", \"M-005\", \"M-006\", \"M-007\", \"M-008\", \"M-009\", \"M-010\", \"M-011\", \"M-012\", \"M-013\", \"M-014\", \"M-015\", \"M-016\", \"M-017\", \"M-018\", \"M-019\", \"M-020\", \"M-021\", \"M-022\", \"M-023\", \"M-024\", \"M-025\", \"M-026\", \"M-027\", \"M-028\", \"M-029\", \"M-030\", \"M-031\", \"M-032\", \"M-033\", \"M-034\", \"M-035\", \"M-036\", \"M-037\", \"M-038\", \"M-039\", \"M-040\", \"M-041\", \"M-042\", \"M-043\", \"M-044\", \"M-045\", \"M-046\", \"M-047\", \"M-048\", \"M-049\", \"M-050\", \"M-051\", \"M-052\", \"M-053\", \"M-054\", \"M-055\", \"M-056\", \"M-057\", \"M-058\", \"M-059\", \"M-060\", \"M-061\", \"M-062\", \"M-063\", \"M-064\", \"M-065\", \"M-066\", \"M-067\", \"M-068\", \"M-069\", \"M-070\", \"M-071\", \"M-072\", \"M-073\", \"M-074\", \"M-075\", \"M-076\", \"M-077\", \"M-078\", \"M-079\", \"M-080\", \"M-081\", \"M-082\", \"M-083\", \"M-084\", \"M-085\", \"M-086\", \"M-087\", \"M-088\", \"M-089\", \"M-090\", \"M-091\", \"M-092\", \"M-093\", \"M-094\", \"M-095\", \"M-096\", \"M-097\", \"M-098\", \"M-099\", \"M-100\"]",
+            "jsonType.label": "JSON",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "simulator-control",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "redirectUris": [
+        "http://127.0.0.1:18081/*",
+        "http://localhost:18081/*"
+      ],
+      "webOrigins": [
+        "http://127.0.0.1:18081",
+        "http://localhost:18081"
+      ],
+      "defaultClientScopes": [
+        "profile"
+      ],
+      "optionalClientScopes": [
+        "simulator:control"
+      ]
+    },
+    {
+      "clientId": "maintai-registry",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": true,
+      "attributes": {},
+      "protocolMappers": [
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "machines",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "machine_ids",
+            "claim.value": "[\"M-001\", \"M-002\", \"M-003\", \"M-004\", \"M-005\", \"M-006\", \"M-007\", \"M-008\", \"M-009\", \"M-010\", \"M-011\", \"M-012\", \"M-013\", \"M-014\", \"M-015\", \"M-016\", \"M-017\", \"M-018\", \"M-019\", \"M-020\", \"M-021\", \"M-022\", \"M-023\", \"M-024\", \"M-025\", \"M-026\", \"M-027\", \"M-028\", \"M-029\", \"M-030\", \"M-031\", \"M-032\", \"M-033\", \"M-034\", \"M-035\", \"M-036\", \"M-037\", \"M-038\", \"M-039\", \"M-040\", \"M-041\", \"M-042\", \"M-043\", \"M-044\", \"M-045\", \"M-046\", \"M-047\", \"M-048\", \"M-049\", \"M-050\", \"M-051\", \"M-052\", \"M-053\", \"M-054\", \"M-055\", \"M-056\", \"M-057\", \"M-058\", \"M-059\", \"M-060\", \"M-061\", \"M-062\", \"M-063\", \"M-064\", \"M-065\", \"M-066\", \"M-067\", \"M-068\", \"M-069\", \"M-070\", \"M-071\", \"M-072\", \"M-073\", \"M-074\", \"M-075\", \"M-076\", \"M-077\", \"M-078\", \"M-079\", \"M-080\", \"M-081\", \"M-082\", \"M-083\", \"M-084\", \"M-085\", \"M-086\", \"M-087\", \"M-088\", \"M-089\", \"M-090\", \"M-091\", \"M-092\", \"M-093\", \"M-094\", \"M-095\", \"M-096\", \"M-097\", \"M-098\", \"M-099\", \"M-100\"]",
+            "jsonType.label": "JSON",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "maintai-business-local",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "secret": "${REGISTRY_CLIENT_SECRET}",
+      "optionalClientScopes": []
+    },
+    {
+      "clientId": "maintai-processing",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": true,
+      "attributes": {},
+      "protocolMappers": [
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "machines",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "machine_ids",
+            "claim.value": "[\"M-001\", \"M-002\", \"M-003\", \"M-004\", \"M-005\", \"M-006\", \"M-007\", \"M-008\", \"M-009\", \"M-010\", \"M-011\", \"M-012\", \"M-013\", \"M-014\", \"M-015\", \"M-016\", \"M-017\", \"M-018\", \"M-019\", \"M-020\", \"M-021\", \"M-022\", \"M-023\", \"M-024\", \"M-025\", \"M-026\", \"M-027\", \"M-028\", \"M-029\", \"M-030\", \"M-031\", \"M-032\", \"M-033\", \"M-034\", \"M-035\", \"M-036\", \"M-037\", \"M-038\", \"M-039\", \"M-040\", \"M-041\", \"M-042\", \"M-043\", \"M-044\", \"M-045\", \"M-046\", \"M-047\", \"M-048\", \"M-049\", \"M-050\", \"M-051\", \"M-052\", \"M-053\", \"M-054\", \"M-055\", \"M-056\", \"M-057\", \"M-058\", \"M-059\", \"M-060\", \"M-061\", \"M-062\", \"M-063\", \"M-064\", \"M-065\", \"M-066\", \"M-067\", \"M-068\", \"M-069\", \"M-070\", \"M-071\", \"M-072\", \"M-073\", \"M-074\", \"M-075\", \"M-076\", \"M-077\", \"M-078\", \"M-079\", \"M-080\", \"M-081\", \"M-082\", \"M-083\", \"M-084\", \"M-085\", \"M-086\", \"M-087\", \"M-088\", \"M-089\", \"M-090\", \"M-091\", \"M-092\", \"M-093\", \"M-094\", \"M-095\", \"M-096\", \"M-097\", \"M-098\", \"M-099\", \"M-100\"]",
+            "jsonType.label": "JSON",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "maintai-processing-local",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "secret": "${PROCESSING_CLIENT_SECRET}",
+      "optionalClientScopes": []
+    },
+    {
+      "clientId": "maintai-sensor",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": true,
+      "attributes": {},
+      "protocolMappers": [
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "machines",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "machine_ids",
+            "claim.value": "[\"M-001\", \"M-002\", \"M-003\", \"M-004\", \"M-005\", \"M-006\", \"M-007\", \"M-008\", \"M-009\", \"M-010\", \"M-011\", \"M-012\", \"M-013\", \"M-014\", \"M-015\", \"M-016\", \"M-017\", \"M-018\", \"M-019\", \"M-020\", \"M-021\", \"M-022\", \"M-023\", \"M-024\", \"M-025\", \"M-026\", \"M-027\", \"M-028\", \"M-029\", \"M-030\", \"M-031\", \"M-032\", \"M-033\", \"M-034\", \"M-035\", \"M-036\", \"M-037\", \"M-038\", \"M-039\", \"M-040\", \"M-041\", \"M-042\", \"M-043\", \"M-044\", \"M-045\", \"M-046\", \"M-047\", \"M-048\", \"M-049\", \"M-050\", \"M-051\", \"M-052\", \"M-053\", \"M-054\", \"M-055\", \"M-056\", \"M-057\", \"M-058\", \"M-059\", \"M-060\", \"M-061\", \"M-062\", \"M-063\", \"M-064\", \"M-065\", \"M-066\", \"M-067\", \"M-068\", \"M-069\", \"M-070\", \"M-071\", \"M-072\", \"M-073\", \"M-074\", \"M-075\", \"M-076\", \"M-077\", \"M-078\", \"M-079\", \"M-080\", \"M-081\", \"M-082\", \"M-083\", \"M-084\", \"M-085\", \"M-086\", \"M-087\", \"M-088\", \"M-089\", \"M-090\", \"M-091\", \"M-092\", \"M-093\", \"M-094\", \"M-095\", \"M-096\", \"M-097\", \"M-098\", \"M-099\", \"M-100\"]",
+            "jsonType.label": "JSON",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "ingestion",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "secret": "${SENSOR_CLIENT_SECRET}",
+      "optionalClientScopes": [
+        "sensor:write"
+      ]
+    },
+    {
+      "clientId": "maintai-ml",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": true,
+      "attributes": {},
+      "protocolMappers": [
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "machines",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "machine_ids",
+            "claim.value": "[\"M-001\", \"M-002\", \"M-003\", \"M-004\", \"M-005\", \"M-006\", \"M-007\", \"M-008\", \"M-009\", \"M-010\", \"M-011\", \"M-012\", \"M-013\", \"M-014\", \"M-015\", \"M-016\", \"M-017\", \"M-018\", \"M-019\", \"M-020\", \"M-021\", \"M-022\", \"M-023\", \"M-024\", \"M-025\", \"M-026\", \"M-027\", \"M-028\", \"M-029\", \"M-030\", \"M-031\", \"M-032\", \"M-033\", \"M-034\", \"M-035\", \"M-036\", \"M-037\", \"M-038\", \"M-039\", \"M-040\", \"M-041\", \"M-042\", \"M-043\", \"M-044\", \"M-045\", \"M-046\", \"M-047\", \"M-048\", \"M-049\", \"M-050\", \"M-051\", \"M-052\", \"M-053\", \"M-054\", \"M-055\", \"M-056\", \"M-057\", \"M-058\", \"M-059\", \"M-060\", \"M-061\", \"M-062\", \"M-063\", \"M-064\", \"M-065\", \"M-066\", \"M-067\", \"M-068\", \"M-069\", \"M-070\", \"M-071\", \"M-072\", \"M-073\", \"M-074\", \"M-075\", \"M-076\", \"M-077\", \"M-078\", \"M-079\", \"M-080\", \"M-081\", \"M-082\", \"M-083\", \"M-084\", \"M-085\", \"M-086\", \"M-087\", \"M-088\", \"M-089\", \"M-090\", \"M-091\", \"M-092\", \"M-093\", \"M-094\", \"M-095\", \"M-096\", \"M-097\", \"M-098\", \"M-099\", \"M-100\"]",
+            "jsonType.label": "JSON",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "maintai-ml-local",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "secret": "${ML_CLIENT_SECRET}",
+      "optionalClientScopes": []
+    }
+  ],
+  "users": [
+    {
+      "username": "viewer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "viewer",
+      "lastName": "MaintAI Local",
+      "email": "viewer@maintai.invalid",
+      "realmRoles": [
+        "VIEWER"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${VIEWER_PASSWORD}",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "technician",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "technician",
+      "lastName": "MaintAI Local",
+      "email": "technician@maintai.invalid",
+      "realmRoles": [
+        "TECHNICIAN",
+        "SIMULATOR_OPERATOR"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${TECHNICIAN_PASSWORD}",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "administrator",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "administrator",
+      "lastName": "MaintAI Local",
+      "email": "administrator@maintai.invalid",
+      "realmRoles": [
+        "ADMIN",
+        "SIMULATOR_OPERATOR"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${ADMINISTRATOR_PASSWORD}",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "service-account-maintai-registry",
+      "enabled": true,
+      "serviceAccountClientId": "maintai-registry",
+      "realmRoles": [
+        "VIEWER"
+      ]
+    },
+    {
+      "username": "service-account-maintai-processing",
+      "enabled": true,
+      "serviceAccountClientId": "maintai-processing",
+      "realmRoles": [
+        "BUSINESS_SERVICE"
+      ]
+    },
+    {
+      "username": "service-account-maintai-sensor",
+      "enabled": true,
+      "serviceAccountClientId": "maintai-sensor",
+      "realmRoles": [
+        "SENSOR_SERVICE"
+      ]
+    },
+    {
+      "username": "service-account-maintai-ml",
+      "enabled": true,
+      "serviceAccountClientId": "maintai-ml",
+      "realmRoles": [
+        "INFERENCE_SERVICE"
+      ]
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "profile",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "simulator:control",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "sensor:write",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    }
+  ]
+}

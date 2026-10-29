@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    kubernetes.io/metadata.name: monitoring
+    app.kubernetes.io/part-of: maintai
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false

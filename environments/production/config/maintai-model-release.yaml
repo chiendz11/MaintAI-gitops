@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maintai-model-release
+  namespace: maintai
+data:
+  model.json: '{"artifacts": {}, "dataset_version": null, "evaluation": null, "model_version":
+    null, "release_id": null, "schema_version": "1.0.0", "status": "unconfigured"}'
