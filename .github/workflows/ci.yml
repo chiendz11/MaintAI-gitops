@@ -19,12 +19,12 @@ jobs:
         python-version: '3.12'
     - run: python -m pip install -r requirements-local.lock
     - run: python -m automation.policy
-    - name: Offline image producer ownership and signer cutover checks
+    - name: Install checksum-pinned kubectl for offline Kustomize rendering
+      run: python scripts/install_local_ci_kubectl.py
+    - name: Offline release, policy and image ownership checks
       run: python -m unittest discover -s tests -p 'test_*.py'
     - name: Check local contracts and protect production desired state
       run: python -m localdev.checks
-    - name: Install checksum-pinned kubectl for offline Kustomize rendering
-      run: python scripts/install_local_ci_kubectl.py
     - name: Render separate local and production roots without a cluster
       run: |
         kubectl kustomize environments/local/platform > /tmp/maintai-local-platform.yaml

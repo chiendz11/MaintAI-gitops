@@ -3,6 +3,7 @@
 import json
 
 from .common import load
+from .risk_policy import POLICY_CONFIGMAP, POLICY_MOUNT
 
 NS = "maintai-local"
 ISSUER = "https://127.0.0.1:18490/realms/maintai"
@@ -52,7 +53,7 @@ def configuration(name, count):
     if name == "processing-worker":
         env.update({"PROCESSING_PROFILE": "local-fixture", "PROCESSING_EXECUTION_MODE": "keyed", "PROCESSING_HEALTH_PORT": "18081",
                     "BUSINESS_BASE_URL": "http://127.0.0.1:18003", "ML_BASE_URL": "http://127.0.0.1:18001",
-                    "PROCESSING_SCHEMA_DIRECTORY": "/app/http-contracts", "PROCESSING_RISK_POLICY_FILE": "/local/fixtures/risk-policy.json",
+                    "PROCESSING_SCHEMA_DIRECTORY": "/app/http-contracts", "PROCESSING_RISK_POLICY_FILE": POLICY_MOUNT + "/risk-policy.json",
                     "PROCESSING_MODEL_IDENTITY_FIXTURE": "/local/fixtures/model-identity.json"})
         bridge["http"] += [http(18003, "business-api", 8003, oauth="registry"), http(18001, "ml-service", 8001, oauth="ml"), http(8081, "127.0.0.1", 18081, public=True)]
         bridge["oauth"] = {key: oauth(key) for key in ("registry", "ml")}
@@ -125,6 +126,7 @@ def resources(name, spec, count, source_sha):
     env.update(spec.get("env", {}))
     # These are app settings only. A caller cannot disable authentication or replace M5 channels.
     forbidden = {"AUTH_ENABLED", "SIM_AUTH_MODE", "BUSINESS_ALERT_NOTIFY_CHANNEL", "BUSINESS_PROCESSING_TOKEN_FILE",
+                 "PROCESSING_RISK_POLICY_FILE",
                  "BUSINESS_PROCESSING_READ_URL", "KAFKA_ENABLE_AUTO_COMMIT", "KAFKA_ENABLE_AUTO_OFFSET_STORE",
                  "KAFKA_BOOTSTRAP_SERVERS", "KAFKA_LOCAL_MODE", "KAFKA_SECURITY_PROTOCOL", "PRODUCER_GIT_SHA"}
     if forbidden.intersection(spec.get("env", {})):
@@ -141,6 +143,9 @@ def resources(name, spec, count, source_sha):
         primary["command"] = ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000", "--serve-artifacts", "--artifacts-destination", "s3://maintai-mlflow/artifacts", "--allowed-hosts", "127.0.0.1:15000,localhost:15000,mlflow:5000,mlflow.maintai-local.svc.cluster.local:5000"]
     volumes = [{"name": "tmp", "emptyDir": {}}, {"name": "tls", "secret": {"secretName": "local-dev-tls", "defaultMode": 288}}]
     containers, init = [primary], []
+    if name == "processing-worker":
+        volumes.append({"name": "risk-policy", "configMap": {"name": POLICY_CONFIGMAP}})
+        primary["volumeMounts"].append({"name": "risk-policy", "mountPath": POLICY_MOUNT, "readOnly": True})
     configs = [{"name": name + "-config", "literals": [key + "=" + value for key, value in sorted(env.items())]}]
     if bridge["tcp"] or bridge["http"] or bridge["oauth"]:
         configs.append({"name": name + "-bridge", "literals": ["bridge.json=" + json.dumps(bridge, sort_keys=True)]})

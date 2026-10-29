@@ -96,13 +96,19 @@ Ví dụ khai báo checksum file trong component Worker (thay hash bằng giá t
 
 ```json
 "files": {
-  "risk_policy": {"path": "/local/fixtures/risk-policy.json", "sha256": "ACTUAL_SHA256"},
   "model_identity": {"path": "/local/fixtures/model-identity.json", "sha256": "ACTUAL_SHA256"}
 }
 ```
 
 Ví dụ này cố ý không qua schema cho đến khi có hash thật. Identity/model/policy
 phải khớp runtime ML được deploy; không lấy reference từ live window cho đủ field.
+
+RISK-POLICY-01: policy không còn là private file trong Worker `files`. Nội dung
+thuộc app; `config/local/risk-policy.lock.json` chọn app SHA/version/hashes.
+Prepare apps nhận `--app-root`, kiểm source rồi tạo ConfigMap read-only tại
+`/local/config/risk-policy.json`. Bỏ khai báo risk_policy/env path cũ; chúng sẽ bị
+từ chối. Model identity vẫn cần file/checksum riêng. Xem
+[hướng dẫn policy và migration](LOCAL_RISK_POLICY.md).
 
 ## 4. Auth và kết nối M5
 

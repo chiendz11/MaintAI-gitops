@@ -69,6 +69,8 @@ def check(app=None, companion=None):
             raise ValueError("Keycloak client secret value must not be committed")
     if app:
         verify_application_source(app, load("config/local/app-source.lock.json"))
+        from .risk_policy import read_policy
+        read_policy(app)
     if companion:
         for left, right in [("config/local/app-source.lock.json", "local/versions/app-source.lock.json"),
                             ("config/local/contract.json", "local/config/contract.json"), ("config/local/runtime-catalog.json", "local/config/runtime-catalog.json"),

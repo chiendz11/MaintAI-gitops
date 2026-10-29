@@ -76,3 +76,6 @@ Start with [local development](docs/LOCAL_DEVELOPMENT.md), [migration](docs/LOCA
 See [source synchronization and publication](docs/LOCAL_SOURCE_SYNC.md) for the
 current app revision, ML/RAG runtime inputs and the distinction between source
 CI and running the demo.
+
+[App-owned risk policy](docs/LOCAL_RISK_POLICY.md): GitOps chọn source/version/hash
+và tạo ConfigMap, không quản lý một bản ngưỡng độc lập trong private fixtures.
