@@ -11,6 +11,7 @@ from jsonschema import Draft202012Validator
 from jsonschema.exceptions import ValidationError
 
 from .common import ROOT, assert_local, fingerprint, identity, load
+from .risk_policy import POLICY_CONFIGMAP, read_policy
 from .workloads import TOOLS, metadata, resources
 
 
@@ -91,10 +92,15 @@ def validate_profile(profile, receipts):
     if enabled & {"processing-worker", "processing-outbox-relay"} and evidence.get("ordering_activated") is not True:
         raise ValueError("PROC-ORDER-01 activation is an explicit owner operation")
     if "processing-worker" in enabled:
-        required = {"/local/fixtures/risk-policy.json", "/local/fixtures/model-identity.json"}
+        required = {"/local/fixtures/model-identity.json"}
         declared = {entry["path"] for entry in profile["components"]["processing-worker"]["files"].values()}
+        entries = profile["components"]["processing-worker"]["files"]
+        if "PROCESSING_RISK_POLICY_FILE" in profile["components"]["processing-worker"].get("env", {}):
+            raise ValueError("Worker risk policy path is managed by its app-owned ConfigMap")
+        if "risk_policy" in entries or any(Path(path).name == "risk-policy.json" for path in declared):
+            raise ValueError("Remove the legacy risk_policy file; policy now comes from the app-owned ConfigMap")
         if not required <= declared or evidence.get("model_identity_reviewed") is not True:
-            raise ValueError("Worker needs checksummed model identity and risk policy matching the serving model")
+            raise ValueError("Worker needs checksummed model identity matching the serving model")
     if "sensor" in enabled:
         declared = {entry["path"] for entry in profile["components"]["sensor"]["files"].values()}
         if "/local/datasets/ai4i2020.csv" not in declared or evidence.get("dataset_reviewed") is not True:
@@ -127,10 +133,13 @@ def edge(name, frontend, backend, port, node):
     return [deployment, service], {"name": name + "-config", "literals": ["bridge.json=" + json.dumps(config, sort_keys=True)]}
 
 
-def prepare_apps(profile, receipts):
+def prepare_apps(profile, receipts, app_root=None):
     enabled = validate_profile(profile, receipts)
+    policy_text, policy_metadata = read_policy(app_root) if "processing-worker" in enabled else (None, None)
     folder = ROOT / "environments/local/apps"
     generated, generators, images = [], [], [image_override("dev-tools", receipts["dev-tools"]["image"])]
+    if policy_text is not None:
+        generators.append({"name": POLICY_CONFIGMAP, "literals": ["risk-policy.json=" + policy_text]})
     for name in sorted(enabled):
         spec = profile["components"][name]
         docs, configs = resources(name, spec, profile["machine_count"], receipts[name]["source_git_sha"])
@@ -150,6 +159,10 @@ def prepare_apps(profile, receipts):
                 annotations.update({"maintai.io/source-sha": receipts[name]["source_git_sha"], "maintai.io/source-snapshot": receipts[name]["source_snapshot_sha256"],
                                     "maintai.io/source-dirty": str(receipts[name]["source_dirty"]).lower(), "prometheus.io/scrape": "false" if name in {"frontend", "simulator-ui", "mlflow"} else "true",
                                     "prometheus.io/port": str(load("config/local/runtime-catalog.json")["components"][name]["port"])})
+                if name == "processing-worker":
+                    annotations.update({"maintai.io/risk-policy-version": policy_metadata["policy_version"],
+                                        "maintai.io/risk-policy-sha256": policy_metadata["policy_sha256"],
+                                        "maintai.io/risk-policy-source-sha": policy_metadata["source_git_sha"]})
         file = "generated/" + name + ".yaml"
         write(folder / file, yaml.safe_dump_all(docs, sort_keys=False))
         generated.append(file)
@@ -173,7 +186,7 @@ def prepare_apps(profile, receipts):
     generators.append({"name": "local-app-release-status", "literals": ["enabled=" + ",".join(sorted(enabled)), "profile-sha256=" + fingerprint(profile)]})
     write(folder / "kustomization.yaml", {"apiVersion": "kustomize.config.k8s.io/v1beta1", "kind": "Kustomization", "namespace": "maintai-local",
         "resources": generated, "configMapGenerator": generators, "images": images})
-    write(folder / "release.json", json.dumps({"schema_version": "1.0.0", "profile": profile,
+    write(folder / "release.json", json.dumps({"schema_version": "1.0.0", "profile": profile, "risk_policy": policy_metadata,
           "receipts": {key: receipts[key] for key in sorted(enabled | {"dev-tools"})}}, indent=2) + "\n")
 
 
@@ -182,6 +195,7 @@ def main(argv=None):
     parser.add_argument("operation", choices=["platform", "apps"])
     parser.add_argument("--receipts", type=Path, required=True)
     parser.add_argument("--profile", type=Path)
+    parser.add_argument("--app-root", type=Path, help="Reviewed app checkout required when preparing Worker policy")
     args = parser.parse_args(argv)
     try:
         receipts = json.loads(args.receipts.read_text())
@@ -190,7 +204,7 @@ def main(argv=None):
         else:
             if args.profile is None:
                 parser.error("apps requires --profile")
-            prepare_apps(json.loads(args.profile.read_text()), receipts)
+            prepare_apps(json.loads(args.profile.read_text()), receipts, args.app_root)
     except (ValueError, ValidationError, KeyError, OSError):
         parser.exit(2, "Local release refused: check profile/schema/receipts and reviewed dependencies. No credential values are logged.\n")
     print("Local desired state prepared. No commit, push, image publication or cluster action occurred.")
