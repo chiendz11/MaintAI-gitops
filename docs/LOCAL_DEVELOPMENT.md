@@ -5,9 +5,11 @@ runtime config2.0.0, SQL và release envelopes giữ nguyên bytes trong lượt
 Local có contract/schema/catalog riêng, tham chiếu app SDK0.3.0, Kafka bundle2.0.0
 và native outcome1.4.0. Không phục hồi reader legacy2.0.
 
-**Trạng thái: source/config/CI đã viết; chưa chạy unit tests, Kustomize render,
-image build, Argo sync hoặc E2E.** Không có deployment/image receipt thật được
-ship trong repo. Hai ZIP chỉ là tài liệu tham khảo, không là source runtime.
+**Trạng thái 29/10: source đã public; CI đã chạy source/unit checks, kiểm app lock
+và render Kustomize không có cluster.** Xem [CI](https://github.com/chiendz11/MaintAI-gitops/actions/workflows/ci.yml)
+và [source sync](LOCAL_SOURCE_SYNC.md). Image build, Argo sync và E2E chưa được
+thực hiện trong đợt publication. Không có deployment/image receipt giả trong repo.
+Hai ZIP chỉ là tài liệu tham khảo, không là source runtime.
 
 ## 1. Ownership và cấu trúc
 

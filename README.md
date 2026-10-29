@@ -68,7 +68,8 @@ activation and image/runtime/config review are still required.
 Local development is now part of these two platform repositories. Infrastructure
 bootstraps the cluster/private kubeconfig/secrets/Argo CD; GitOps owns local
 platform and app desired state. AWS production sources remain independently
-versioned. Local implementation/CI is authored but not executed or deployed.
+versioned. Source is published and checked by [GitHub CI](https://github.com/chiendz11/MaintAI-gitops/actions/workflows/ci.yml).
+Image builds, Argo synchronization and a full local demo require separate runtime evidence.
 
 Start with [local development](docs/LOCAL_DEVELOPMENT.md), [migration](docs/LOCAL_MIGRATION.md) and [versioning](docs/LOCAL_VERSIONING.md).
 
