@@ -54,7 +54,9 @@
         "enabled": true,
         "image": null,
         "receipt": null,
-        "env": {},
+        "env": {
+          "KAFKA_POLL_INTERVAL_SECONDS": "0.01"
+        },
         "files": {},
         "runtime_reviewed": false
       },
@@ -62,7 +64,9 @@
         "enabled": true,
         "image": null,
         "receipt": null,
-        "env": {},
+        "env": {
+          "KAFKA_POLL_INTERVAL_SECONDS": "0.01"
+        },
         "files": {},
         "runtime_reviewed": false
       },
