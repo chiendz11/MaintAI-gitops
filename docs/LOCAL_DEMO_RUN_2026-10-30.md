@@ -2,12 +2,12 @@
 
 Đã triển khai thật lên cluster `maintai-local` từ nhánh `demo/local-k3d`.
 Ba Argo Application quản lý riêng platform, observability và app. Đây là local
-demo5 máy, mỗi máy1 reading/giây; không phải benchmark100 máy hoặc production rollout.
+demo 5 máy, mỗi máy 1 reading/giây; không phải benchmark 100 máy hoặc production rollout.
 
 ## Source và image
 
 - App nền ở commit `5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3`.
-- Business API/Consumer và Storage dùng image từ bản sửa SDK0.3.1 tại commit
+- Business API/Consumer và Storage dùng image từ bản sửa SDK 0.3.1 tại commit
   `2df0a914287a86f3500731ba05a2ba866bbee160`, [PR22](https://github.com/chiendz11/MaintAI/pull/22).
 - Các component còn lại giữ image receipt/source của bản nền. Không khai một
   source SHA giả chung cho những image được build từ các commit khác nhau.
@@ -25,10 +25,10 @@ demo5 máy, mỗi máy1 reading/giây; không phải benchmark100 máy hoặc pr
    Pod annotation realm hash làm mới service clients sau khi cập nhật cấu hình.
 5. RAG dùng Groq model openai/gpt-oss-20b, key lấy từ Kubernetes Secret;
    MiniLM embedding và PVC vẫn là dependency riêng của retrieval.
-6. Business/Storage chọn KAFKA_POLL_INTERVAL_SECONDS0.01; SDK0.3.1 sửa cơ chế
+6. Business/Storage chọn KAFKA_POLL_INTERVAL_SECONDS 0.01; SDK 0.3.1 sửa cơ chế
    prefetch, giữ một handler và durable offset semantics.
-7. Relay local chọn OUTBOX_POLL_INTERVAL_MS10 để tránh hàng đợi DB tăng ở tải
-   demo5 readings/s. Giá trị250ms trước đó không đủ cho đường relay một message/lượt.
+7. Relay local chọn OUTBOX_POLL_INTERVAL_MS 10 để tránh hàng đợi DB tăng ở tải
+   demo 5 readings/s. Giá trị 250ms trước đó không đủ cho đường relay một message/lượt.
 
 Các ConfigMap hash cũ không còn được active Pod/Deployment/StatefulSet tham chiếu
 đã được dọn riêng. Không bật global pruning, xóa PVC/DB/Secret hoặc reset offsets.
@@ -39,19 +39,19 @@ Các ConfigMap hash cũ không còn được active Pod/Deployment/StatefulSet t
 - Pause/Resume: một máy dừng, máy khác vẫn chạy, sequence tiếp tục sau Resume.
 - Critical: có alert mới từ ML/risk thật, không ép state từ tên scenario.
 - Recovery: không tự đóng alert; UI thực hiện ACK/START/RESOLVE và feedback với audit.
-- Degradation: control và readings/inference mới đã được kiểm; chưa đo toàn ramp300 mẫu.
+- Degradation: control và readings/inference mới đã được kiểm; chưa đo toàn ramp 300 mẫu.
 - Raw archive: object/manifest vào MinIO versioned; kiểm exact VersionId và SHA-256.
-- RAG trực tiếp: HTTP200, dịch vụ trả GROUNDED,10 checklist steps,3 citations.
+- RAG trực tiếp: HTTP 200, dịch vụ trả GROUNDED, 10 checklist steps, 3 citations.
 
 Business Copilot M7 vẫn chưa tích hợp; không coi lời gọi RAG trực tiếp là kết quả
 hiển thị brief trên Business UI. MLflow/Drift/training không bật trong profile này.
 
-Sau tuning, kiểm tra120 snapshot trong120 giây của5 máy cho thấy telemetry và
-prediction age đều dưới5 giây; lớn nhất quan sát được lần lượt1.03 và1.08 giây.
-Đây là age snapshot API, không phải p95 event-to-browser hoặc benchmark100 máy.
-DB outbox đã về0 trong lúc các máy tiếp tục chạy.
+Sau tuning, kiểm tra 120 snapshot trong 120 giây của 5 máy cho thấy telemetry và
+prediction age đều dưới 5 giây; lớn nhất quan sát được lần lượt1.03 và1.08 giây.
+Đây là age snapshot API, không phải p95 event-to-browser hoặc benchmark 100 máy.
+DB outbox đã về 0 trong lúc các máy tiếp tục chạy.
 
-GitOps32 tests và source/contract policies passed. CI, Argo convergence, provider
+GitOps 32 tests và source/contract policies passed. CI, Argo convergence, provider
 response và browser E2E được ghi thành các mức bằng chứng riêng.
 
 Hướng dẫn đầy đủ về chuẩn bị, owner Jobs, credential locations, URL, lỗi đã sửa,
