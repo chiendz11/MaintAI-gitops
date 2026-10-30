@@ -1,6 +1,7 @@
 """Reviewed local app interfaces; adapters are explicit development workloads."""
 
 import json
+import hashlib
 
 from .common import load
 from .risk_policy import POLICY_CONFIGMAP, POLICY_MOUNT
@@ -206,6 +207,9 @@ def resources(name, spec, count, source_sha):
         deployment = {"apiVersion": "apps/v1", "kind": "Deployment", "metadata": metadata(name), "spec": {"replicas": 1,
                       "strategy": {"type": "Recreate"} if name in {"sensor", "ml-service", "mlflow"} else {"type": "RollingUpdate", "rollingUpdate": {"maxSurge": 1, "maxUnavailable": 0}},
                       "selector": {"matchLabels": {"app.kubernetes.io/name": name}}, "template": {"metadata": {"labels": labels}, "spec": pod}}}
+        if name in {"business-api", "business-consumer", "processing-worker", "sensor"}:
+            from .common import ROOT
+            deployment["spec"]["template"]["metadata"]["annotations"] = {"maintai.io/identity-realm-sha256": hashlib.sha256((ROOT / "local/platform/maintai-realm.json").read_bytes()).hexdigest()}
         docs += [deployment, {"apiVersion": "v1", "kind": "Service", "metadata": metadata(name), "spec": {"selector": {"app.kubernetes.io/name": name}, "ports": [{"name": "http", "port": port, "targetPort": port}]}}]
     else:
         pod["restartPolicy"] = "Never"

@@ -91,7 +91,8 @@
         "http://localhost:18080"
       ],
       "defaultClientScopes": [
-        "profile"
+        "profile",
+        "basic"
       ],
       "optionalClientScopes": []
     },
@@ -155,7 +156,8 @@
         "http://localhost:18081"
       ],
       "defaultClientScopes": [
-        "profile"
+        "profile",
+        "basic"
       ],
       "optionalClientScopes": [
         "simulator:control"
@@ -211,7 +213,10 @@
         }
       ],
       "secret": "${REGISTRY_CLIENT_SECRET}",
-      "optionalClientScopes": []
+      "optionalClientScopes": [],
+      "defaultClientScopes": [
+        "basic"
+      ]
     },
     {
       "clientId": "maintai-processing",
@@ -263,7 +268,10 @@
         }
       ],
       "secret": "${PROCESSING_CLIENT_SECRET}",
-      "optionalClientScopes": []
+      "optionalClientScopes": [],
+      "defaultClientScopes": [
+        "basic"
+      ]
     },
     {
       "clientId": "maintai-sensor",
@@ -317,6 +325,9 @@
       "secret": "${SENSOR_CLIENT_SECRET}",
       "optionalClientScopes": [
         "sensor:write"
+      ],
+      "defaultClientScopes": [
+        "basic"
       ]
     },
     {
@@ -369,7 +380,10 @@
         }
       ],
       "secret": "${ML_CLIENT_SECRET}",
-      "optionalClientScopes": []
+      "optionalClientScopes": [],
+      "defaultClientScopes": [
+        "basic"
+      ]
     }
   ],
   "users": [
@@ -483,6 +497,42 @@
       "attributes": {
         "include.in.token.scope": "true"
       }
+    },
+    {
+      "name": "basic",
+      "description": "OpenID Connect scope for add all basic claims to the token",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "sub",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-sub-mapper",
+          "consentRequired": false,
+          "config": {
+            "introspection.token.claim": "true",
+            "access.token.claim": "true"
+          }
+        },
+        {
+          "name": "auth_time",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "AUTH_TIME",
+            "introspection.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "auth_time",
+            "jsonType.label": "long"
+          }
+        }
+      ]
     }
   ]
 }
