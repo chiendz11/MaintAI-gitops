@@ -38,7 +38,9 @@
         "enabled": true,
         "image": null,
         "receipt": null,
-        "env": {},
+        "env": {
+          "OUTBOX_POLL_INTERVAL_MS": "10"
+        },
         "files": {},
         "runtime_reviewed": false
       },
