@@ -187,8 +187,8 @@ configMapGenerator:
   - AWS_REGION=us-east-1
   - EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
   - EMBEDDING_REVISION=e8f8c211226b894fcb81acc59f3b34ba3efd5f42
-  - GROQ_MAX_COMPLETION_TOKENS=2048
-  - GROQ_MODEL=llama-3.3-70b-versatile
+  - GROQ_MAX_COMPLETION_TOKENS=4096
+  - GROQ_MODEL=openai/gpt-oss-20b
   - GROQ_TIMEOUT_SECONDS=60
   - HF_HOME=/opt/maintai/model-cache
   - MLFLOW_TRACKING_URI=http://mlflow:5000
@@ -275,7 +275,7 @@ configMapGenerator:
 images:
 - name: registry.invalid/maintai-local/dev-tools
   newName: maintai-local/dev-tools
-  newTag: image-c8693399c7a459582b47bb7d285b0b3edc8a5a4389cf01b55154390cef22276c
+  newTag: image-49caa80f93c6ac68ed249619e474eb4fdfe627ddf582753c4d6bc4b1fb8004a3
 - name: registry.invalid/maintai-local/business-api
   newName: maintai-local/business-api
   newTag: image-f6d9db5d5341cc3856a0611bdd06522f0c455a7111f3018682acaa4983548090
