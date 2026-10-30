@@ -11,4 +11,4 @@ images:
   newTag: image-2eacbc6c4f325cca64ebd55a5d21ed78d2851c5c061a0b544665215ded0ef3c6
 - name: registry.invalid/maintai-local/dev-tools
   newName: maintai-local/dev-tools
-  newTag: image-a1601ed400374074957c129e2e822ce6c7f396de61a19edd37356278bc4e92e3
+  newTag: image-c8693399c7a459582b47bb7d285b0b3edc8a5a4389cf01b55154390cef22276c
