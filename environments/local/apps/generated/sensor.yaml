@@ -19,6 +19,7 @@ spec:
         app.kubernetes.io/name: sensor
         app.kubernetes.io/part-of: maintai-local
       annotations:
+        maintai.io/identity-realm-sha256: 53ac8c62a8fb134b3652d41a1183493d19d40b4909d32566278ccd5ee012f9b0
         maintai.io/source-sha: 5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
         maintai.io/source-snapshot: e449b3c92f7ee1e6ca34504d9d5a6db947e45f2600a2d59861409587c9c41fcc
         maintai.io/source-dirty: 'false'
