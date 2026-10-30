@@ -1,0 +1,147 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processing-read-api
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: processing-read-api
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: processing-read-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: processing-read-api
+        app.kubernetes.io/part-of: maintai-local
+      annotations:
+        maintai.io/source-sha: 5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
+        maintai.io/source-snapshot: e449b3c92f7ee1e6ca34504d9d5a6db947e45f2600a2d59861409587c9c41fcc
+        maintai.io/source-dirty: 'false'
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8004'
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 90
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: processing-read-api
+        image: registry.invalid/maintai-local/processing-read-api:NOT_BUILT
+        imagePullPolicy: Never
+        envFrom:
+        - configMapRef:
+            name: processing-read-api-config
+        - secretRef:
+            name: local-processing-read-api-env
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            memory: 1Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: tokens
+          mountPath: /tokens
+          readOnly: true
+        command:
+        - maintai-processing-read-api
+        ports:
+        - containerPort: 8004
+          name: http
+        startupProbe:
+          httpGet:
+            path: /health/ready
+            port: 8004
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8004
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8004
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+      - name: local-adapter
+        image: registry.invalid/maintai-local/dev-tools:NOT_BUILT
+        imagePullPolicy: Never
+        args:
+        - serve
+        volumeMounts:
+        - name: bridge-config
+          mountPath: /config
+          readOnly: true
+        - name: tokens
+          mountPath: /tokens
+        - name: tls
+          mountPath: /tls
+          readOnly: true
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: tls
+        secret:
+          secretName: local-dev-tls
+          defaultMode: 288
+      - name: bridge-config
+        configMap:
+          name: processing-read-api-bridge
+      - name: tokens
+        emptyDir:
+          medium: Memory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: processing-read-api
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: processing-read-api
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  selector:
+    app.kubernetes.io/name: processing-read-api
+  ports:
+  - name: http
+    port: 8004
+    targetPort: 8004

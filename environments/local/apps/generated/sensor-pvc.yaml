@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: local-sensor-state
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: local-sensor-state
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi

@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: business-edge
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: business-edge
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: business-edge
+  template:
+    metadata:
+      labels:
+        app: business-edge
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 10001
+        runAsNonRoot: true
+      containers:
+      - name: edge
+        image: registry.invalid/maintai-local/dev-tools:NOT_BUILT
+        imagePullPolicy: Never
+        args:
+        - serve
+        volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: true
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            memory: 256Mi
+      volumes:
+      - name: config
+        configMap:
+          name: business-edge-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: business-edge
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: business-edge
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  type: NodePort
+  selector:
+    app: business-edge
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30080

@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-service
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: ml-service
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ml-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ml-service
+        app.kubernetes.io/part-of: maintai-local
+      annotations:
+        maintai.io/source-sha: 5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
+        maintai.io/source-snapshot: e449b3c92f7ee1e6ca34504d9d5a6db947e45f2600a2d59861409587c9c41fcc
+        maintai.io/source-dirty: 'false'
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8001'
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 90
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: ml-service
+        image: registry.invalid/maintai-local/ml-service:NOT_BUILT
+        imagePullPolicy: Never
+        envFrom:
+        - configMapRef:
+            name: ml-service-config
+        - secretRef:
+            name: local-ml-service-env
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            memory: 1Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: models
+          mountPath: /local/models
+          readOnly: true
+        ports:
+        - containerPort: 8001
+          name: http
+        startupProbe:
+          httpGet:
+            path: /health/ready
+            port: 8001
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8001
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8001
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: tls
+        secret:
+          secretName: local-dev-tls
+          defaultMode: 288
+      - name: models
+        hostPath:
+          path: /mnt/maintai-local/models
+          type: Directory
+      - name: artifact-lock
+        configMap:
+          name: ml-service-artifacts
+      initContainers:
+      - name: verify-artifact-checksums
+        image: registry.invalid/maintai-local/dev-tools:NOT_BUILT
+        imagePullPolicy: Never
+        args:
+        - verify-files
+        - --config
+        - /artifact-lock/artifacts.json
+        volumeMounts:
+        - name: models
+          mountPath: /local/models
+          readOnly: true
+        - name: artifact-lock
+          mountPath: /artifact-lock
+          readOnly: true
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ml-service
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: ml-service
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  selector:
+    app.kubernetes.io/name: ml-service
+  ports:
+  - name: http
+    port: 8001
+    targetPort: 8001
