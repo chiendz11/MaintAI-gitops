@@ -6,7 +6,9 @@ metadata:
   labels:
     app.kubernetes.io/part-of: maintai-local
   annotations:
-    argocd.argoproj.io/sync-wave: '-35'
+    # local-path waits for a consumer. Keep DB/bootstrap waves ahead of this
+    # claim; the explicit knowledge-owner Job binds it before RAG is enabled.
+    argocd.argoproj.io/sync-wave: '0'
 spec:
   accessModes: [ReadWriteOnce]
   storageClassName: local-path

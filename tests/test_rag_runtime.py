@@ -9,6 +9,12 @@ from test_local_release import receipt
 
 
 class RagRuntime(unittest.TestCase):
+    def test_wait_for_consumer_cache_cannot_block_datastore_bootstrap_waves(self):
+        import yaml
+        from localdev.common import ROOT
+        claim = yaml.safe_load((ROOT / "local/platform/rag-cache.yaml").read_text())
+        self.assertGreaterEqual(int(claim["metadata"]["annotations"]["argocd.argoproj.io/sync-wave"]), 0)
+
     def test_deployment_uses_scoped_secret_and_writable_cache_only(self):
         docs, configs = resources("rag-service", {"env": {}}, 5, "b" * 40)
         pod = docs[0]["spec"]["template"]["spec"]
