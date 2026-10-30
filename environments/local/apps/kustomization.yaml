@@ -37,7 +37,7 @@ configMapGenerator:
   - BUSINESS_PROCESSING_TOKEN_FILE=/tokens/processing.jwt
   - BUSINESS_PROFILE=local-test
   - BUSINESS_ROLES_CLAIM=roles
-  - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
+  - PRODUCER_GIT_SHA=2df0a914287a86f3500731ba05a2ba866bbee160
 - name: business-api-bridge
   literals:
   - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "127.0.0.1", "port":
@@ -62,7 +62,7 @@ configMapGenerator:
   - KAFKA_LOCAL_MODE=true
   - KAFKA_POLL_INTERVAL_SECONDS=0.01
   - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
-  - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
+  - PRODUCER_GIT_SHA=2df0a914287a86f3500731ba05a2ba866bbee160
 - name: business-consumer-bridge
   literals:
   - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "127.0.0.1", "port":
@@ -247,7 +247,7 @@ configMapGenerator:
   - KAFKA_LOCAL_MODE=true
   - KAFKA_POLL_INTERVAL_SECONDS=0.01
   - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
-  - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
+  - PRODUCER_GIT_SHA=2df0a914287a86f3500731ba05a2ba866bbee160
   - S3_ADDRESSING_STYLE=path
   - S3_ALLOW_UNVERSIONED=false
   - S3_ENDPOINT_URL=http://minio:9000
@@ -273,17 +273,17 @@ configMapGenerator:
 - name: local-app-release-status
   literals:
   - enabled=business-api,business-consumer,frontend,ingestion-api,ml-service,processing-outbox-relay,processing-read-api,processing-worker,rag-service,sensor,simulator-ui,storage-consumer
-  - profile-sha256=949b1010129fc5f7802af4300299ea642e1141b0c773eb1e28cac3b9f8f3b6de
+  - profile-sha256=164ea501cbf0614a493f2065ce1e9dd738b8d03ac64cf02538906131fc8bfa70
 images:
 - name: registry.invalid/maintai-local/dev-tools
   newName: maintai-local/dev-tools
   newTag: image-49caa80f93c6ac68ed249619e474eb4fdfe627ddf582753c4d6bc4b1fb8004a3
 - name: registry.invalid/maintai-local/business-api
   newName: maintai-local/business-api
-  newTag: image-f6d9db5d5341cc3856a0611bdd06522f0c455a7111f3018682acaa4983548090
+  newTag: image-2720ab687787adb8051b7b9fa0274fab1a0ee3bad3528639191f66b7253fee56
 - name: registry.invalid/maintai-local/business-consumer
   newName: maintai-local/business-consumer
-  newTag: image-4ad9e90d7d09897d355f6926fc80f172a1e3f5f8f7b32c996a11a77b6966713c
+  newTag: image-aab56a2dee01736548b42ab08d0d1dc66f6411db0091cacc2f1a8235ab7bfda7
 - name: registry.invalid/maintai-local/frontend
   newName: maintai-local/frontend
   newTag: image-033200a15efa62a09f4987544b42b8275a8b282a616486b5554a11f52eb01f65
@@ -313,4 +313,4 @@ images:
   newTag: image-b822148fce165a0ab14845138bb9c68ddb254fc0c9fbd11e4f3a5f6fc1ca3d72
 - name: registry.invalid/maintai-local/storage-consumer
   newName: maintai-local/storage-consumer
-  newTag: image-920b0051cf201da244b2b325973ff83df29e61b4660948eb6794e80777568c6e
+  newTag: image-e1ff8eb44568c27c085c01e98c8df4f3a7a9a0f28b417abce0d839a22ec2881a

@@ -44,7 +44,7 @@
       },
       "business-api": {
         "enabled": true,
-        "image": null,
+        "image": "maintai-local/business-api:image-2720ab687787adb8051b7b9fa0274fab1a0ee3bad3528639191f66b7253fee56",
         "receipt": null,
         "env": {},
         "files": {},
@@ -52,7 +52,7 @@
       },
       "business-consumer": {
         "enabled": true,
-        "image": null,
+        "image": "maintai-local/business-consumer:image-aab56a2dee01736548b42ab08d0d1dc66f6411db0091cacc2f1a8235ab7bfda7",
         "receipt": null,
         "env": {
           "KAFKA_POLL_INTERVAL_SECONDS": "0.01"
@@ -62,7 +62,7 @@
       },
       "storage-consumer": {
         "enabled": true,
-        "image": null,
+        "image": "maintai-local/storage-consumer:image-e1ff8eb44568c27c085c01e98c8df4f3a7a9a0f28b417abce0d839a22ec2881a",
         "receipt": null,
         "env": {
           "KAFKA_POLL_INTERVAL_SECONDS": "0.01"
@@ -172,7 +172,7 @@
   "risk_policy": {
     "schema_version": "1.0.0",
     "source_repository": "chiendz11/MaintAI",
-    "source_git_sha": "5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3",
+    "source_git_sha": "2df0a914287a86f3500731ba05a2ba866bbee160",
     "policy_version": "demo-risk-v1",
     "path": "processing/config/risk-policies/demo-risk-v1.json",
     "sha256": "254926e93f9a9435bf938c1e4d4f605ada5415f9a024b53aaabf762e963cc588",
@@ -184,11 +184,11 @@
     "business-api": {
       "schema_version": "1.0.0",
       "component": "business-api",
-      "image": "maintai-local/business-api:image-f6d9db5d5341cc3856a0611bdd06522f0c455a7111f3018682acaa4983548090",
-      "image_id": "sha256:f6d9db5d5341cc3856a0611bdd06522f0c455a7111f3018682acaa4983548090",
-      "source_git_sha": "5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3",
+      "image": "maintai-local/business-api:image-2720ab687787adb8051b7b9fa0274fab1a0ee3bad3528639191f66b7253fee56",
+      "image_id": "sha256:2720ab687787adb8051b7b9fa0274fab1a0ee3bad3528639191f66b7253fee56",
+      "source_git_sha": "2df0a914287a86f3500731ba05a2ba866bbee160",
       "source_dirty": false,
-      "source_snapshot_sha256": "e449b3c92f7ee1e6ca34504d9d5a6db947e45f2600a2d59861409587c9c41fcc",
+      "source_snapshot_sha256": "7798625728e8d03470b52c43badd8a65cc51c90b922f124265d5314df96e803a",
       "dockerfile": "backend/business-api/Dockerfile",
       "dockerfile_sha256": "ad08a5520ab678561c790baa1734596f0b91a19be47001e3744aa8e82b4dbe37",
       "build_context": ".",
@@ -197,11 +197,11 @@
     "business-consumer": {
       "schema_version": "1.0.0",
       "component": "business-consumer",
-      "image": "maintai-local/business-consumer:image-4ad9e90d7d09897d355f6926fc80f172a1e3f5f8f7b32c996a11a77b6966713c",
-      "image_id": "sha256:4ad9e90d7d09897d355f6926fc80f172a1e3f5f8f7b32c996a11a77b6966713c",
-      "source_git_sha": "5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3",
+      "image": "maintai-local/business-consumer:image-aab56a2dee01736548b42ab08d0d1dc66f6411db0091cacc2f1a8235ab7bfda7",
+      "image_id": "sha256:aab56a2dee01736548b42ab08d0d1dc66f6411db0091cacc2f1a8235ab7bfda7",
+      "source_git_sha": "2df0a914287a86f3500731ba05a2ba866bbee160",
       "source_dirty": false,
-      "source_snapshot_sha256": "e449b3c92f7ee1e6ca34504d9d5a6db947e45f2600a2d59861409587c9c41fcc",
+      "source_snapshot_sha256": "7798625728e8d03470b52c43badd8a65cc51c90b922f124265d5314df96e803a",
       "dockerfile": "backend/business-consumer/Dockerfile",
       "dockerfile_sha256": "31c29c48f82fdf5f1a18efcc8350c020bf8a288d0329ae892739981bc8c0cc71",
       "build_context": ".",
@@ -340,11 +340,11 @@
     "storage-consumer": {
       "schema_version": "1.0.0",
       "component": "storage-consumer",
-      "image": "maintai-local/storage-consumer:image-920b0051cf201da244b2b325973ff83df29e61b4660948eb6794e80777568c6e",
-      "image_id": "sha256:920b0051cf201da244b2b325973ff83df29e61b4660948eb6794e80777568c6e",
-      "source_git_sha": "5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3",
+      "image": "maintai-local/storage-consumer:image-e1ff8eb44568c27c085c01e98c8df4f3a7a9a0f28b417abce0d839a22ec2881a",
+      "image_id": "sha256:e1ff8eb44568c27c085c01e98c8df4f3a7a9a0f28b417abce0d839a22ec2881a",
+      "source_git_sha": "2df0a914287a86f3500731ba05a2ba866bbee160",
       "source_dirty": false,
-      "source_snapshot_sha256": "e449b3c92f7ee1e6ca34504d9d5a6db947e45f2600a2d59861409587c9c41fcc",
+      "source_snapshot_sha256": "7798625728e8d03470b52c43badd8a65cc51c90b922f124265d5314df96e803a",
       "dockerfile": "storage-consumer/Dockerfile",
       "dockerfile_sha256": "eca4cbd1eaae7f4122567bb703a1a755c54c557beba56e794bee72d0e6967c30",
       "build_context": ".",

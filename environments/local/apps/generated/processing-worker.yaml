@@ -30,7 +30,7 @@ spec:
         prometheus.io/port: '8081'
         maintai.io/risk-policy-version: demo-risk-v1
         maintai.io/risk-policy-sha256: 25ec9dc4a1178bee4b560349c88dbb6b25fe7615f99884b5b8cc1e2f4963c08c
-        maintai.io/risk-policy-source-sha: 5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
+        maintai.io/risk-policy-source-sha: 2df0a914287a86f3500731ba05a2ba866bbee160
     spec:
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 90

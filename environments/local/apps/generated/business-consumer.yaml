@@ -23,8 +23,8 @@ spec:
         app.kubernetes.io/part-of: maintai-local
       annotations:
         maintai.io/identity-realm-sha256: 53ac8c62a8fb134b3652d41a1183493d19d40b4909d32566278ccd5ee012f9b0
-        maintai.io/source-sha: 5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
-        maintai.io/source-snapshot: e449b3c92f7ee1e6ca34504d9d5a6db947e45f2600a2d59861409587c9c41fcc
+        maintai.io/source-sha: 2df0a914287a86f3500731ba05a2ba866bbee160
+        maintai.io/source-snapshot: 7798625728e8d03470b52c43badd8a65cc51c90b922f124265d5314df96e803a
         maintai.io/source-dirty: 'false'
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8083'
