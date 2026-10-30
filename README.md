@@ -53,6 +53,10 @@ owned PRs, protected main, immutable artifacts and independent lifecycle stages.
 Reference main commits are captured in [reference-lock](docs/reference-lock.json).
 This new code does not reuse the old underscore deployment folders as active state.
 
+Đã chạy demo local ngày30/10/2026 từ nhánh `demo/local-k3d`. Xem
+[báo cáo desired state và kết quả thực](docs/LOCAL_DEMO_RUN_2026-10-30.md);
+không suy kết quả local thành production readiness hoặc chức năng Copilot M7.
+
 ## Application alignment — PROC-ORDER-01,2026-10-23
 
 The current app design is [v1.4 + PROC-ORDER-01](../MaintAI/docs/PROCESSING_CONCURRENCY_AND_ORDERING.md),
