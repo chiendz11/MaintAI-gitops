@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "images": {
+    "minio": {
+      "schema_version": "1.0.0",
+      "component": "minio",
+      "image": "maintai-local/minio:image-7455c79dcf6ffc4d279080f5b7e19854e42410cd0f6bee1c96706f874509ee6c",
+      "image_id": "sha256:7455c79dcf6ffc4d279080f5b7e19854e42410cd0f6bee1c96706f874509ee6c",
+      "source_git_sha": "3887ef4217554424545b2b01b5b39d5a0d583bd9",
+      "source_dirty": false,
+      "source_snapshot_sha256": "1adf2ecd6cc20d3dec6a5939413069d30fe68c016d8f2dcd8e03e8985114abb9",
+      "dockerfile": "local/images/minio.Dockerfile",
+      "dockerfile_sha256": "bae8a01dfe08fdecc149832608a70ae6ec3cc6437d35ab93ded1a0e0ec9031e8",
+      "build_context": "local/images",
+      "imported_context": "k3d-maintai-local"
+    },
+    "mc": {
+      "schema_version": "1.0.0",
+      "component": "mc",
+      "image": "maintai-local/mc:image-2eacbc6c4f325cca64ebd55a5d21ed78d2851c5c061a0b544665215ded0ef3c6",
+      "image_id": "sha256:2eacbc6c4f325cca64ebd55a5d21ed78d2851c5c061a0b544665215ded0ef3c6",
+      "source_git_sha": "3887ef4217554424545b2b01b5b39d5a0d583bd9",
+      "source_dirty": false,
+      "source_snapshot_sha256": "1adf2ecd6cc20d3dec6a5939413069d30fe68c016d8f2dcd8e03e8985114abb9",
+      "dockerfile": "local/images/mc.Dockerfile",
+      "dockerfile_sha256": "87e5bea1de47999d603f0aac1fa777fbae4bc866266afdac7cb2d9b02db0f311",
+      "build_context": "local/images",
+      "imported_context": "k3d-maintai-local"
+    },
+    "dev-tools": {
+      "schema_version": "1.0.0",
+      "component": "dev-tools",
+      "image": "maintai-local/dev-tools:image-a1601ed400374074957c129e2e822ce6c7f396de61a19edd37356278bc4e92e3",
+      "image_id": "sha256:a1601ed400374074957c129e2e822ce6c7f396de61a19edd37356278bc4e92e3",
+      "source_git_sha": "3887ef4217554424545b2b01b5b39d5a0d583bd9",
+      "source_dirty": false,
+      "source_snapshot_sha256": "1adf2ecd6cc20d3dec6a5939413069d30fe68c016d8f2dcd8e03e8985114abb9",
+      "dockerfile": "local/runtime/Dockerfile",
+      "dockerfile_sha256": "f0f516d9f660d456d48760a6395c6089504b981f2df9eaf2bda940c419551524",
+      "build_context": "local/runtime",
+      "imported_context": "k3d-maintai-local"
+    }
+  },
+  "platform_lock_sha256": "7e839c16e00ca75cb7a85db4edb5861a374de5bc8434ebf140a1e9bc937926f8"
+}

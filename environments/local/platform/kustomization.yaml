@@ -2,4 +2,13 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - ../../../local/platform
-images: []
+images:
+- name: registry.invalid/maintai-local/minio
+  newName: maintai-local/minio
+  newTag: image-7455c79dcf6ffc4d279080f5b7e19854e42410cd0f6bee1c96706f874509ee6c
+- name: registry.invalid/maintai-local/mc
+  newName: maintai-local/mc
+  newTag: image-2eacbc6c4f325cca64ebd55a5d21ed78d2851c5c061a0b544665215ded0ef3c6
+- name: registry.invalid/maintai-local/dev-tools
+  newName: maintai-local/dev-tools
+  newTag: image-a1601ed400374074957c129e2e822ce6c7f396de61a19edd37356278bc4e92e3
