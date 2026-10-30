@@ -50,6 +50,10 @@ spec:
           value: 'true'
         - name: KC_HEALTH_ENABLED
           value: 'true'
+        - name: KC_PROXY_HEADERS
+          value: xforwarded
+        - name: JAVA_OPTS_KC_HEAP
+          value: -Xms128m -Xmx512m
         - name: KC_BOOTSTRAP_ADMIN_USERNAME
           valueFrom:
             secretKeyRef:
@@ -120,7 +124,8 @@ spec:
             cpu: 250m
             memory: 512Mi
           limits:
-            memory: 1Gi
+            # Runtime augmentation needs native/build memory beyond the heap.
+            memory: 2Gi
       volumes:
       - name: realm
         configMap:
