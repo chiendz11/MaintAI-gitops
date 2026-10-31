@@ -17,6 +17,8 @@ resources:
 - generated/business-edge.yaml
 - generated/simulator-edge.yaml
 - generated/sensor-pvc.yaml
+- hooks/processing-migration.yaml
+- hooks/business-migration.yaml
 configMapGenerator:
 - name: processing-risk-policy
   literals:
@@ -314,3 +316,8 @@ images:
 - name: registry.invalid/maintai-local/storage-consumer
   newName: maintai-local/storage-consumer
   newTag: image-e1ff8eb44568c27c085c01e98c8df4f3a7a9a0f28b417abce0d839a22ec2881a
+patches:
+- target:
+    kind: Deployment
+  patch: "- op: replace\n  path: /spec/template/spec/containers/0/imagePullPolicy\n\
+    \  value: IfNotPresent"

@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: processing-db-migration
+  namespace: maintai-local
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 300
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      name: processing-db-migration
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migration
+        image: registry.invalid/maintai-local/processing-worker:NOT_BUILT
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -c
+        - |
+          maintai-processing-migrate upgrade && \
+          python -c "import os,psycopg; from psycopg.rows import dict_row; from processing.shared.persistence.connection import grant_processing_permissions as grant; with psycopg.connect(os.environ['PROCESSING_DATABASE_URL'], row_factory=dict_row) as c: grant(c, reader_role='processing_reader', worker_role='processing_worker', relay_role='processing_relay')"
+        env:
+        - name: PROCESSING_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: local-processing-owner
+              key: url

@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: business-db-migration
+  namespace: maintai-local
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 300
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      name: business-db-migration
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migration
+        image: registry.invalid/maintai-local/business-api:NOT_BUILT
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -c
+        - |
+          maintai-business-migrate upgrade && \
+          python -c "import os,psycopg; from psycopg.rows import dict_row; from backend.shared.persistence.permissions import grant_business_permissions as grant; with psycopg.connect(os.environ['BUSINESS_DATABASE_URL'], row_factory=dict_row) as c: grant(c, reader_role='business_reader', consumer_role='business_consumer', api_role='business_api')"
+        env:
+        - name: BUSINESS_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: local-business-owner
+              key: url
