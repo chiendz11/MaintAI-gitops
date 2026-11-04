@@ -19,6 +19,11 @@ resources:
 - generated/sensor-pvc.yaml
 - hooks/processing-migration.yaml
 - hooks/business-migration.yaml
+- external-secrets.yaml
+- ingress.yaml
+- hpa.yaml
+- pdb.yaml
+- network-policies.yaml
 configMapGenerator:
 - name: processing-risk-policy
   literals:
