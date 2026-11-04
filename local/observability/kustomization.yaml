@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: maintai-local
 resources:
 - resources.yaml
+- loki-promtail.yaml
 configMapGenerator:
 - name: local-prometheus
   files:
