@@ -1,0 +1,243 @@
+{
+  "uid": "maintai-pipeline",
+  "title": "MaintAI — Pipeline, Kafka & Outbox Relay",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "tags": ["maintai", "kafka", "outbox", "storage"],
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Outbox Oldest Pending Age",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 6},
+      "targets": [
+        {
+          "expr": "maintai_outbox_oldest_pending_age_seconds or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 5},
+              {"color": "red", "value": 30}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Processing Worker Backlog",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 6},
+      "targets": [
+        {
+          "expr": "maintai_processing_backlog or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 100},
+              {"color": "red", "value": 1000}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Sensor Spool Pending Records",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 6},
+      "targets": [
+        {
+          "expr": "maintai_sensor_pending_spool or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 10},
+              {"color": "red", "value": 100}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Storage S3 Raw Record Age",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 6},
+      "targets": [
+        {
+          "expr": "maintai_storage_age_seconds or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 10},
+              {"color": "red", "value": 60}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Processing Worker Ingestion Rate & Validation",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 0, "y": 6, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(maintai_processing_records_total[1m])) by (status)",
+          "legendFormat": "Processed {{status}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(maintai_processing_validation_attempts_total[1m]))",
+          "legendFormat": "Validation Attempts",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Outbox Relay Throughput vs Pending Records",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 12, "y": 6, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(maintai_processing_published_total[1m]))",
+          "legendFormat": "Dispatched to Kafka",
+          "refId": "A"
+        },
+        {
+          "expr": "maintai_outbox_oldest_pending_age_seconds",
+          "legendFormat": "Oldest Pending (s)",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Sensor Event Generation & Spool Throughput",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 0, "y": 14, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(maintai_sensor_generated_total[1m]))",
+          "legendFormat": "Generated (msg/s)",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(maintai_sensor_attempts_total[1m]))",
+          "legendFormat": "HTTP Ingestion Attempts",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Storage Consumer (S3/MinIO) Ingestion & Cataloging",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 12, "y": 14, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(maintai_storage_batches_total[1m]))",
+          "legendFormat": "S3 Batches / sec",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(maintai_storage_catalog_runs_total[1m]))",
+          "legendFormat": "Catalog Runs / sec",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(maintai_storage_errors_total[5m]))",
+          "legendFormat": "Storage Errors",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      }
+    }
+  ]
+}

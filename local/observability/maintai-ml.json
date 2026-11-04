@@ -1,0 +1,218 @@
+{
+  "uid": "maintai-ml",
+  "title": "MaintAI — ML Inference & Latency",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "tags": ["maintai", "ml", "inference"],
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "ML Service Status",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 6},
+      "targets": [
+        {
+          "expr": "up{service=\"ml-service\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"type": "value", "options": {"0": {"text": "DOWN"}, "1": {"text": "UP"}}}
+          ]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Active ML Model Version",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 6},
+      "targets": [
+        {
+          "expr": "maintai_ml_model_info",
+          "legendFormat": "{{model_version}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"}
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Inference Latency p95",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 6},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(maintai_ml_inference_duration_seconds_bucket[5m])) by (le)) * 1000",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 50},
+              {"color": "red", "value": 150}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Failure Predictions Total",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 6},
+      "targets": [
+        {
+          "expr": "sum(maintai_ml_predictions_total{prediction=\"FAILURE\"}) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Inference Request Throughput (req/s)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 0, "y": 6, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(maintai_ml_inference_requests_total[1m])) by (status)",
+          "legendFormat": "Status {{status}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Predictions Breakdown (Normal vs Failure)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 12, "y": 6, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(maintai_ml_predictions_total[5m])) by (prediction)",
+          "legendFormat": "{{prediction}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Inference Latency Percentiles (p50, p95, p99)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 0, "y": 14, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(maintai_ml_inference_duration_seconds_bucket[5m])) by (le)) * 1000",
+          "legendFormat": "p50 (median) ms",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(maintai_ml_inference_duration_seconds_bucket[5m])) by (le)) * 1000",
+          "legendFormat": "p95 ms",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(maintai_ml_inference_duration_seconds_bucket[5m])) by (le)) * 1000",
+          "legendFormat": "p99 ms",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Processing Worker ML Client Latency & Results",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 12, "y": 14, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(maintai_processing_ml_latency_seconds_bucket[5m])) by (le)) * 1000",
+          "legendFormat": "Worker ML Call p95 (ms)",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(maintai_processing_ml_results_total[5m])) by (status)",
+          "legendFormat": "Worker Result: {{status}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      }
+    }
+  ]
+}

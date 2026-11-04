@@ -17,3 +17,7 @@ configMapGenerator:
 - name: local-grafana-dashboards
   files:
   - maintai-local.json
+  - maintai-overview.json
+  - maintai-ml.json
+  - maintai-drift.json
+  - maintai-pipeline.json

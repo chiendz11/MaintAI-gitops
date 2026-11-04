@@ -1,0 +1,183 @@
+{
+  "uid": "maintai-drift",
+  "title": "MaintAI — Data Drift Monitoring",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "tags": ["maintai", "drift", "mlops"],
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Overall Drift Health State",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "maintai_drift_overall_state or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "red", "value": 2}
+            ]
+          },
+          "mappings": [
+            {"type": "value", "options": {"0": {"text": "NORMAL / NO DRIFT"}, "1": {"text": "WARNING (PSI > 0.1)"}, "2": {"text": "CRITICAL (PSI > 0.2)"}}}
+          ]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Drifted Features Count",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 8, "y": 0, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "maintai_drift_features_drifted or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "red", "value": 3}
+            ]
+          },
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Time Since Last Drift Evaluation",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "time() - maintai_drift_worker_last_success_timestamp_seconds or vector(300)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 600},
+              {"color": "red", "value": 3600}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Population Stability Index (PSI) by Feature",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 0, "y": 6, "w": 14, "h": 10},
+      "targets": [
+        {
+          "expr": "maintai_drift_score",
+          "legendFormat": "{{feature}} (PSI)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.1},
+              {"color": "red", "value": 0.2}
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Individual Feature Drift State (0: OK, 1: Warn, 2: Crit)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 14, "y": 6, "w": 10, "h": 10},
+      "targets": [
+        {
+          "expr": "maintai_drift_feature_state",
+          "legendFormat": "{{feature}} State",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 2,
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Total Drift Evaluation Batches Run",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 0, "y": 16, "w": 24, "h": 7},
+      "targets": [
+        {
+          "expr": "sum(rate(maintai_drift_runs_total[5m])) or vector(0)",
+          "legendFormat": "Drift Checks / sec",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      }
+    }
+  ]
+}
