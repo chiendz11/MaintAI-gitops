@@ -67,6 +67,9 @@ spec:
         - name: datasets
           mountPath: /local/datasets
           readOnly: true
+        - name: manuals
+          mountPath: /local/manuals
+          readOnly: true
         env:
         - name: GROQ_API_KEY
           valueFrom:
@@ -111,6 +114,10 @@ spec:
         hostPath:
           path: /mnt/maintai-local/datasets
           type: Directory
+      - name: manuals
+        hostPath:
+          path: /mnt/maintai-local/manuals
+          type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service

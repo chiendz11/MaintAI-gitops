@@ -214,6 +214,34 @@
           "unit": "ms"
         }
       }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Shadow Disagreement / Model Divergence Rate (%)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 0, "y": 22, "w": 24, "h": 8},
+      "targets": [
+        {
+          "expr": "abs(sum(rate(maintai_ml_predictions_total{role=\"champion\",prediction=\"FAILURE\"}[5m])) - sum(rate(maintai_ml_predictions_total{role=\"shadow\",prediction=\"FAILURE\"}[5m]))) / (sum(rate(maintai_ml_predictions_total{role=\"champion\"}[5m])) + 0.001) * 100",
+          "legendFormat": "Failure Prediction Divergence Rate (%)",
+          "refId": "A"
+        },
+        {
+          "expr": "abs(sum(rate(maintai_ml_predictions_total{role=\"champion\",prediction=\"NORMAL\"}[5m])) - sum(rate(maintai_ml_predictions_total{role=\"shadow\",prediction=\"NORMAL\"}[5m]))) / (sum(rate(maintai_ml_predictions_total{role=\"champion\"}[5m])) + 0.001) * 100",
+          "legendFormat": "Normal Prediction Divergence Rate (%)",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0
+        }
+      }
     }
   ]
 }

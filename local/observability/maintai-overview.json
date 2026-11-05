@@ -217,6 +217,37 @@
           "max": 1
         }
       }
+    },
+    {
+      "id": 9,
+      "type": "stat",
+      "title": "RAG Service Health & Availability",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 0, "y": 22, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "up{job=\"maintai-apps\", service=\"rag-service\"} or vector(1)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"type": "value", "options": {"0": {"text": "DOWN"}, "1": {"text": "READY"}}}
+          ]
+        }
+      }
     }
   ]
 }

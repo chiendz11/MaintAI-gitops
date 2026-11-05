@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rag-knowledge-init
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: rag-knowledge-init
+    app.kubernetes.io/part-of: maintai-local
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 600
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      name: rag-knowledge-init
+      labels:
+        app.kubernetes.io/name: rag-knowledge-init
+        app.kubernetes.io/part-of: maintai-local
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: init
+        image: registry.invalid/maintai-local/rag-service:NOT_BUILT
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -c
+        - |
+          python -m ingestion.prepare_demo --manifest /app/knowledge-demo.json
+        envFrom:
+        - configMapRef:
+            name: rag-service-config
+        - secretRef:
+            name: local-rag-service-env
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: embedding-cache
+          mountPath: /opt/maintai/model-cache
+        - name: manuals
+          mountPath: /local/manuals
+          readOnly: true
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: "2"
+            memory: 2Gi
+        securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: embedding-cache
+        persistentVolumeClaim:
+          claimName: local-rag-embedding-cache
+      - name: manuals
+        hostPath:
+          path: /mnt/maintai-local/manuals
+          type: DirectoryOrCreate

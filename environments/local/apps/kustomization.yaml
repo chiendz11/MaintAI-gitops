@@ -9,6 +9,7 @@ resources:
 - generated/ml-service.yaml
 - generated/ml-service-shadow.yaml
 - ml-traffic-mirror.yaml
+- generated/mlflow.yaml
 - generated/processing-outbox-relay.yaml
 - generated/processing-read-api.yaml
 - generated/processing-worker.yaml
@@ -21,6 +22,7 @@ resources:
 - generated/sensor-pvc.yaml
 - hooks/processing-migration.yaml
 - hooks/business-migration.yaml
+- hooks/rag-knowledge-init.yaml
 - external-secrets.yaml
 - ingress.yaml
 - hpa.yaml
@@ -215,6 +217,7 @@ configMapGenerator:
   - AWS_REGION=us-east-1
   - EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
   - EMBEDDING_REVISION=e8f8c211226b894fcb81acc59f3b34ba3efd5f42
+  - FALLBACK_ENABLED=true
   - GROQ_MAX_COMPLETION_TOKENS=4096
   - GROQ_MODEL=openai/gpt-oss-20b
   - GROQ_TIMEOUT_SECONDS=60
