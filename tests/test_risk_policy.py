@@ -264,6 +264,9 @@ class RiskPolicyRelease(unittest.TestCase):
                     target.write_text(
                         yaml.safe_dump(value, sort_keys=False) if isinstance(value, dict) else value
                     )
+                hooks_dir = ROOT / "environments/local/apps/hooks"
+                if hooks_dir.exists():
+                    shutil.copytree(hooks_dir, root / "environments/local/apps/hooks")
                 raw = subprocess.check_output(
                     ["kubectl", "kustomize", str(root / "environments/local/apps")], text=True
                 )
