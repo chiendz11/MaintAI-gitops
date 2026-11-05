@@ -184,7 +184,7 @@ def prepare_apps(profile, receipts, app_root=None):
         write(folder / file, {"apiVersion": "v1", "kind": "Service", "metadata": metadata("mlflow-local-ui"), "spec": {"type": "NodePort", "selector": {"app.kubernetes.io/name": "mlflow"}, "ports": [{"port": 5000, "targetPort": 5000, "nodePort": 30500}]}})
         generated.append(file)
     generators.append({"name": "local-app-release-status", "literals": ["enabled=" + ",".join(sorted(enabled)), "profile-sha256=" + fingerprint(profile)]})
-    hooks = [h for h in ("hooks/processing-migration.yaml", "hooks/business-migration.yaml") if (folder / h).exists()]
+    hooks = [h for h in ("hooks/processing-migration.yaml", "hooks/business-migration.yaml", "hooks/rag-knowledge-init.yaml") if (folder / h).exists()]
     write(folder / "kustomization.yaml", {"apiVersion": "kustomize.config.k8s.io/v1beta1", "kind": "Kustomization", "namespace": "maintai-local",
         "resources": generated + hooks, "configMapGenerator": generators, "images": images,
         "patches": [{"target": {"kind": "Deployment"}, "patch": "- op: replace\n  path: /spec/template/spec/containers/0/imagePullPolicy\n  value: IfNotPresent"}]})
