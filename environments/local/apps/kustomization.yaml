@@ -287,40 +287,40 @@ images:
   newTag: image-49caa80f93c6ac68ed249619e474eb4fdfe627ddf582753c4d6bc4b1fb8004a3
 - name: registry.invalid/maintai-local/business-api
   newName: ghcr.io/chiendz11/maintai-business-api
-  newTag: sha-b79b3213c980cbed644117fd44f7ad6ffcb21968
+  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/business-consumer
   newName: ghcr.io/chiendz11/maintai-business-consumer
-  newTag: sha-b79b3213c980cbed644117fd44f7ad6ffcb21968
+  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/frontend
   newName: ghcr.io/chiendz11/maintai-frontend
-  newTag: sha-b79b3213c980cbed644117fd44f7ad6ffcb21968
+  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/ingestion-api
   newName: ghcr.io/chiendz11/maintai-ingestion-api
-  newTag: sha-b79b3213c980cbed644117fd44f7ad6ffcb21968
+  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/ml-service
-  newName: maintai-local/ml-service
-  newTag: image-7631b54155c59dfdd4ff6cd16c3d5b3b45364d499da0fa984a637111f00e00e4
+  newName: ghcr.io/chiendz11/maintai-ml-service
+  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/processing-outbox-relay
   newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
-  newTag: sha-b79b3213c980cbed644117fd44f7ad6ffcb21968
+  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/processing-read-api
   newName: ghcr.io/chiendz11/maintai-processing-read-api
-  newTag: sha-b79b3213c980cbed644117fd44f7ad6ffcb21968
+  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/processing-worker
   newName: ghcr.io/chiendz11/maintai-processing-worker
-  newTag: sha-b79b3213c980cbed644117fd44f7ad6ffcb21968
+  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/rag-service
-  newName: maintai-local/rag-service
-  newTag: image-60f27072a74d5d2c7e821ce394658d050c07191e3763d116027b302d6042bb81
+  newName: ghcr.io/chiendz11/maintai-rag-service
+  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/sensor
   newName: ghcr.io/chiendz11/maintai-sensor
-  newTag: sha-b79b3213c980cbed644117fd44f7ad6ffcb21968
+  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/simulator-ui
   newName: ghcr.io/chiendz11/maintai-simulator-ui
-  newTag: sha-b79b3213c980cbed644117fd44f7ad6ffcb21968
+  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/storage-consumer
   newName: ghcr.io/chiendz11/maintai-storage-consumer
-  newTag: sha-b79b3213c980cbed644117fd44f7ad6ffcb21968
+  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 patches:
 - target:
     kind: Deployment
