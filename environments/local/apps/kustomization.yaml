@@ -7,6 +7,8 @@ resources:
 - generated/frontend.yaml
 - generated/ingestion-api.yaml
 - generated/ml-service.yaml
+- generated/ml-service-shadow.yaml
+- ml-traffic-mirror.yaml
 - generated/processing-outbox-relay.yaml
 - generated/processing-read-api.yaml
 - generated/processing-worker.yaml
@@ -121,6 +123,24 @@ configMapGenerator:
   - MAINTAI_LOCAL_ONLY=1
   - MLFLOW_TRACKING_URI=http://mlflow:5000
   - MODEL_DIR=/local/models/logreg-baseline-v0
+  - SERVICE_ROLE=champion
+  - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
+  - S3_ENDPOINT_URL=http://minio:9000
+- name: ml-service-shadow-artifacts
+  literals:
+  - 'artifacts.json=[{"path": "/local/models/hgb-interactions-candidate-v1/pipeline.joblib",
+    "sha256": "eb96429b8fa5896f8b4f43d23b2df7499a9e25a6f67ffcbaf272d8e6656f4599"},
+    {"path": "/local/models/hgb-interactions-candidate-v1/metadata.json", "sha256": "034c84233af9e2c3b1a0960deb66324259736f362ecb83aa4fa230998c976805"},
+    {"path": "/local/models/hgb-interactions-candidate-v1/evaluation.json", "sha256": "d09679f27a448d5aed5ed72af6256265afa68865e2e63192fdb5b44dbeb2c6ce"},
+    {"path": "/local/models/hgb-interactions-candidate-v1/drift_reference.json", "sha256": "76ce402c7c42c3267524bccc133d4383166f07d9f804b0aa650723574db46543"}]'
+- name: ml-service-shadow-config
+  literals:
+  - AWS_DEFAULT_REGION=us-east-1
+  - AWS_REGION=us-east-1
+  - MAINTAI_LOCAL_ONLY=1
+  - MLFLOW_TRACKING_URI=http://mlflow:5000
+  - MODEL_DIR=/local/models/hgb-interactions-candidate-v1
+  - SERVICE_ROLE=shadow
   - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
   - S3_ENDPOINT_URL=http://minio:9000
 - name: processing-outbox-relay-config
@@ -279,7 +299,7 @@ configMapGenerator:
     {"prefix": "/", "target_host": "simulator-ui", "target_port": 8080}]}]}'
 - name: local-app-release-status
   literals:
-  - enabled=business-api,business-consumer,frontend,ingestion-api,ml-service,processing-outbox-relay,processing-read-api,processing-worker,rag-service,sensor,simulator-ui,storage-consumer
+  - enabled=business-api,business-consumer,frontend,ingestion-api,ml-service,ml-service-shadow,processing-outbox-relay,processing-read-api,processing-worker,rag-service,sensor,simulator-ui,storage-consumer
   - profile-sha256=623e527d22e462628afb31913a0f2eb594d0ccbaa9ebc07fbd665063746f2b8a
 images:
 - name: registry.invalid/maintai-local/dev-tools
@@ -298,6 +318,9 @@ images:
   newName: ghcr.io/chiendz11/maintai-ingestion-api
   newTag: sha-b79b3213c980cbed644117fd44f7ad6ffcb21968
 - name: registry.invalid/maintai-local/ml-service
+  newName: maintai-local/ml-service
+  newTag: image-7631b54155c59dfdd4ff6cd16c3d5b3b45364d499da0fa984a637111f00e00e4
+- name: registry.invalid/maintai-local/ml-service-shadow
   newName: maintai-local/ml-service
   newTag: image-7631b54155c59dfdd4ff6cd16c3d5b3b45364d499da0fa984a637111f00e00e4
 - name: registry.invalid/maintai-local/processing-outbox-relay

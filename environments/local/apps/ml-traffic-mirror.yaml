@@ -1,0 +1,43 @@
+# Cấu hình Traffic Mirroring (Shadow Deployment) cho ML Service
+# Hỗ trợ cả Traefik (k3d local) và Istio / Envoy (Cloud EKS production)
+
+apiVersion: traefik.io/v1alpha1
+kind: TraefikService
+metadata:
+  name: ml-service-mirror
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: ml-service-mirror
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  mirroring:
+    name: ml-service
+    port: 8001
+    mirrors:
+    - name: ml-service-shadow
+      port: 8001
+      percent: 100
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ml-service-mirror
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: ml-service-mirror
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  hosts:
+  - ml-service
+  http:
+  - route:
+    - destination:
+        host: ml-service
+        port:
+          number: 8001
+    mirror:
+      host: ml-service-shadow
+      port:
+        number: 8001
+    mirrorPercentage:
+      value: 100.0

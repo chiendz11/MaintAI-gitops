@@ -9,7 +9,7 @@
     {
       "id": 1,
       "type": "stat",
-      "title": "ML Service Status",
+      "title": "ML Service Status (Champion & Shadow)",
       "datasource": {
         "type": "prometheus",
         "uid": "maintai-prometheus"
@@ -17,7 +17,8 @@
       "gridPos": {"x": 0, "y": 0, "w": 6, "h": 6},
       "targets": [
         {
-          "expr": "up{service=\"ml-service\"}",
+          "expr": "up{service=~\"ml-service.*\"} or up{app_kubernetes_io_name=~\"ml-service.*\"}",
+          "legendFormat": "{{pod}}",
           "refId": "A"
         }
       ],
@@ -114,7 +115,7 @@
     {
       "id": 5,
       "type": "timeseries",
-      "title": "Inference Request Throughput (req/s)",
+      "title": "Inference Request Throughput (Champion vs Shadow)",
       "datasource": {
         "type": "prometheus",
         "uid": "maintai-prometheus"
@@ -122,8 +123,8 @@
       "gridPos": {"x": 0, "y": 6, "w": 12, "h": 8},
       "targets": [
         {
-          "expr": "sum(rate(maintai_ml_inference_requests_total[1m])) by (status)",
-          "legendFormat": "Status {{status}}",
+          "expr": "sum(rate(maintai_ml_inference_requests_total[1m])) by (pod, status)",
+          "legendFormat": "{{pod}} ({{status}})",
           "refId": "A"
         }
       ],
@@ -136,7 +137,7 @@
     {
       "id": 6,
       "type": "timeseries",
-      "title": "Predictions Breakdown (Normal vs Failure)",
+      "title": "Predictions Breakdown (Champion vs Shadow)",
       "datasource": {
         "type": "prometheus",
         "uid": "maintai-prometheus"
@@ -144,8 +145,8 @@
       "gridPos": {"x": 12, "y": 6, "w": 12, "h": 8},
       "targets": [
         {
-          "expr": "sum(rate(maintai_ml_predictions_total[5m])) by (prediction)",
-          "legendFormat": "{{prediction}}",
+          "expr": "sum(rate(maintai_ml_predictions_total[5m])) by (pod, prediction)",
+          "legendFormat": "{{pod}} - {{prediction}}",
           "refId": "A"
         }
       ],
@@ -216,3 +217,4 @@
     }
   ]
 }
+
