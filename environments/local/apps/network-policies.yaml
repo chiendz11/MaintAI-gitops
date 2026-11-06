@@ -76,8 +76,12 @@ metadata:
   namespace: maintai-local
 spec:
   podSelector:
-    matchLabels:
-      app.kubernetes.io/name: rag-service
+    matchExpressions:
+    - key: app.kubernetes.io/name
+      operator: In
+      values:
+      - rag-service
+      - rag-knowledge-init
   policyTypes:
   - Egress
   egress:
