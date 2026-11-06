@@ -27,6 +27,7 @@ spec:
         maintai.io/source-dirty: 'false'
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8004'
+        maintai.io/history-config-sha256: 1042c57f8ef9329d15fc0df84d3dcf9c2722cf7dd83d66d91b6958a09bbd7121
     spec:
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 90
@@ -46,6 +47,8 @@ spec:
             name: processing-read-api-config
         - secretRef:
             name: local-processing-read-api-env
+        - secretRef:
+            name: local-processing-history-env
         resources:
           requests:
             cpu: 100m
@@ -63,6 +66,9 @@ spec:
           mountPath: /tmp
         - name: tokens
           mountPath: /tokens
+          readOnly: true
+        - name: history-keys
+          mountPath: /history
           readOnly: true
         command:
         - maintai-processing-read-api
@@ -91,7 +97,7 @@ spec:
           timeoutSeconds: 2
           failureThreshold: 3
       - name: local-adapter
-        image: registry.invalid/maintai-local/dev-tools:NOT_BUILT
+        image: maintai-local/dev-tools:image-e5851d12a0c38a3c6155fe5edcd3649a5fabb701e7570fa7fea27182db6ce1c7
         imagePullPolicy: Never
         args:
         - serve
@@ -129,6 +135,10 @@ spec:
       - name: tokens
         emptyDir:
           medium: Memory
+      - name: history-keys
+        secret:
+          secretName: local-processing-history-keys
+          defaultMode: 288
 ---
 apiVersion: v1
 kind: Service
