@@ -40,4 +40,7 @@ mc admin policy attach local maintai-mlflow --user maintai-mlflow >/dev/null
 mc admin user add local maintai-processing-reader "$(cat /secrets/processing-reader_password)" >/dev/null
 mc admin policy create local maintai-processing-reader /policies/processing-reader.json >/dev/null
 mc admin policy attach local maintai-processing-reader --user maintai-processing-reader >/dev/null
+mc admin user add local maintai-history "$(cat /secrets/history_password)" >/dev/null
+mc admin policy create local maintai-history /policies/history.json >/dev/null
+mc admin policy attach local maintai-history --user maintai-history >/dev/null
 echo 'Seven versioned buckets and scoped local users initialized; no lifecycle deletion configured.'

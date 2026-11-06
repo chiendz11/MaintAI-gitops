@@ -9,3 +9,4 @@ processing_reader	processing_db
 business_consumer	business_db
 business_api	business_db
 business_reader	business_db
+processing_history_meta	processing_db
