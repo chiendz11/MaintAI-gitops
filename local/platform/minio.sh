@@ -45,4 +45,4 @@ mc admin policy attach local maintai-processing-reader --user maintai-processing
 mc admin user add local maintai-history "$(cat /secrets/history_password)" >/dev/null
 mc admin policy create local maintai-history /policies/history.json >/dev/null
 mc admin policy attach local maintai-history --user maintai-history >/dev/null
-echo 'Seven versioned buckets and scoped local users initialized; no lifecycle deletion configured.'
+echo 'Versioned buckets and scoped local users initialized; no lifecycle deletion configured.'

@@ -44,6 +44,10 @@ def wire(name, documents, configs):
     pod = deployment["spec"]["template"]["spec"]
     primary = next(c for c in pod["containers"] if c["name"] == name)
     if name == "storage-consumer":
+        replicas = config.get("archive_replicas", 1)
+        if type(replicas) is not int or not 1 <= replicas <= 3:
+            raise ValueError("Local archive supports one to three reviewed replicas")
+        deployment["spec"]["replicas"] = replicas
         env_config = next(c for c in configs if c["name"] == name + "-config")
         env = dict(row.split("=", 1) for row in env_config["literals"])
         env.update({"S3_RAW_BUCKET": config.get("raw_bucket", "maintai-raw"), "STORAGE_CATALOG_ENABLED": "true",

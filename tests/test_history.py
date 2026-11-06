@@ -38,3 +38,18 @@ class HistoryWiring(unittest.TestCase):
         self.assertEqual([x["kind"] for x in docs], ["Deployment", "Service"])
         settings = dict(x.split("=", 1) for x in configs[0]["literals"])
         self.assertNotIn("BUSINESS_HISTORY_ENABLED", settings)
+
+    def test_raw_archive_uses_same_lineage_as_reader_and_preserves_catalog(self):
+        config = {**self.config(), "raw_bucket": "maintai-raw-fixture", "archive_group_prefix": "local-fixture-", "archive_replicas": 3}
+        with patch("localdev.history.selection", return_value=config):
+            docs, configs = resources("storage-consumer", {}, 5, "b" * 40)
+            _, reader = resources("processing-read-api", {}, 5, "b" * 40)
+        storage = dict(x.split("=", 1) for x in configs[0]["literals"])
+        processing = dict(x.split("=", 1) for x in reader[0]["literals"])
+        self.assertEqual(docs[0]["spec"]["replicas"], 3)
+        self.assertEqual(storage["KAFKA_GROUP_PREFIX"], "local-fixture-")
+        self.assertEqual(storage["S3_RAW_BUCKET"], processing["PROCESSING_HISTORY_RAW_BUCKET"])
+        self.assertEqual(storage["STORAGE_CATALOG_ENABLED"], "true")
+        self.assertEqual(storage["S3_ALLOW_UNVERSIONED"], "false")
+        self.assertEqual(storage["STORAGE_ARCHIVE_OUTCOMES"], "false")
+        self.assertEqual([x["kind"] for x in docs], ["Deployment", "Service"])

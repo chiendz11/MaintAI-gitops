@@ -25,5 +25,6 @@
       "sensor.readings": "BKKdnEPMR4CS838TI+Nmlg",
       "sensor.rejected": "lDHimTyiRVSJQGVwhE53cA"
     }
-  }
+  },
+  "archive_replicas": 3
 }
