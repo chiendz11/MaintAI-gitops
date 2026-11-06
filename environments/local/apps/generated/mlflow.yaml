@@ -49,21 +49,10 @@ spec:
         - --port
         - "5000"
         - --backend-store-uri
-        - $(MLFLOW_BACKEND_STORE_URI)
-        - --serve-artifacts
+        - sqlite:////tmp/mlflow.db
         - --artifacts-destination
-        - s3://maintai-mlflow/mlflow
-        - --allowed-hosts
-        - "*"
+        - /tmp/artifacts
         env:
-        - name: MLFLOW_BACKEND_STORE_URI
-          value: postgresql://mlflow_owner:secret@postgres:5432/mlflow_db
-        - name: MLFLOW_S3_ENDPOINT_URL
-          value: http://minio:9000
-        - name: AWS_ACCESS_KEY_ID
-          value: maintai-mlflow
-        - name: AWS_SECRET_ACCESS_KEY
-          value: secret
         - name: AWS_DEFAULT_REGION
           value: us-east-1
         ports:
@@ -88,3 +77,4 @@ spec:
           limits:
             cpu: 500m
             memory: 1Gi
+
