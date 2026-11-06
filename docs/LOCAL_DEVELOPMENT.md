@@ -225,7 +225,8 @@ Bản ghi kết quả runtime chỉ áp dụng cho local; không suy ra năng l�
 Catalog audit dùng `STORAGE_CATALOG_POLL_SECONDS=2` (ngân sách tối đa mỗi lần
 fetch, không phải delay cho từng reading). Kiểm tra live còn phát hiện EOF cũ
 được client giữ từ lượt fetch trước làm audit dừng sớm. Tăng budget không sửa
-được điều kiện này; app PR #40/source 63a17fa tiếp tục poll khi EOF chưa đạt
+được điều kiện này; [app PR #40](https://github.com/chiendz11/MaintAI/pull/40)
+(source 63a17fa) tiếp tục poll khi EOF chưa đạt
 watermark đã chụp. Image Storage đã được build/import từ source sạch và chọn
 bằng receipt trong local release. Sau bản vá, coverage đạt COMPLETE khi Sensor
 vẫn chạy. Offset chỉ được xác nhận từ receipt thật; không sửa coverage để vượt
