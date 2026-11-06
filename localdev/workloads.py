@@ -215,4 +215,5 @@ def resources(name, spec, count, source_sha):
         pod["restartPolicy"] = "Never"
         docs.append({"apiVersion": "batch/v1", "kind": "CronJob", "metadata": metadata(name), "spec": {"schedule": spec.get("schedule", "*/5 * * * *"), "suspend": not spec.get("schedule_enabled", False),
                     "concurrencyPolicy": "Forbid", "jobTemplate": {"spec": {"backoffLimit": 1, "activeDeadlineSeconds": 300, "template": {"metadata": {"labels": labels}, "spec": pod}}}}})
-    return docs, configs
+    from .history import wire
+    return wire(name, docs, configs)

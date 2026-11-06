@@ -37,6 +37,12 @@ configMapGenerator:
 - name: business-api-config
   literals:
   - BUSINESS_ALERT_NOTIFY_CHANNEL=maintai_business_alert_v1
+  - BUSINESS_HISTORY_CURSOR_KEY_FILE=/history/cursor-keys.json
+  - BUSINESS_HISTORY_DELEGATION_ISSUER=http://127.0.0.1:18091/maintai-history
+  - BUSINESS_HISTORY_ENABLED=true
+  - BUSINESS_HISTORY_SERVICE_SUBJECT=6975518b-75cc-484b-aed6-cf0afd6b4db1
+  - BUSINESS_HISTORY_SIGNING_KEY_FILE=/history/signing-key.pem
+  - BUSINESS_HISTORY_SIGNING_KEY_ID=history-66da4408f7354908
   - BUSINESS_HOST=127.0.0.1
   - BUSINESS_MACHINES_CLAIM=machine_ids
   - BUSINESS_NOTIFY_CHANNEL=maintai_business_live_v1
@@ -54,7 +60,8 @@ configMapGenerator:
   - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "127.0.0.1", "port":
     18090, "target_host": "keycloak", "target_port": 8080}, {"bind": "127.0.0.1",
     "port": 18004, "target_host": "processing-read-api", "target_port": 8004}, {"bind":
-    "0.0.0.0", "port": 8003, "target_host": "127.0.0.1", "target_port": 18003}], "oauth":
+    "0.0.0.0", "port": 8003, "target_host": "127.0.0.1", "target_port": 18003}], "jwks":
+    [{"bind": "0.0.0.0", "file": "/history-jwks/jwks.json", "port": 18091}], "oauth":
     {"processing": {"client_id": "maintai-processing", "secret_file": "/credentials/processing/client_secret",
     "token_url": "http://keycloak:8080/realms/maintai/protocol/openid-connect/token"}},
     "tcp": [{"port": 25432, "target_host": "postgres", "target_port": 5432}], "token_directory":
@@ -132,9 +139,11 @@ configMapGenerator:
   literals:
   - 'artifacts.json=[{"path": "/local/models/hgb-interactions-candidate-v1/pipeline.joblib",
     "sha256": "eb96429b8fa5896f8b4f43d23b2df7499a9e25a6f67ffcbaf272d8e6656f4599"},
-    {"path": "/local/models/hgb-interactions-candidate-v1/metadata.json", "sha256": "034c84233af9e2c3b1a0960deb66324259736f362ecb83aa4fa230998c976805"},
-    {"path": "/local/models/hgb-interactions-candidate-v1/evaluation.json", "sha256": "d09679f27a448d5aed5ed72af6256265afa68865e2e63192fdb5b44dbeb2c6ce"},
-    {"path": "/local/models/hgb-interactions-candidate-v1/drift_reference.json", "sha256": "76ce402c7c42c3267524bccc133d4383166f07d9f804b0aa650723574db46543"}]'
+    {"path": "/local/models/hgb-interactions-candidate-v1/metadata.json", "sha256":
+    "034c84233af9e2c3b1a0960deb66324259736f362ecb83aa4fa230998c976805"}, {"path":
+    "/local/models/hgb-interactions-candidate-v1/evaluation.json", "sha256": "d09679f27a448d5aed5ed72af6256265afa68865e2e63192fdb5b44dbeb2c6ce"},
+    {"path": "/local/models/hgb-interactions-candidate-v1/drift_reference.json", "sha256":
+    "76ce402c7c42c3267524bccc133d4383166f07d9f804b0aa650723574db46543"}]'
 - name: ml-service-shadow-config
   literals:
   - AWS_DEFAULT_REGION=us-east-1
@@ -165,6 +174,15 @@ configMapGenerator:
     "target_host": "postgres", "target_port": 5432}], "token_directory": "/tokens"}'
 - name: processing-read-api-config
   literals:
+  - PROCESSING_CLEANER_DRY_RUN=true
+  - PROCESSING_HISTORY_CURSOR_KEY_FILE=/history/cursor-keys.json
+  - PROCESSING_HISTORY_DELEGATION_ISSUER=http://127.0.0.1:18091/maintai-history
+  - PROCESSING_HISTORY_DELEGATION_JWKS_URL=http://127.0.0.1:18091/.well-known/jwks.json
+  - PROCESSING_HISTORY_ENABLED=true
+  - PROCESSING_HISTORY_EXPORT_BUCKET=maintai-processed
+  - PROCESSING_HISTORY_META_SCHEMA=history_meta
+  - PROCESSING_HISTORY_RAW_BUCKET=maintai-raw-c8c61d245736
+  - PROCESSING_HISTORY_S3_ENDPOINT=http://127.0.0.1:19000
   - PROCESSING_READ_HOST=127.0.0.1
   - PROCESSING_READ_MACHINES_CLAIM=machine_ids
   - PROCESSING_READ_OIDC_AUDIENCE=maintai-processing-local
@@ -173,14 +191,16 @@ configMapGenerator:
   - PROCESSING_READ_PORT=18004
   - PROCESSING_READ_PROFILE=local-test
   - PROCESSING_READ_ROLES_CLAIM=roles
+  - PROCESSING_RETENTION_ENABLED=false
   - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
 - name: processing-read-api-bridge
   literals:
   - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "127.0.0.1", "port":
     18090, "target_host": "keycloak", "target_port": 8080}, {"bind": "0.0.0.0", "port":
-    8004, "target_host": "127.0.0.1", "target_port": 18004}], "oauth": {}, "tcp":
-    [{"port": 25432, "target_host": "postgres", "target_port": 5432}], "token_directory":
-    "/tokens"}'
+    8004, "target_host": "127.0.0.1", "target_port": 18004}, {"bind": "127.0.0.1",
+    "port": 18091, "target_host": "business-api", "target_port": 18091}], "oauth":
+    {}, "tcp": [{"port": 25432, "target_host": "postgres", "target_port": 5432}, {"port":
+    19000, "target_host": "minio", "target_port": 9000}], "token_directory": "/tokens"}'
 - name: processing-worker-artifacts
   literals:
   - 'artifacts.json=[{"path": "/local/fixtures/model-identity.json", "sha256": "a884a79e45086ae4df1e596c3ea05500e7413b86dd553931c9fe8f47d921322b"}]'
@@ -273,7 +293,7 @@ configMapGenerator:
 - name: storage-consumer-config
   literals:
   - KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:19092
-  - KAFKA_GROUP_PREFIX=local-
+  - KAFKA_GROUP_PREFIX=local-m6-c8c61d245736-
   - KAFKA_LOCAL_MODE=true
   - KAFKA_POLL_INTERVAL_SECONDS=0.01
   - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
@@ -281,9 +301,13 @@ configMapGenerator:
   - S3_ADDRESSING_STYLE=path
   - S3_ALLOW_UNVERSIONED=false
   - S3_ENDPOINT_URL=http://minio:9000
-  - S3_RAW_BUCKET=maintai-raw
+  - S3_RAW_BUCKET=maintai-raw-c8c61d245736
   - S3_RAW_PREFIX=raw-sensor
   - STORAGE_ARCHIVE_OUTCOMES=false
+  - STORAGE_CATALOG_ENABLED=true
+  - STORAGE_CATALOG_HEARTBEAT_SECONDS=15
+  - STORAGE_CATALOG_INTERVAL_SECONDS=1
+  - STORAGE_CATALOG_POLL_SECONDS=2
   - STORAGE_HTTP_HOST=0.0.0.0
   - STORAGE_HTTP_PORT=8008
 - name: storage-consumer-bridge
@@ -304,6 +328,11 @@ configMapGenerator:
   literals:
   - enabled=business-api,business-consumer,frontend,ingestion-api,ml-service,ml-service-shadow,processing-outbox-relay,processing-read-api,processing-worker,rag-service,sensor,simulator-ui,storage-consumer
   - profile-sha256=623e527d22e462628afb31913a0f2eb594d0ccbaa9ebc07fbd665063746f2b8a
+- name: local-history-jwks
+  literals:
+  - 'jwks.json={"keys": [{"alg": "RS256", "e": "AQAB", "kid": "history-66da4408f7354908",
+    "kty": "RSA", "n": "k4DFMu6gzJQyuEX1lTLAtWbrtAWuszmNNckpGPgB4zmauUOPrks3qoPU1Y0VKEkpevAVcReKAZmdWRvRHFERuSKxAyqoIQ-z5Cga-For0NqQKh8CxdHLN0LKFuhffJ_dHllq-2dtXPATRmsyAq55geOhcTeh2zVg6px3e7S4D0KF2oDrXd7S-h0X6KEuFq26hZoNxcVJwiLG8xhV6fl3lc-7UhwdxDqhRJYKtKRUlthA7k-Y4lL0W9urJ-kgP1_K-MZr_ReBOf6TlhWTMCAslIgu10AQqPhy3T0eoEAGX2rS1WtJpef6ZjDyhWNShiAhDIPcg_SLVopcTrjwdQ-fDOqZWF5IxxmllmyobkLNjln3pX6Qj0zL51idjLz5juRFlq6xASQt5AoMGFyO9h11-wKjums4bx6E7UCfwkWczH_7hZs7D2-F-5-wIbJ7UWI7OUJjBkj0KgAOPmH1BhqkY-ko3XZ6bOkTiRY2brJ3465OCtnBqpxevkVcGPk-6mXr",
+    "use": "sig"}]}'
 images:
 - name: registry.invalid/maintai-local/dev-tools
   newName: maintai-local/dev-tools
@@ -345,8 +374,8 @@ images:
   newName: ghcr.io/chiendz11/maintai-simulator-ui
   newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/storage-consumer
-  newName: ghcr.io/chiendz11/maintai-storage-consumer
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newName: maintai-local/storage-consumer
+  newTag: image-4012adc70eb0bcba0bb0126c3e1c10c7b3302b429a62084728b6686c8bd0b494
 patches:
 - target:
     kind: Deployment

@@ -148,8 +148,9 @@ Runtime logins cho worker, relay, read API, Business Consumer/API có grants ri�
 owner passwords chỉ dùng bootstrap/migration/provision Jobs. Không có cross-owner
 SQL shortcut. Keycloak dev dùng PVC/H2 riêng, không tạo domain DB thứ sáu.
 
-Bảy buckets đều versioned: raw, processed, models, approved, manuals, drift,
-mlflow. Mỗi bên có S3 account/policy riêng; không dùng MinIO root trong app. Không
+Bảy bucket nền đều có versioning: raw, processed, models, approved, manuals, drift,
+mlflow. M6 bổ sung namespace raw theo Kafka lineage (xem §8). Mỗi bên có S3
+account/policy riêng; không dùng MinIO root trong app. Không
 có DeleteObject quyền ứng dụng hoặc lifecycle tự xóa version/retention mới.
 Storage Consumer chỉ archive raw/quarantine; processed history/archive là phần
 Processing/M6, không tự được implement vì bucket đã tồn tại.
@@ -181,3 +182,52 @@ thực thi trong lượt này. Runbook kiểm chứng cần theo từng tầng v
 so với provider thật. Xem `LOCAL_MIGRATION.md` để chuyển từ folder k3d cũ.
 
 Hướng dẫn mới: [Groq, model identity và knowledge preparation](LOCAL_DEMO_PREPARATION.md).
+
+## 8. History M6 — cấu hình đã bật ngày 06/11/2026
+
+`config/local/history-runtime.json` chọn trạng thái History, public signing key,
+subject service đã xác minh, adapter image và namespace raw archive hiện hành.
+`localdev/history.py` được gọi bởi generator chuẩn và có lệnh cập nhật riêng để
+không ghi mất ESO, NetworkPolicy, HPA hoặc ML shadow của môi trường local.
+
+- Business API bật `BUSINESS_HISTORY_ENABLED`, mount private signing key và cursor
+  secret riêng. Public JWKS được phục vụ ở adapter hiện có, port 18091 nội bộ.
+- Processing Read API bật `PROCESSING_HISTORY_ENABLED`, dùng cùng issuer/public
+  JWKS; login `processing_history_meta` chỉ ghi metadata. Source login vẫn chỉ đọc.
+- Read API nối MinIO qua loopback adapter; chỉ đọc raw/catalog và ghi export theo
+  policy riêng. Retention vẫn tắt, cleaner vẫn dry-run.
+- Storage Consumer bật native catalog và dùng cùng raw bucket với Read API. Selector
+  cho phép 1–3 replicas; đã dùng 3 để backfill và trở về 1 khi archive bắt kịp.
+- Ba ExternalSecrets M6 lấy khóa/credential từ LocalStack qua ESO. Repo chỉ giữ tên
+  Secret và public key, không giữ private key, password hoặc cursor secret.
+
+Bucket mới `maintai-raw-c8c61d245736` và group prefix `local-m6-c8c61d245736-` tách
+archive của Kafka lineage hiện tại khỏi bucket cũ đang có offset trùng payload
+khác. Bucket `maintai-raw` vẫn giữ nguyên. Không reset Processing/Business groups,
+không ghi đè object conflict và không tự gộp raw từ hai bucket. Trong lúc backfill,
+raw history trả 503 cho đến khi catalog đủ 12 accepted partitions COMPLETE; lịch sử
+prediction trong Processing DB có thể dùng trước.
+
+Lệnh ở repo GitOps sau khi infrastructure đã tạo khóa/grants và import adapter:
+
+```bash
+../Maint-infrastructure/.venv/bin/python -m localdev.history \
+  --enable \
+  --adapter-receipt ../Maint-infrastructure/local/.local/receipts/dev-tools.json
+```
+
+Review, commit và push vào revision mà Argo đang theo dõi; lệnh này không tự deploy.
+Sau lần bật đầu chỉ cần `python -m localdev.history` để tái sinh theo selector đang có.
+Quy trình tạo khóa, restore ESO sau restart, cấp grants và kiểm chứng UI/export nằm
+ở [runbook M6 trong infrastructure](../../Maint-infrastructure/docs/LOCAL_M6_HISTORY.md).
+Bản ghi kết quả runtime chỉ áp dụng cho local; không suy ra năng lực100 máy hoặc HA.
+
+Catalog audit dùng `STORAGE_CATALOG_POLL_SECONDS=2` (ngân sách tối đa mỗi lần
+fetch, không phải delay cho từng reading). Kiểm tra live còn phát hiện EOF cũ
+được client giữ từ lượt fetch trước làm audit dừng sớm. Tăng budget không sửa
+được điều kiện này; [app PR #40](https://github.com/chiendz11/MaintAI/pull/40)
+(source 63a17fa) tiếp tục poll khi EOF chưa đạt
+watermark đã chụp. Image Storage đã được build/import từ source sạch và chọn
+bằng receipt trong local release. Sau bản vá, coverage đạt COMPLETE khi Sensor
+vẫn chạy. Offset chỉ được xác nhận từ receipt thật; không sửa coverage để vượt
+readiness check. Hai API không cần rebuild cho bản sửa audit này.

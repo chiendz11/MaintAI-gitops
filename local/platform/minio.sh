@@ -16,6 +16,8 @@ mc mb --ignore-existing local/maintai-drift >/dev/null
 mc version enable local/maintai-drift >/dev/null
 mc mb --ignore-existing local/maintai-mlflow >/dev/null
 mc version enable local/maintai-mlflow >/dev/null
+mc mb --ignore-existing local/maintai-raw-c8c61d245736 >/dev/null
+mc version enable local/maintai-raw-c8c61d245736 >/dev/null
 mc admin user add local maintai-storage "$(cat /secrets/storage_password)" >/dev/null
 mc admin policy create local maintai-storage /policies/storage.json >/dev/null
 mc admin policy attach local maintai-storage --user maintai-storage >/dev/null
@@ -40,4 +42,7 @@ mc admin policy attach local maintai-mlflow --user maintai-mlflow >/dev/null
 mc admin user add local maintai-processing-reader "$(cat /secrets/processing-reader_password)" >/dev/null
 mc admin policy create local maintai-processing-reader /policies/processing-reader.json >/dev/null
 mc admin policy attach local maintai-processing-reader --user maintai-processing-reader >/dev/null
-echo 'Seven versioned buckets and scoped local users initialized; no lifecycle deletion configured.'
+mc admin user add local maintai-history "$(cat /secrets/history_password)" >/dev/null
+mc admin policy create local maintai-history /policies/history.json >/dev/null
+mc admin policy attach local maintai-history --user maintai-history >/dev/null
+echo 'Versioned buckets and scoped local users initialized; no lifecycle deletion configured.'

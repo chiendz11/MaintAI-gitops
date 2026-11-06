@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "enabled": true,
+  "issuer": "http://127.0.0.1:18091/maintai-history",
+  "service_subject": "6975518b-75cc-484b-aed6-cf0afd6b4db1",
+  "signing_key_id": "history-66da4408f7354908",
+  "jwks": {
+    "keys": [
+      {
+        "kty": "RSA",
+        "n": "k4DFMu6gzJQyuEX1lTLAtWbrtAWuszmNNckpGPgB4zmauUOPrks3qoPU1Y0VKEkpevAVcReKAZmdWRvRHFERuSKxAyqoIQ-z5Cga-For0NqQKh8CxdHLN0LKFuhffJ_dHllq-2dtXPATRmsyAq55geOhcTeh2zVg6px3e7S4D0KF2oDrXd7S-h0X6KEuFq26hZoNxcVJwiLG8xhV6fl3lc-7UhwdxDqhRJYKtKRUlthA7k-Y4lL0W9urJ-kgP1_K-MZr_ReBOf6TlhWTMCAslIgu10AQqPhy3T0eoEAGX2rS1WtJpef6ZjDyhWNShiAhDIPcg_SLVopcTrjwdQ-fDOqZWF5IxxmllmyobkLNjln3pX6Qj0zL51idjLz5juRFlq6xASQt5AoMGFyO9h11-wKjums4bx6E7UCfwkWczH_7hZs7D2-F-5-wIbJ7UWI7OUJjBkj0KgAOPmH1BhqkY-ko3XZ6bOkTiRY2brJ3465OCtnBqpxevkVcGPk-6mXr",
+        "e": "AQAB",
+        "kid": "history-66da4408f7354908",
+        "alg": "RS256",
+        "use": "sig"
+      }
+    ]
+  },
+  "adapter_image": "maintai-local/dev-tools:image-e5851d12a0c38a3c6155fe5edcd3649a5fabb701e7570fa7fea27182db6ce1c7",
+  "raw_bucket": "maintai-raw-c8c61d245736",
+  "archive_group_prefix": "local-m6-c8c61d245736-",
+  "archive_lineage": {
+    "cluster_id": "U5WHrEp86UFsPgdKABK7fA",
+    "topics": {
+      "sensor.readings": "BKKdnEPMR4CS838TI+Nmlg",
+      "sensor.rejected": "lDHimTyiRVSJQGVwhE53cA"
+    }
+  },
+  "archive_replicas": 1
+}

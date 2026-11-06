@@ -64,7 +64,7 @@
       },
       "storage-consumer": {
         "enabled": true,
-        "image": "maintai-local/storage-consumer:image-e1ff8eb44568c27c085c01e98c8df4f3a7a9a0f28b417abce0d839a22ec2881a",
+        "image": "maintai-local/storage-consumer:image-4012adc70eb0bcba0bb0126c3e1c10c7b3302b429a62084728b6686c8bd0b494",
         "receipt": null,
         "env": {
           "KAFKA_POLL_INTERVAL_SECONDS": "0.01"
@@ -342,11 +342,11 @@
     "storage-consumer": {
       "schema_version": "1.0.0",
       "component": "storage-consumer",
-      "image": "maintai-local/storage-consumer:image-e1ff8eb44568c27c085c01e98c8df4f3a7a9a0f28b417abce0d839a22ec2881a",
-      "image_id": "sha256:e1ff8eb44568c27c085c01e98c8df4f3a7a9a0f28b417abce0d839a22ec2881a",
-      "source_git_sha": "2df0a914287a86f3500731ba05a2ba866bbee160",
+      "image": "maintai-local/storage-consumer:image-4012adc70eb0bcba0bb0126c3e1c10c7b3302b429a62084728b6686c8bd0b494",
+      "image_id": "sha256:4012adc70eb0bcba0bb0126c3e1c10c7b3302b429a62084728b6686c8bd0b494",
+      "source_git_sha": "63a17fa19b6898ab877732cf4bbdf8beadab61b3",
       "source_dirty": false,
-      "source_snapshot_sha256": "7798625728e8d03470b52c43badd8a65cc51c90b922f124265d5314df96e803a",
+      "source_snapshot_sha256": "b18d93a6411b5a8576850e6557bd577407b886220848c791e00779ef8e248435",
       "dockerfile": "storage-consumer/Dockerfile",
       "dockerfile_sha256": "eca4cbd1eaae7f4122567bb703a1a755c54c557beba56e794bee72d0e6967c30",
       "build_context": ".",

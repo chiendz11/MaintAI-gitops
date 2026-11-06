@@ -40,3 +40,4 @@ configMapGenerator:
   - policies/drift.json
   - policies/mlflow.json
   - policies/processing-reader.json
+  - policies/history.json
