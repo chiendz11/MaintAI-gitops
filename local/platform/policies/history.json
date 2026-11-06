@@ -7,7 +7,7 @@
         "s3:GetBucketVersioning"
       ],
       "Resource": [
-        "arn:aws:s3:::maintai-raw",
+        "arn:aws:s3:::maintai-raw-c8c61d245736",
         "arn:aws:s3:::maintai-processed"
       ]
     },
@@ -18,8 +18,8 @@
         "s3:GetObjectVersion"
       ],
       "Resource": [
-        "arn:aws:s3:::maintai-raw/raw-sensor/*",
-        "arn:aws:s3:::maintai-raw/raw-catalog/v1/*"
+        "arn:aws:s3:::maintai-raw-c8c61d245736/raw-sensor/*",
+        "arn:aws:s3:::maintai-raw-c8c61d245736/raw-catalog/v1/*"
       ]
     },
     {

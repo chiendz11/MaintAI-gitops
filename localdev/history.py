@@ -35,7 +35,7 @@ def put_named(values, value):
 
 def wire(name, documents, configs):
     config = selection()
-    if not config or not config["enabled"] or name not in {"business-api", "processing-read-api"}:
+    if not config or not config["enabled"] or name not in {"business-api", "processing-read-api", "storage-consumer"}:
         return documents, configs
     if not config.get("adapter_image"):
         raise ValueError("Import a reviewed JWKS-capable adapter before enabling history")
@@ -43,6 +43,16 @@ def wire(name, documents, configs):
     service = next(d for d in documents if d["kind"] == "Service")
     pod = deployment["spec"]["template"]["spec"]
     primary = next(c for c in pod["containers"] if c["name"] == name)
+    if name == "storage-consumer":
+        env_config = next(c for c in configs if c["name"] == name + "-config")
+        env = dict(row.split("=", 1) for row in env_config["literals"])
+        env.update({"S3_RAW_BUCKET": config.get("raw_bucket", "maintai-raw"), "STORAGE_CATALOG_ENABLED": "true",
+                    "STORAGE_CATALOG_INTERVAL_SECONDS": "1", "STORAGE_CATALOG_POLL_SECONDS": "0.1",
+                    "STORAGE_CATALOG_HEARTBEAT_SECONDS": "15", "KAFKA_POLL_INTERVAL_SECONDS": "0.01"})
+        if config.get("archive_group_prefix"):
+            env["KAFKA_GROUP_PREFIX"] = config["archive_group_prefix"]
+        env_config["literals"] = [key + "=" + value for key, value in sorted(env.items())]
+        return documents, configs
     helper = next(c for c in pod["containers"] if c["name"] == "local-adapter")
     helper["image"] = config["adapter_image"]
     for init in pod.get("initContainers", []):
@@ -66,7 +76,7 @@ def wire(name, documents, configs):
                     "PROCESSING_HISTORY_DELEGATION_ISSUER": config["issuer"],
                     "PROCESSING_HISTORY_DELEGATION_JWKS_URL": "http://127.0.0.1:18091/.well-known/jwks.json",
                     "PROCESSING_HISTORY_CURSOR_KEY_FILE": "/history/cursor-keys.json",
-                    "PROCESSING_HISTORY_RAW_BUCKET": "maintai-raw", "PROCESSING_HISTORY_EXPORT_BUCKET": "maintai-processed",
+                    "PROCESSING_HISTORY_RAW_BUCKET": config.get("raw_bucket", "maintai-raw"), "PROCESSING_HISTORY_EXPORT_BUCKET": "maintai-processed",
                     "PROCESSING_HISTORY_S3_ENDPOINT": "http://127.0.0.1:19000", "PROCESSING_RETENTION_ENABLED": "false", "PROCESSING_CLEANER_DRY_RUN": "true"})
         key_secret = "local-processing-history-keys"
         reference = {"secretRef": {"name": "local-processing-history-env"}}
@@ -93,7 +103,7 @@ def prepare_current():
     folder = ROOT / "environments/local/apps"
     path = folder / "kustomization.yaml"
     document = yaml.safe_load(path.read_text())
-    for name in ("business-api", "processing-read-api"):
+    for name in ("business-api", "processing-read-api", "storage-consumer"):
         manifest = folder / ("generated/" + name + ".yaml")
         resources, _ = wire(name, list(yaml.safe_load_all(manifest.read_text())), document["configMapGenerator"])
         manifest.write_text(yaml.safe_dump_all(resources, sort_keys=False))

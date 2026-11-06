@@ -10,7 +10,8 @@
         "s3:ListBucketVersions"
       ],
       "Resource": [
-        "arn:aws:s3:::maintai-raw"
+        "arn:aws:s3:::maintai-raw",
+        "arn:aws:s3:::maintai-raw-c8c61d245736"
       ]
     },
     {
@@ -20,7 +21,8 @@
         "s3:GetObjectVersion"
       ],
       "Resource": [
-        "arn:aws:s3:::maintai-raw/*"
+        "arn:aws:s3:::maintai-raw/*",
+        "arn:aws:s3:::maintai-raw-c8c61d245736/*"
       ]
     },
     {
@@ -31,7 +33,8 @@
         "s3:ListMultipartUploadParts"
       ],
       "Resource": [
-        "arn:aws:s3:::maintai-raw/*"
+        "arn:aws:s3:::maintai-raw/*",
+        "arn:aws:s3:::maintai-raw-c8c61d245736/*"
       ]
     }
   ]

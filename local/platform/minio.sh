@@ -16,6 +16,8 @@ mc mb --ignore-existing local/maintai-drift >/dev/null
 mc version enable local/maintai-drift >/dev/null
 mc mb --ignore-existing local/maintai-mlflow >/dev/null
 mc version enable local/maintai-mlflow >/dev/null
+mc mb --ignore-existing local/maintai-raw-c8c61d245736 >/dev/null
+mc version enable local/maintai-raw-c8c61d245736 >/dev/null
 mc admin user add local maintai-storage "$(cat /secrets/storage_password)" >/dev/null
 mc admin policy create local maintai-storage /policies/storage.json >/dev/null
 mc admin policy attach local maintai-storage --user maintai-storage >/dev/null

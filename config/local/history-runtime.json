@@ -16,5 +16,14 @@
       }
     ]
   },
-  "adapter_image": "maintai-local/dev-tools:image-e5851d12a0c38a3c6155fe5edcd3649a5fabb701e7570fa7fea27182db6ce1c7"
+  "adapter_image": "maintai-local/dev-tools:image-e5851d12a0c38a3c6155fe5edcd3649a5fabb701e7570fa7fea27182db6ce1c7",
+  "raw_bucket": "maintai-raw-c8c61d245736",
+  "archive_group_prefix": "local-m6-c8c61d245736-",
+  "archive_lineage": {
+    "cluster_id": "U5WHrEp86UFsPgdKABK7fA",
+    "topics": {
+      "sensor.readings": "BKKdnEPMR4CS838TI+Nmlg",
+      "sensor.rejected": "lDHimTyiRVSJQGVwhE53cA"
+    }
+  }
 }

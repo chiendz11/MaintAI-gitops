@@ -28,7 +28,7 @@ spec:
         maintai.io/source-dirty: 'false'
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8003'
-        maintai.io/history-config-sha256: 1042c57f8ef9329d15fc0df84d3dcf9c2722cf7dd83d66d91b6958a09bbd7121
+        maintai.io/history-config-sha256: df582f775ee023b5feb4a7142c64516b43125236f22e88bc4d2668d29889c6b0
     spec:
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 90
