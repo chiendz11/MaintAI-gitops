@@ -51,7 +51,7 @@ def wire(name, documents, configs):
         env_config = next(c for c in configs if c["name"] == name + "-config")
         env = dict(row.split("=", 1) for row in env_config["literals"])
         env.update({"S3_RAW_BUCKET": config.get("raw_bucket", "maintai-raw"), "STORAGE_CATALOG_ENABLED": "true",
-                    "STORAGE_CATALOG_INTERVAL_SECONDS": "1", "STORAGE_CATALOG_POLL_SECONDS": "0.1",
+                    "STORAGE_CATALOG_INTERVAL_SECONDS": "1", "STORAGE_CATALOG_POLL_SECONDS": "0.5",
                     "STORAGE_CATALOG_HEARTBEAT_SECONDS": "15", "KAFKA_POLL_INTERVAL_SECONDS": "0.01"})
         if config.get("archive_group_prefix"):
             env["KAFKA_GROUP_PREFIX"] = config["archive_group_prefix"]
