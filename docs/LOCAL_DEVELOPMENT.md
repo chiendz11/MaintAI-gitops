@@ -223,7 +223,10 @@ Quy trình tạo khóa, restore ESO sau restart, cấp grants và kiểm chứng
 Bản ghi kết quả runtime chỉ áp dụng cho local; không suy ra năng lực100 máy hoặc HA.
 
 Catalog audit dùng `STORAGE_CATALOG_POLL_SECONDS=2` (ngân sách tối đa mỗi lần
-fetch, không phải delay cho từng reading). Kiểm tra trên Kafka local cho thấy
-budget0.5 giây có thể trả LAGGING dù raw object đã lưu; budget2 giây lấy đủ prefix
-đến watermark đã chụp và cho coverage COMPLETE khi Sensor vẫn chạy. Offset chỉ
-được xác nhận từ receipt thật; không sửa coverage để vượt readiness check.
+fetch, không phải delay cho từng reading). Kiểm tra live còn phát hiện EOF cũ
+được client giữ từ lượt fetch trước làm audit dừng sớm. Tăng budget không sửa
+được điều kiện này; app PR #40/source 63a17fa tiếp tục poll khi EOF chưa đạt
+watermark đã chụp. Image Storage đã được build/import từ source sạch và chọn
+bằng receipt trong local release. Sau bản vá, coverage đạt COMPLETE khi Sensor
+vẫn chạy. Offset chỉ được xác nhận từ receipt thật; không sửa coverage để vượt
+readiness check. Hai API không cần rebuild cho bản sửa audit này.
