@@ -374,8 +374,8 @@ images:
   newName: ghcr.io/chiendz11/maintai-simulator-ui
   newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/storage-consumer
-  newName: ghcr.io/chiendz11/maintai-storage-consumer
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newName: maintai-local/storage-consumer
+  newTag: image-4012adc70eb0bcba0bb0126c3e1c10c7b3302b429a62084728b6686c8bd0b494
 patches:
 - target:
     kind: Deployment
