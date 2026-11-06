@@ -181,3 +181,42 @@ thực thi trong lượt này. Runbook kiểm chứng cần theo từng tầng v
 so với provider thật. Xem `LOCAL_MIGRATION.md` để chuyển từ folder k3d cũ.
 
 Hướng dẫn mới: [Groq, model identity và knowledge preparation](LOCAL_DEMO_PREPARATION.md).
+
+## 8. History M6 — cấu hình đã bật ngày 06/11/2026
+
+`config/local/history-runtime.json` chọn trạng thái History, public signing key,
+subject service đã xác minh, adapter image và namespace raw archive hiện hành.
+`localdev/history.py` được gọi bởi generator chuẩn và có lệnh cập nhật riêng để
+không ghi mất ESO, NetworkPolicy, HPA hoặc ML shadow của môi trường local.
+
+- Business API bật `BUSINESS_HISTORY_ENABLED`, mount private signing key và cursor
+  secret riêng. Public JWKS được phục vụ ở adapter hiện có, port18091 nội bộ.
+- Processing Read API bật `PROCESSING_HISTORY_ENABLED`, dùng cùng issuer/public
+  JWKS; login `processing_history_meta` chỉ ghi metadata. Source login vẫn chỉ đọc.
+- Read API nối MinIO qua loopback adapter; chỉ đọc raw/catalog và ghi export theo
+  policy riêng. Retention vẫn tắt, cleaner vẫn dry-run.
+- Storage Consumer bật native catalog và dùng cùng raw bucket với Read API. Selector
+  cho phép1–3 replicas;3 được chọn để backfill dữ liệu Kafka hiện còn trong broker.
+- Ba ExternalSecrets M6 lấy khóa/credential từ LocalStack qua ESO. Repo chỉ giữ tên
+  Secret và public key, không giữ private key, password hoặc cursor secret.
+
+Bucket mới `maintai-raw-c8c61d245736` và group prefix `local-m6-c8c61d245736-` tách
+archive của Kafka lineage hiện tại khỏi bucket cũ đang có offset trùng payload
+khác. Bucket `maintai-raw` vẫn giữ nguyên. Không reset Processing/Business groups,
+không ghi đè object conflict và không tự gộp raw từ hai bucket. Trong lúc backfill,
+raw history trả503 cho đến khi catalog đủ12 accepted partitions COMPLETE; lịch sử
+prediction trong Processing DB có thể dùng trước.
+
+Lệnh ở repo GitOps sau khi infrastructure đã tạo khóa/grants và import adapter:
+
+```bash
+../Maint-infrastructure/.venv/bin/python -m localdev.history \
+  --enable \
+  --adapter-receipt ../Maint-infrastructure/local/.local/receipts/dev-tools.json
+```
+
+Review, commit và push vào revision mà Argo đang theo dõi; lệnh này không tự deploy.
+Sau lần bật đầu chỉ cần `python -m localdev.history` để tái sinh theo selector đang có.
+Quy trình tạo khóa, restore ESO sau restart, cấp grants và kiểm chứng UI/export nằm
+ở [runbook M6 trong infrastructure](../../Maint-infrastructure/docs/LOCAL_M6_HISTORY.md).
+Bản ghi kết quả runtime chỉ áp dụng cho local; không suy ra năng lực100 máy hoặc HA.
