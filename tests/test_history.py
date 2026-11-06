@@ -50,7 +50,7 @@ class HistoryWiring(unittest.TestCase):
         self.assertEqual(storage["KAFKA_GROUP_PREFIX"], "local-fixture-")
         self.assertEqual(storage["S3_RAW_BUCKET"], processing["PROCESSING_HISTORY_RAW_BUCKET"])
         self.assertEqual(storage["STORAGE_CATALOG_ENABLED"], "true")
-        self.assertEqual(storage["STORAGE_CATALOG_POLL_SECONDS"], "0.5")
+        self.assertEqual(storage["STORAGE_CATALOG_POLL_SECONDS"], "2")
         self.assertEqual(storage["S3_ALLOW_UNVERSIONED"], "false")
         self.assertEqual(storage["STORAGE_ARCHIVE_OUTCOMES"], "false")
         self.assertEqual([x["kind"] for x in docs], ["Deployment", "Service"])
