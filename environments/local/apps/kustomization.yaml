@@ -8,7 +8,6 @@ resources:
 - generated/ingestion-api.yaml
 - generated/ml-service.yaml
 - generated/ml-service-shadow.yaml
-# - ml-traffic-mirror.yaml
 - generated/mlflow.yaml
 - generated/processing-outbox-relay.yaml
 - generated/processing-read-api.yaml
@@ -40,7 +39,7 @@ configMapGenerator:
   - BUSINESS_HISTORY_CURSOR_KEY_FILE=/history/cursor-keys.json
   - BUSINESS_HISTORY_DELEGATION_ISSUER=http://127.0.0.1:18091/maintai-history
   - BUSINESS_HISTORY_ENABLED=true
-  - BUSINESS_HISTORY_SERVICE_SUBJECT=6975518b-75cc-484b-aed6-cf0afd6b4db1
+  - BUSINESS_HISTORY_SERVICE_SUBJECT=96d54736-c8d4-40b1-b407-a55fb554e81a
   - BUSINESS_HISTORY_SIGNING_KEY_FILE=/history/signing-key.pem
   - BUSINESS_HISTORY_SIGNING_KEY_ID=history-66da4408f7354908
   - BUSINESS_HOST=127.0.0.1
