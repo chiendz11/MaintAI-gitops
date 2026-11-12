@@ -338,8 +338,8 @@ images:
   newName: maintai-local/dev-tools
   newTag: image-49caa80f93c6ac68ed249619e474eb4fdfe627ddf582753c4d6bc4b1fb8004a3
 - name: registry.invalid/maintai-local/business-api
-  newName: ghcr.io/chiendz11/maintai-business-api
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newName: maintai-local/business-api
+  newTag: image-da663f68ddf629ab65a54676c61fa2e0135606c5c1773a6a54c1d2d1c6eefa6b
 - name: registry.invalid/maintai-local/business-consumer
   newName: ghcr.io/chiendz11/maintai-business-consumer
   newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
@@ -362,8 +362,8 @@ images:
   newName: ghcr.io/chiendz11/maintai-processing-read-api
   newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/processing-worker
-  newName: ghcr.io/chiendz11/maintai-processing-worker
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newName: maintai-local/processing-worker
+  newTag: image-08230ffbd1ca854ca4ef436586e6491a289bc86ea8a2754c99312080cd771b88
 - name: registry.invalid/maintai-local/rag-service
   newName: maintai-local/rag-service
   newTag: image-60f27072a74d5d2c7e821ce394658d050c07191e3763d116027b302d6042bb81
