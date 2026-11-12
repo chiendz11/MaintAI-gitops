@@ -7,7 +7,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 LOCAL_ALIAS = re.compile(r"maintai-local/[a-z0-9-]+:image-([0-9a-f]{64})")
 DIGEST = re.compile(r"[^\s]+@sha256:[0-9a-f]{64}")
 

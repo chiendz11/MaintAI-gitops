@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: maintai-local-root
+  namespace: argocd
+spec:
+  project: maintai-local
+  source:
+    repoURL: https://github.com/chiendz11/MaintAI-gitops.git
+    targetRevision: feat/pure-declarative-gitops
+    path: applications/local
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - ApplyOutOfSyncOnly=true

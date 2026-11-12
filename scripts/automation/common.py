@@ -11,7 +11,7 @@ from typing import Any
 import jsonschema
 import yaml
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 ARCHITECTURE = "maintai-1.3.1+simulator-ui.1"
 DIGEST_IMAGE = re.compile(r"^[a-z0-9][a-z0-9./_-]+@sha256:[0-9a-f]{64}$")
 SHA = re.compile(r"^[0-9a-f]{64}$")

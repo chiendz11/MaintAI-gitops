@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: maintai-production-root
+  namespace: argocd
+spec:
+  project: maintai-production
+  source:
+    repoURL: https://github.com/chiendz11/MaintAI-gitops.git
+    targetRevision: main
+    path: applications
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true

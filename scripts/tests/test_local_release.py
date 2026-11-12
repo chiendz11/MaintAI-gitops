@@ -43,7 +43,7 @@ class LocalReleaseSafety(unittest.TestCase):
     def test_release_writer_rejects_production_and_path_escape(self):
         for target in ("environments/production/workloads/kustomization.yaml", "environments/local/../production/config.yaml"):
             with self.assertRaises(ValueError):
-                assert_local(Path(__file__).resolve().parents[1] / target)
+                assert_local(Path(__file__).resolve().parents[2] / target)
 
     def test_default_profile_contains_no_enabled_or_fabricated_runtime(self):
         profile = load("profiles/local.example.json")
