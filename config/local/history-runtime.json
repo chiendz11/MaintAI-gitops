@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "enabled": true,
   "issuer": "http://127.0.0.1:18091/maintai-history",
-  "service_subject": "6975518b-75cc-484b-aed6-cf0afd6b4db1",
+  "service_subject": "96d54736-c8d4-40b1-b407-a55fb554e81a",
   "signing_key_id": "history-66da4408f7354908",
   "jwks": {
     "keys": [
