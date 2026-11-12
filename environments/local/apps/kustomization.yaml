@@ -132,9 +132,11 @@ configMapGenerator:
   literals:
   - 'artifacts.json=[{"path": "/local/models/hgb-interactions-candidate-v1/pipeline.joblib",
     "sha256": "eb96429b8fa5896f8b4f43d23b2df7499a9e25a6f67ffcbaf272d8e6656f4599"},
-    {"path": "/local/models/hgb-interactions-candidate-v1/metadata.json", "sha256": "034c84233af9e2c3b1a0960deb66324259736f362ecb83aa4fa230998c976805"},
-    {"path": "/local/models/hgb-interactions-candidate-v1/evaluation.json", "sha256": "d09679f27a448d5aed5ed72af6256265afa68865e2e63192fdb5b44dbeb2c6ce"},
-    {"path": "/local/models/hgb-interactions-candidate-v1/drift_reference.json", "sha256": "76ce402c7c42c3267524bccc133d4383166f07d9f804b0aa650723574db46543"}]'
+    {"path": "/local/models/hgb-interactions-candidate-v1/metadata.json", "sha256":
+    "034c84233af9e2c3b1a0960deb66324259736f362ecb83aa4fa230998c976805"}, {"path":
+    "/local/models/hgb-interactions-candidate-v1/evaluation.json", "sha256": "d09679f27a448d5aed5ed72af6256265afa68865e2e63192fdb5b44dbeb2c6ce"},
+    {"path": "/local/models/hgb-interactions-candidate-v1/drift_reference.json", "sha256":
+    "76ce402c7c42c3267524bccc133d4383166f07d9f804b0aa650723574db46543"}]'
 - name: ml-service-shadow-config
   literals:
   - AWS_DEFAULT_REGION=us-east-1
@@ -310,43 +312,43 @@ images:
   newTag: image-49caa80f93c6ac68ed249619e474eb4fdfe627ddf582753c4d6bc4b1fb8004a3
 - name: registry.invalid/maintai-local/business-api
   newName: ghcr.io/chiendz11/maintai-business-api
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 - name: registry.invalid/maintai-local/business-consumer
   newName: ghcr.io/chiendz11/maintai-business-consumer
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 - name: registry.invalid/maintai-local/frontend
   newName: ghcr.io/chiendz11/maintai-frontend
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 - name: registry.invalid/maintai-local/ingestion-api
   newName: ghcr.io/chiendz11/maintai-ingestion-api
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 - name: registry.invalid/maintai-local/ml-service
-  newName: maintai-local/ml-service
-  newTag: v2
+  newName: ghcr.io/chiendz11/maintai-ml-service
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 - name: registry.invalid/maintai-local/ml-service-shadow
-  newName: maintai-local/ml-service
-  newTag: v2
+  newName: ghcr.io/chiendz11/maintai-ml-service-shadow
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 - name: registry.invalid/maintai-local/processing-outbox-relay
   newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 - name: registry.invalid/maintai-local/processing-read-api
   newName: ghcr.io/chiendz11/maintai-processing-read-api
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 - name: registry.invalid/maintai-local/processing-worker
   newName: ghcr.io/chiendz11/maintai-processing-worker
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 - name: registry.invalid/maintai-local/rag-service
-  newName: maintai-local/rag-service
-  newTag: image-60f27072a74d5d2c7e821ce394658d050c07191e3763d116027b302d6042bb81
+  newName: ghcr.io/chiendz11/maintai-rag-service
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 - name: registry.invalid/maintai-local/sensor
   newName: ghcr.io/chiendz11/maintai-sensor
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 - name: registry.invalid/maintai-local/simulator-ui
   newName: ghcr.io/chiendz11/maintai-simulator-ui
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 - name: registry.invalid/maintai-local/storage-consumer
   newName: ghcr.io/chiendz11/maintai-storage-consumer
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newTag: sha-da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3
 patches:
 - target:
     kind: Deployment
