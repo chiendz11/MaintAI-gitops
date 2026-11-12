@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: maintai-local-root
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: maintai-local-root
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  project: maintai-local
+  source:
+    repoURL: https://github.com/chiendz11/MaintAI-gitops.git
+    targetRevision: feat/local-m6-history
+    path: applications/local
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+    - FailOnSharedResource=true
+    - PruneLast=true

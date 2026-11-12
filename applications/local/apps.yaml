@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: maintai-local-apps
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  project: maintai-local
+  source:
+    repoURL: https://github.com/chiendz11/MaintAI-gitops.git
+    targetRevision: feat/local-m6-history
+    path: environments/local/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: maintai-local
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+    - FailOnSharedResource=true
+    - PruneLast=true
+  ignoreDifferences:
+  - group: apps
+    kind: Deployment
+    name: business-api
+    jsonPointers:
+    - /spec/replicas
+  - group: apps
+    kind: Deployment
+    name: frontend
+    jsonPointers:
+    - /spec/replicas
+  - group: apps
+    kind: Deployment
+    name: ingestion-api
+    jsonPointers:
+    - /spec/replicas
+  - group: apps
+    kind: Deployment
+    name: ml-service
+    jsonPointers:
+    - /spec/replicas
+  - group: apps
+    kind: Deployment
+    name: ml-service-shadow
+    jsonPointers:
+    - /spec/replicas
+  - group: apps
+    kind: Deployment
+    name: processing-worker
+    jsonPointers:
+    - /spec/replicas
+  - group: apps
+    kind: Deployment
+    name: rag-service
+    jsonPointers:
+    - /spec/replicas

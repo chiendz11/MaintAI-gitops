@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: maintai-local
+  namespace: argocd
+spec:
+  description: MaintAI local k3d development and demonstration project
+  sourceRepos:
+  - https://github.com/chiendz11/MaintAI-gitops.git
+  destinations:
+  - namespace: maintai-local
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: ""
+    kind: Namespace
+  namespaceResourceBlacklist:
+  - group: argoproj.io
+    kind: Application
+  - group: argoproj.io
+    kind: AppProject
