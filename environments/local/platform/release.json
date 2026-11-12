@@ -4,8 +4,8 @@
     "minio": {
       "schema_version": "1.0.0",
       "component": "minio",
-      "image": "maintai-local/minio:image-3807d3e67e53b46a97206f2b2dfbd2fcd03d398d19120f94d47999d6821229f4",
-      "image_id": "sha256:3807d3e67e53b46a97206f2b2dfbd2fcd03d398d19120f94d47999d6821229f4",
+      "image": "maintai-local/minio:image-f93b308f46ee3aebdeef22f9c4166040ebf92789ba03b3d26a5f36cbe3b9396b",
+      "image_id": "sha256:f93b308f46ee3aebdeef22f9c4166040ebf92789ba03b3d26a5f36cbe3b9396b",
       "source_git_sha": "2419993beb6022de8e7ba4026f0308f256fbdf90",
       "source_dirty": false,
       "source_snapshot_sha256": "71c0ecb721ed74ac0c1b9058a67e421a23bf8bdb8f7238c41e35b70a1c1baf9b",
@@ -17,8 +17,8 @@
     "mc": {
       "schema_version": "1.0.0",
       "component": "mc",
-      "image": "maintai-local/mc:image-90effb21189b93442207da7ffa2642803fd58b5a910621f42eddd931c7c15bdc",
-      "image_id": "sha256:90effb21189b93442207da7ffa2642803fd58b5a910621f42eddd931c7c15bdc",
+      "image": "maintai-local/mc:image-476ba82a36e652f2fef443e8071817683e7419b981c4bfe9cdd271a97bca3b06",
+      "image_id": "sha256:476ba82a36e652f2fef443e8071817683e7419b981c4bfe9cdd271a97bca3b06",
       "source_git_sha": "2419993beb6022de8e7ba4026f0308f256fbdf90",
       "source_dirty": false,
       "source_snapshot_sha256": "71c0ecb721ed74ac0c1b9058a67e421a23bf8bdb8f7238c41e35b70a1c1baf9b",
@@ -30,8 +30,8 @@
     "dev-tools": {
       "schema_version": "1.0.0",
       "component": "dev-tools",
-      "image": "maintai-local/dev-tools:image-a4def4059a3dfd1c50365c7bc189820de8d36b80f4a89caf099f1765007aa97b",
-      "image_id": "sha256:a4def4059a3dfd1c50365c7bc189820de8d36b80f4a89caf099f1765007aa97b",
+      "image": "maintai-local/dev-tools:image-1bc74e51f2c8b7f7c52fcb1c0b322babec12c1649aadb0249b843a44594b737e",
+      "image_id": "sha256:1bc74e51f2c8b7f7c52fcb1c0b322babec12c1649aadb0249b843a44594b737e",
       "source_git_sha": "2419993beb6022de8e7ba4026f0308f256fbdf90",
       "source_dirty": false,
       "source_snapshot_sha256": "71c0ecb721ed74ac0c1b9058a67e421a23bf8bdb8f7238c41e35b70a1c1baf9b",
