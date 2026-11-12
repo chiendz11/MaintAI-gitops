@@ -16,7 +16,7 @@ spec:
     namespace: maintai-local
   syncPolicy:
     automated:
-      prune: false
+      prune: true
       selfHeal: true
     syncOptions:
     - FailOnSharedResource=true
