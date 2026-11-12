@@ -21,6 +21,7 @@ resources:
 - generated/sensor-pvc.yaml
 - hooks/processing-migration.yaml
 - hooks/business-migration.yaml
+- hooks/business-data-init.yaml
 - hooks/rag-knowledge-init.yaml
 - external-secrets.yaml
 - ingress.yaml
@@ -332,6 +333,9 @@ configMapGenerator:
   - 'jwks.json={"keys": [{"alg": "RS256", "e": "AQAB", "kid": "history-66da4408f7354908",
     "kty": "RSA", "n": "k4DFMu6gzJQyuEX1lTLAtWbrtAWuszmNNckpGPgB4zmauUOPrks3qoPU1Y0VKEkpevAVcReKAZmdWRvRHFERuSKxAyqoIQ-z5Cga-For0NqQKh8CxdHLN0LKFuhffJ_dHllq-2dtXPATRmsyAq55geOhcTeh2zVg6px3e7S4D0KF2oDrXd7S-h0X6KEuFq26hZoNxcVJwiLG8xhV6fl3lc-7UhwdxDqhRJYKtKRUlthA7k-Y4lL0W9urJ-kgP1_K-MZr_ReBOf6TlhWTMCAslIgu10AQqPhy3T0eoEAGX2rS1WtJpef6ZjDyhWNShiAhDIPcg_SLVopcTrjwdQ-fDOqZWF5IxxmllmyobkLNjln3pX6Qj0zL51idjLz5juRFlq6xASQt5AoMGFyO9h11-wKjums4bx6E7UCfwkWczH_7hZs7D2-F-5-wIbJ7UWI7OUJjBkj0KgAOPmH1BhqkY-ko3XZ6bOkTiRY2brJ3465OCtnBqpxevkVcGPk-6mXr",
     "use": "sig"}]}'
+- name: local-reviewed-machines
+  literals:
+  - 'machines.json=[{"machine_id": "M-001", "display_name": "Simulated machine 1"}, {"machine_id": "M-002", "display_name": "Simulated machine 2"}, {"machine_id": "M-003", "display_name": "Simulated machine 3"}, {"machine_id": "M-004", "display_name": "Simulated machine 4"}, {"machine_id": "M-005", "display_name": "Simulated machine 5"}]'
 images:
 - name: registry.invalid/maintai-local/dev-tools
   newName: maintai-local/dev-tools

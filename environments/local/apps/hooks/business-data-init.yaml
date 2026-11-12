@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: business-data-init
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: business-data-init
+    app.kubernetes.io/part-of: maintai-local
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 300
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      name: business-data-init
+      labels:
+        app.kubernetes.io/name: business-data-init
+        app.kubernetes.io/part-of: maintai-local
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: init
+        image: registry.invalid/maintai-local/business-api:NOT_BUILT
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -c
+        - |
+          maintai-business-provision /review/machines.json
+        env:
+        - name: BUSINESS_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: local-business-owner
+              key: url
+        volumeMounts:
+        - name: review
+          mountPath: /review
+          readOnly: true
+        securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: review
+        configMap:
+          name: local-reviewed-machines
