@@ -5,10 +5,10 @@ resources:
 images:
 - name: registry.invalid/maintai-local/minio
   newName: maintai-local/minio
-  newTag: image-be9a4d164beb4c0f7b57caadc5270098aca11059059e68f87092eddc26ce36a0
+  newTag: image-0e99e34358d85b513a53a4cce166fb7eca01a5d1beb486d476a31af50947a73b
 - name: registry.invalid/maintai-local/mc
   newName: maintai-local/mc
-  newTag: image-a768bc2dbfeccc63850731da5c9cf45311dfaa07e915f8f2325d9a139cd3039d
+  newTag: image-e83e52481791a63c0ab4c4ca603d63d7d67976e35c7e1c19ce8e1eabd3c9280d
 - name: registry.invalid/maintai-local/dev-tools
   newName: maintai-local/dev-tools
-  newTag: image-c553cd95b1ebf8f85c2bac69eb28e7528fb61e610f0671534d683e43567aebf1
+  newTag: image-4bba14e171fbddbe8860c168e3f622310e09c34409d20c0c5e8bb9a5a1699860
