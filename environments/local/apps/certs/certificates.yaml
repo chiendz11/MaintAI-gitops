@@ -1,0 +1,102 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: local-dev-tls
+  namespace: maintai-local
+spec:
+  secretName: local-dev-tls
+  privateKey:
+    rotationPolicy: Always
+  issuerRef:
+    name: maintai-ca-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: local-dev.maintai-local.svc.cluster.local
+  dnsNames:
+  - localhost
+  - 127.0.0.1
+  - business-api
+  - business-api.maintai-local
+  - business-api.maintai-local.svc
+  - business-api.maintai-local.svc.cluster.local
+  - processing-read-api
+  - processing-read-api.maintai-local
+  - processing-read-api.maintai-local.svc
+  - processing-read-api.maintai-local.svc.cluster.local
+  - keycloak
+  - keycloak.maintai-local
+  - keycloak.maintai-local.svc
+  - keycloak.maintai-local.svc.cluster.local
+  - ingestion-api
+  - ingestion-api.maintai-local
+  - ingestion-api.maintai-local.svc
+  - ingestion-api.maintai-local.svc.cluster.local
+  - sensor
+  - sensor.maintai-local
+  - sensor.maintai-local.svc
+  - sensor.maintai-local.svc.cluster.local
+  ipAddresses:
+  - 127.0.0.1
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: business-api-tls
+  namespace: maintai-local
+spec:
+  secretName: business-api-tls
+  issuerRef:
+    name: maintai-ca-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: business-api.maintai-local.svc.cluster.local
+  dnsNames:
+  - business-api
+  - business-api.maintai-local
+  - business-api.maintai-local.svc
+  - business-api.maintai-local.svc.cluster.local
+  - localhost
+  ipAddresses:
+  - 127.0.0.1
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: processing-read-api-tls
+  namespace: maintai-local
+spec:
+  secretName: processing-read-api-tls
+  issuerRef:
+    name: maintai-ca-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: processing-read-api.maintai-local.svc.cluster.local
+  dnsNames:
+  - processing-read-api
+  - processing-read-api.maintai-local
+  - processing-read-api.maintai-local.svc
+  - processing-read-api.maintai-local.svc.cluster.local
+  - localhost
+  ipAddresses:
+  - 127.0.0.1
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: keycloak-tls
+  namespace: maintai-local
+spec:
+  secretName: keycloak-tls
+  issuerRef:
+    name: maintai-ca-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: keycloak.maintai-local.svc.cluster.local
+  dnsNames:
+  - keycloak
+  - keycloak.maintai-local
+  - keycloak.maintai-local.svc
+  - keycloak.maintai-local.svc.cluster.local
+  - localhost
+  ipAddresses:
+  - 127.0.0.1
