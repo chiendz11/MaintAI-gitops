@@ -8,7 +8,7 @@ resources:
 - generated/ingestion-api.yaml
 - generated/ml-service.yaml
 - generated/ml-service-shadow.yaml
-- ml-traffic-mirror.yaml
+# - ml-traffic-mirror.yaml
 - generated/mlflow.yaml
 - generated/processing-outbox-relay.yaml
 - generated/processing-read-api.yaml
