@@ -353,10 +353,10 @@ images:
   newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/ml-service
   newName: maintai-local/ml-service
-  newTag: v2
+  newTag: image-1f2d0ba8437d57a0d3aeca1c6c29425f1267a8f1dead47f6063463fa6a45a7a5
 - name: registry.invalid/maintai-local/ml-service-shadow
   newName: maintai-local/ml-service
-  newTag: v2
+  newTag: image-1f2d0ba8437d57a0d3aeca1c6c29425f1267a8f1dead47f6063463fa6a45a7a5
 - name: registry.invalid/maintai-local/processing-outbox-relay
   newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
   newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
@@ -368,7 +368,7 @@ images:
   newTag: image-08230ffbd1ca854ca4ef436586e6491a289bc86ea8a2754c99312080cd771b88
 - name: registry.invalid/maintai-local/rag-service
   newName: maintai-local/rag-service
-  newTag: image-60f27072a74d5d2c7e821ce394658d050c07191e3763d116027b302d6042bb81
+  newTag: image-1e5c3fe741a5e45d73a0dd500f6717f2f7a5b7574f809fc74b8e3b9a260d3759
 - name: registry.invalid/maintai-local/sensor
   newName: ghcr.io/chiendz11/maintai-sensor
   newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
@@ -377,7 +377,7 @@ images:
   newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/storage-consumer
   newName: maintai-local/storage-consumer
-  newTag: image-4012adc70eb0bcba0bb0126c3e1c10c7b3302b429a62084728b6686c8bd0b494
+  newTag: image-7907bcce614c6dfa9d29001b8100af8e3d4695f8bf76f19d3cded25ec193512b
 patches:
 - target:
     kind: Deployment
