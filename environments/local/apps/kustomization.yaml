@@ -21,7 +21,6 @@ resources:
 - generated/sensor-pvc.yaml
 - hooks/processing-migration.yaml
 - hooks/business-migration.yaml
-- hooks/business-data-init.yaml
 - hooks/rag-knowledge-init.yaml
 - external-secrets.yaml
 - ingress.yaml

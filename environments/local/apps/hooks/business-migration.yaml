@@ -27,10 +27,19 @@ spec:
           python -c "import os,psycopg; from psycopg.rows import dict_row; from backend.shared.persistence.permissions import grant_business_permissions as grant
           with psycopg.connect(os.environ['BUSINESS_DATABASE_URL'], row_factory=dict_row) as c:
               grant(c, reader_role='business_reader', consumer_role='business_consumer', api_role='business_api')
-              c.execute('GRANT SELECT,INSERT,UPDATE,DELETE ON history_marker_snapshots TO business_api')"
+              c.execute('GRANT SELECT,INSERT,UPDATE,DELETE ON history_marker_snapshots TO business_api')" && \
+          maintai-business-provision /review/machines.json
         env:
         - name: BUSINESS_DATABASE_URL
           valueFrom:
             secretKeyRef:
               name: local-business-owner
               key: url
+        volumeMounts:
+        - name: review
+          mountPath: /review
+          readOnly: true
+      volumes:
+      - name: review
+        configMap:
+          name: local-reviewed-machines
