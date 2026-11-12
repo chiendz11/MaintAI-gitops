@@ -126,7 +126,8 @@ configMapGenerator:
   - OUTBOX_CLAIM_LEASE_SECONDS=120
   - OUTBOX_EXECUTION_MODE=ordered
   - OUTBOX_POLL_INTERVAL_MS=10
-  - PROCESSING_HEALTH_PORT=8081
+  - PROCESSING_HEALTH_HOST=0.0.0.0
+  - PROCESSING_HEALTH_PORT=8082
   - PROCESSING_PROFILE=local-fixture
   - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
 - name: processing-read-api-config
@@ -139,7 +140,7 @@ configMapGenerator:
   - PROCESSING_HISTORY_EXPORT_BUCKET=maintai-processed
   - PROCESSING_HISTORY_META_SCHEMA=history_meta
   - PROCESSING_HISTORY_RAW_BUCKET=maintai-raw-c8c61d245736
-  - PROCESSING_HISTORY_S3_ENDPOINT=http://127.0.0.1:19000
+  - PROCESSING_HISTORY_S3_ENDPOINT=http://minio:9000
   - PROCESSING_READ_HOST=0.0.0.0
   - PROCESSING_READ_MACHINES_CLAIM=machine_ids
   - PROCESSING_READ_OIDC_AUDIENCE=maintai-processing-local
@@ -162,6 +163,7 @@ configMapGenerator:
   - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
   - ML_BASE_URL=http://ml-service:8001
   - PROCESSING_EXECUTION_MODE=keyed
+  - PROCESSING_HEALTH_HOST=0.0.0.0
   - PROCESSING_HEALTH_PORT=8081
   - PROCESSING_MODEL_IDENTITY_FIXTURE=/local/fixtures/model-identity.json
   - PROCESSING_PROFILE=local-fixture
@@ -190,7 +192,7 @@ configMapGenerator:
   - 'artifacts.json=[{"path": "/local/datasets/ai4i2020.csv", "sha256": "dc6630cd9b1f0f853922fad78a1b6436570d3f1ec863f1dd5c4340ac56bc8a8e"}]'
 - name: sensor-config
   literals:
-  - BACKEND_BASE_URL=https://127.0.0.1:18400
+  - BACKEND_BASE_URL=http://ingestion-api:8000
   - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
   - SIM_AUTH_MODE=jwt
   - SIM_CONTROL_SCOPE=simulator:control
@@ -199,7 +201,7 @@ configMapGenerator:
   - SIM_INGESTION_AUTH=oauth
   - SIM_INITIAL_STATE=PAUSED
   - SIM_INTERVAL_MS=1000
-  - SIM_JWKS_URL=https://127.0.0.1:18490/realms/maintai/protocol/openid-connect/certs
+  - SIM_JWKS_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/certs
   - SIM_JWT_AUDIENCE=simulator-control
   - SIM_JWT_ISSUER=https://127.0.0.1:18490/realms/maintai
   - SIM_LOOP_DATASET=true
@@ -208,7 +210,7 @@ configMapGenerator:
   - SIM_OAUTH_CLIENT_ID=maintai-sensor
   - SIM_OAUTH_SCOPE=sensor:write
   - SIM_OAUTH_SECRET_FILE=/credentials/sensor/client_secret
-  - SIM_OAUTH_TOKEN_URL=https://127.0.0.1:18490/realms/maintai/protocol/openid-connect/token
+  - SIM_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
   - SIM_PORT=8005
   - SIM_ROLES_CLAIM=roles
   - SIM_STATE_PATH=/state/state.sqlite3
@@ -290,8 +292,8 @@ images:
   newName: maintai-local/ml-service
   newTag: image-1f2d0ba8437d57a0d3aeca1c6c29425f1267a8f1dead47f6063463fa6a45a7a5
 - name: registry.invalid/maintai-local/processing-outbox-relay
-  newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newName: maintai-local/processing-outbox-relay
+  newTag: cloud-native
 - name: registry.invalid/maintai-local/processing-read-api
   newName: maintai-local/processing-read-api
   newTag: cloud-native
