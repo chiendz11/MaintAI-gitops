@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: business-consumer
+  labels:
+    app.kubernetes.io/name: business-consumer
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  selector:
+    app.kubernetes.io/name: business-consumer
+  ports:
+  - name: http
+    port: 8083
+    targetPort: 8083

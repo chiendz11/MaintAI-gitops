@@ -1,15 +1,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ../workloads/business-api
-  - ../workloads/business-consumer
-  - ../workloads/frontend
-  - ../workloads/ingestion-api
-  - ../workloads/ml-service
-  - ../workloads/processing-outbox-relay
-  - ../workloads/processing-read-api
-  - ../workloads/processing-worker
-  - ../workloads/rag-service
-  - ../workloads/sensor
-  - ../workloads/simulator-ui
-  - ../workloads/storage-consumer
+- business-api
+- business-consumer
+- frontend
+- ingestion-api
+- ml-service
+- processing-outbox-relay
+- processing-read-api
+- processing-worker
+- rag-service
+- sensor
+- simulator-ui
+- storage-consumer

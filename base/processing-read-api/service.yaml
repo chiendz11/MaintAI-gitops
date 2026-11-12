@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: processing-read-api
+  labels:
+    app.kubernetes.io/name: processing-read-api
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  selector:
+    app.kubernetes.io/name: processing-read-api
+  ports:
+  - name: http
+    port: 8004
+    targetPort: 8004

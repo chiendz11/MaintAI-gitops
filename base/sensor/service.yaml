@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sensor
+  labels:
+    app.kubernetes.io/name: sensor
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  selector:
+    app.kubernetes.io/name: sensor
+  ports:
+  - name: http
+    port: 8005
+    targetPort: 8005

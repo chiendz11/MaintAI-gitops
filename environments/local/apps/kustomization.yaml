@@ -2,23 +2,12 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: maintai-local
 resources:
-- generated/business-api.yaml
-- generated/business-consumer.yaml
-- generated/frontend.yaml
-- generated/ingestion-api.yaml
-- generated/ml-service.yaml
-- generated/ml-service-shadow.yaml
-- generated/mlflow.yaml
-- generated/processing-outbox-relay.yaml
-- generated/processing-read-api.yaml
-- generated/processing-worker.yaml
-- generated/rag-service.yaml
-- generated/sensor.yaml
-- generated/simulator-ui.yaml
-- generated/storage-consumer.yaml
-- generated/business-edge.yaml
-- generated/simulator-edge.yaml
-- generated/sensor-pvc.yaml
+- ../../../base
+- sensor-pvc.yaml
+- mlflow.yaml
+- ml-service-shadow.yaml
+- business-edge.yaml
+- simulator-edge.yaml
 - hooks/processing-migration.yaml
 - hooks/business-migration.yaml
 - hooks/rag-knowledge-init.yaml
@@ -37,58 +26,38 @@ configMapGenerator:
   literals:
   - BUSINESS_ALERT_NOTIFY_CHANNEL=maintai_business_alert_v1
   - BUSINESS_HISTORY_CURSOR_KEY_FILE=/history/cursor-keys.json
-  - BUSINESS_HISTORY_DELEGATION_ISSUER=http://127.0.0.1:18091/maintai-history
+  - BUSINESS_HISTORY_DELEGATION_ISSUER=http://business-api:8003/maintai-history
   - BUSINESS_HISTORY_ENABLED=true
   - BUSINESS_HISTORY_SERVICE_SUBJECT=1aa95d50-1576-407f-97ff-46048198b1d6
   - BUSINESS_HISTORY_SIGNING_KEY_FILE=/history/signing-key.pem
   - BUSINESS_HISTORY_SIGNING_KEY_ID=history-66da4408f7354908
-  - BUSINESS_HOST=127.0.0.1
+  - BUSINESS_HOST=0.0.0.0
   - BUSINESS_MACHINES_CLAIM=machine_ids
   - BUSINESS_NOTIFY_CHANNEL=maintai_business_live_v1
   - BUSINESS_OIDC_AUDIENCE=maintai-business-local
   - BUSINESS_OIDC_ISSUER=https://127.0.0.1:18490/realms/maintai
-  - BUSINESS_OIDC_JWKS_URL=http://127.0.0.1:18090/realms/maintai/protocol/openid-connect/certs
-  - BUSINESS_PORT=18003
-  - BUSINESS_PROCESSING_READ_URL=http://127.0.0.1:18004
+  - BUSINESS_OIDC_JWKS_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/certs
+  - BUSINESS_PORT=8003
+  - BUSINESS_PROCESSING_READ_URL=http://processing-read-api:8004
   - BUSINESS_PROCESSING_TOKEN_FILE=/tokens/processing.jwt
   - BUSINESS_PROFILE=local-test
   - BUSINESS_ROLES_CLAIM=roles
   - PRODUCER_GIT_SHA=2df0a914287a86f3500731ba05a2ba866bbee160
-- name: business-api-bridge
-  literals:
-  - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "127.0.0.1", "port":
-    18090, "target_host": "keycloak", "target_port": 8080}, {"bind": "127.0.0.1",
-    "port": 18004, "target_host": "processing-read-api", "target_port": 8004}, {"bind":
-    "0.0.0.0", "port": 8003, "target_host": "127.0.0.1", "target_port": 18003}], "jwks":
-    [{"bind": "0.0.0.0", "file": "/history-jwks/jwks.json", "port": 18091}], "oauth":
-    {"processing": {"client_id": "maintai-processing", "secret_file": "/credentials/processing/client_secret",
-    "token_url": "http://keycloak:8080/realms/maintai/protocol/openid-connect/token"}},
-    "tcp": [{"port": 25432, "target_host": "postgres", "target_port": 5432}], "token_directory":
-    "/tokens"}'
 - name: business-consumer-config
   literals:
   - BUSINESS_ALERT_NOTIFY_CHANNEL=maintai_business_alert_v1
-  - BUSINESS_CONSUMER_HOST=127.0.0.1
-  - BUSINESS_CONSUMER_PORT=18083
+  - BUSINESS_CONSUMER_HOST=0.0.0.0
+  - BUSINESS_CONSUMER_PORT=8083
   - BUSINESS_CONSUMER_PROFILE=local-test
   - BUSINESS_NOTIFY_CHANNEL=maintai_business_live_v1
-  - BUSINESS_PROCESSING_READ_URL=http://127.0.0.1:18004
+  - BUSINESS_PROCESSING_READ_URL=http://processing-read-api:8004
   - BUSINESS_PROCESSING_TOKEN_FILE=/tokens/processing.jwt
-  - KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:19092
+  - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
   - KAFKA_GROUP_PREFIX=local-
   - KAFKA_LOCAL_MODE=true
   - KAFKA_POLL_INTERVAL_SECONDS=0.01
   - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
   - PRODUCER_GIT_SHA=2df0a914287a86f3500731ba05a2ba866bbee160
-- name: business-consumer-bridge
-  literals:
-  - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "127.0.0.1", "port":
-    18004, "target_host": "processing-read-api", "target_port": 8004}, {"bind": "0.0.0.0",
-    "port": 8083, "target_host": "127.0.0.1", "target_port": 18083}], "oauth": {"processing":
-    {"client_id": "maintai-processing", "secret_file": "/credentials/processing/client_secret",
-    "token_url": "http://keycloak:8080/realms/maintai/protocol/openid-connect/token"}},
-    "tcp": [{"port": 19092, "target_host": "kafka", "target_port": 9092}, {"port":
-    25432, "target_host": "postgres", "target_port": 5432}], "token_directory": "/tokens"}'
 - name: frontend-config
   literals:
   - 'runtime-config.json={"apiBaseUrl": "/api/v1", "auth": {"audience": "maintai-business-local",
@@ -102,21 +71,16 @@ configMapGenerator:
   - INGESTION_ENV=local
   - INGESTION_HOST=0.0.0.0
   - INGESTION_PORT=8000
-  - KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:19092
+  - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
   - KAFKA_GROUP_PREFIX=local-
   - KAFKA_LOCAL_MODE=true
   - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
   - OIDC_AUDIENCE=ingestion
   - OIDC_ISSUER=https://127.0.0.1:18490/realms/maintai
-  - OIDC_JWKS_URL=http://127.0.0.1:18090/realms/maintai/protocol/openid-connect/certs
+  - OIDC_JWKS_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/certs
   - OIDC_MACHINES_CLAIM=machine_ids
   - OIDC_ROLES_CLAIM=roles
   - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
-- name: ingestion-api-bridge
-  literals:
-  - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "127.0.0.1", "port":
-    18090, "target_host": "keycloak", "target_port": 8080}], "oauth": {}, "tcp": [{"port":
-    19092, "target_host": "kafka", "target_port": 9092}], "token_directory": "/tokens"}'
 - name: ml-service-artifacts
   literals:
   - 'artifacts.json=[{"path": "/local/models/logreg-baseline-v0/pipeline.joblib",
@@ -155,81 +119,55 @@ configMapGenerator:
   - S3_ENDPOINT_URL=http://minio:9000
 - name: processing-outbox-relay-config
   literals:
-  - KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:19092
+  - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
   - KAFKA_GROUP_PREFIX=local-
   - KAFKA_LOCAL_MODE=true
   - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
   - OUTBOX_CLAIM_LEASE_SECONDS=120
   - OUTBOX_EXECUTION_MODE=ordered
   - OUTBOX_POLL_INTERVAL_MS=10
-  - PROCESSING_HEALTH_PORT=18082
+  - PROCESSING_HEALTH_PORT=8081
   - PROCESSING_PROFILE=local-fixture
   - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
-- name: processing-outbox-relay-bridge
-  literals:
-  - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "0.0.0.0", "port":
-    8082, "target_host": "127.0.0.1", "target_port": 18082}], "oauth": {}, "tcp":
-    [{"port": 19092, "target_host": "kafka", "target_port": 9092}, {"port": 25432,
-    "target_host": "postgres", "target_port": 5432}], "token_directory": "/tokens"}'
 - name: processing-read-api-config
   literals:
   - PROCESSING_CLEANER_DRY_RUN=true
   - PROCESSING_HISTORY_CURSOR_KEY_FILE=/history/cursor-keys.json
-  - PROCESSING_HISTORY_DELEGATION_ISSUER=http://127.0.0.1:18091/maintai-history
-  - PROCESSING_HISTORY_DELEGATION_JWKS_URL=http://127.0.0.1:18091/.well-known/jwks.json
+  - PROCESSING_HISTORY_DELEGATION_ISSUER=http://business-api:8003/maintai-history
+  - PROCESSING_HISTORY_DELEGATION_JWKS_URL=http://business-api:8003/.well-known/jwks.json
   - PROCESSING_HISTORY_ENABLED=true
   - PROCESSING_HISTORY_EXPORT_BUCKET=maintai-processed
   - PROCESSING_HISTORY_META_SCHEMA=history_meta
   - PROCESSING_HISTORY_RAW_BUCKET=maintai-raw-c8c61d245736
   - PROCESSING_HISTORY_S3_ENDPOINT=http://127.0.0.1:19000
-  - PROCESSING_READ_HOST=127.0.0.1
+  - PROCESSING_READ_HOST=0.0.0.0
   - PROCESSING_READ_MACHINES_CLAIM=machine_ids
   - PROCESSING_READ_OIDC_AUDIENCE=maintai-processing-local
   - PROCESSING_READ_OIDC_ISSUER=https://127.0.0.1:18490/realms/maintai
-  - PROCESSING_READ_OIDC_JWKS_URL=http://127.0.0.1:18090/realms/maintai/protocol/openid-connect/certs
-  - PROCESSING_READ_PORT=18004
+  - PROCESSING_READ_OIDC_JWKS_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/certs
+  - PROCESSING_READ_PORT=8004
   - PROCESSING_READ_PROFILE=local-test
   - PROCESSING_READ_ROLES_CLAIM=roles
   - PROCESSING_RETENTION_ENABLED=false
   - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
-- name: processing-read-api-bridge
-  literals:
-  - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "127.0.0.1", "port":
-    18090, "target_host": "keycloak", "target_port": 8080}, {"bind": "0.0.0.0", "port":
-    8004, "target_host": "127.0.0.1", "target_port": 18004}, {"bind": "127.0.0.1",
-    "port": 18091, "target_host": "business-api", "target_port": 18091}], "oauth":
-    {}, "tcp": [{"port": 25432, "target_host": "postgres", "target_port": 5432}, {"port":
-    19000, "target_host": "minio", "target_port": 9000}], "token_directory": "/tokens"}'
 - name: processing-worker-artifacts
   literals:
   - 'artifacts.json=[{"path": "/local/fixtures/model-identity.json", "sha256": "a884a79e45086ae4df1e596c3ea05500e7413b86dd553931c9fe8f47d921322b"}]'
 - name: processing-worker-config
   literals:
-  - BUSINESS_BASE_URL=http://127.0.0.1:18003
-  - KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:19092
+  - BUSINESS_BASE_URL=http://business-api:8003
+  - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
   - KAFKA_GROUP_PREFIX=local-
   - KAFKA_LOCAL_MODE=true
   - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
-  - ML_BASE_URL=http://127.0.0.1:18001
+  - ML_BASE_URL=http://ml-service:8001
   - PROCESSING_EXECUTION_MODE=keyed
-  - PROCESSING_HEALTH_PORT=18081
+  - PROCESSING_HEALTH_PORT=8081
   - PROCESSING_MODEL_IDENTITY_FIXTURE=/local/fixtures/model-identity.json
   - PROCESSING_PROFILE=local-fixture
   - PROCESSING_RISK_POLICY_FILE=/local/config/risk-policy.json
   - PROCESSING_SCHEMA_DIRECTORY=/app/http-contracts
   - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
-- name: processing-worker-bridge
-  literals:
-  - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "127.0.0.1", "oauth":
-    "registry", "port": 18003, "target_host": "business-api", "target_port": 8003},
-    {"bind": "127.0.0.1", "oauth": "ml", "port": 18001, "target_host": "ml-service",
-    "target_port": 8001}, {"bind": "0.0.0.0", "port": 8081, "target_host": "127.0.0.1",
-    "target_port": 18081}], "oauth": {"ml": {"client_id": "maintai-ml", "secret_file":
-    "/credentials/ml/client_secret", "token_url": "http://keycloak:8080/realms/maintai/protocol/openid-connect/token"},
-    "registry": {"client_id": "maintai-registry", "secret_file": "/credentials/registry/client_secret",
-    "token_url": "http://keycloak:8080/realms/maintai/protocol/openid-connect/token"}},
-    "tcp": [{"port": 19092, "target_host": "kafka", "target_port": 9092}, {"port":
-    25432, "target_host": "postgres", "target_port": 5432}], "token_directory": "/tokens"}'
 - name: rag-service-config
   literals:
   - AWS_DEFAULT_REGION=us-east-1
@@ -275,12 +213,6 @@ configMapGenerator:
   - SIM_ROLES_CLAIM=roles
   - SIM_STATE_PATH=/state/state.sqlite3
   - SSL_CERT_FILE=/tls/ca.crt
-- name: sensor-bridge
-  literals:
-  - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "127.0.0.1", "port":
-    18490, "target_host": "keycloak", "target_port": 8080, "tls": true}, {"bind":
-    "127.0.0.1", "port": 18400, "target_host": "ingestion-api", "target_port": 8000,
-    "tls": true}], "oauth": {}, "tcp": [], "token_directory": "/tokens"}'
 - name: simulator-ui-config
   literals:
   - 'runtime-config.json={"apiBaseUrl": "", "auth": {"audience": "simulator-control",
@@ -291,7 +223,7 @@ configMapGenerator:
     20000}'
 - name: storage-consumer-config
   literals:
-  - KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:19092
+  - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
   - KAFKA_GROUP_PREFIX=local-m6-c8c61d245736-
   - KAFKA_LOCAL_MODE=true
   - KAFKA_POLL_INTERVAL_SECONDS=0.01
@@ -309,20 +241,6 @@ configMapGenerator:
   - STORAGE_CATALOG_POLL_SECONDS=2
   - STORAGE_HTTP_HOST=0.0.0.0
   - STORAGE_HTTP_PORT=8008
-- name: storage-consumer-bridge
-  literals:
-  - 'bridge.json={"environment": "local-k3d", "http": [], "oauth": {}, "tcp": [{"port":
-    19092, "target_host": "kafka", "target_port": 9092}], "token_directory": "/tokens"}'
-- name: business-edge-config
-  literals:
-  - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "0.0.0.0", "port":
-    8080, "routes": [{"prefix": "/api/", "target_host": "business-api", "target_port":
-    8003}, {"prefix": "/", "target_host": "frontend", "target_port": 8080}]}]}'
-- name: simulator-edge-config
-  literals:
-  - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "0.0.0.0", "port":
-    8080, "routes": [{"prefix": "/api/", "target_host": "sensor", "target_port": 8005},
-    {"prefix": "/", "target_host": "simulator-ui", "target_port": 8080}]}]}'
 - name: local-app-release-status
   literals:
   - enabled=business-api,business-consumer,frontend,ingestion-api,ml-service,ml-service-shadow,processing-outbox-relay,processing-read-api,processing-worker,rag-service,sensor,simulator-ui,storage-consumer
@@ -334,23 +252,37 @@ configMapGenerator:
     "use": "sig"}]}'
 - name: local-reviewed-machines
   literals:
-  - 'machines.json=[{"machine_id": "M-001", "display_name": "Simulated machine 1"}, {"machine_id": "M-002", "display_name": "Simulated machine 2"}, {"machine_id": "M-003", "display_name": "Simulated machine 3"}, {"machine_id": "M-004", "display_name": "Simulated machine 4"}, {"machine_id": "M-005", "display_name": "Simulated machine 5"}]'
+  - 'machines.json=[{"machine_id": "M-001", "display_name": "Simulated machine 1"},
+    {"machine_id": "M-002", "display_name": "Simulated machine 2"}, {"machine_id":
+    "M-003", "display_name": "Simulated machine 3"}, {"machine_id": "M-004", "display_name":
+    "Simulated machine 4"}, {"machine_id": "M-005", "display_name": "Simulated machine
+    5"}]'
+- name: business-edge-config
+  literals:
+  - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "0.0.0.0", "port":
+    8080, "routes": [{"prefix": "/api/", "target_host": "business-api", "target_port":
+    8003}, {"prefix": "/", "target_host": "frontend", "target_port": 8080}]}]}'
+- name: simulator-edge-config
+  literals:
+  - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "0.0.0.0", "port":
+    8080, "routes": [{"prefix": "/api/", "target_host": "sensor", "target_port": 8005},
+    {"prefix": "/", "target_host": "simulator-ui", "target_port": 8080}]}]}'
 images:
 - name: registry.invalid/maintai-local/dev-tools
   newName: maintai-local/dev-tools
   newTag: image-49caa80f93c6ac68ed249619e474eb4fdfe627ddf582753c4d6bc4b1fb8004a3
 - name: registry.invalid/maintai-local/business-api
   newName: maintai-local/business-api
-  newTag: image-da663f68ddf629ab65a54676c61fa2e0135606c5c1773a6a54c1d2d1c6eefa6b
+  newTag: cloud-native
 - name: registry.invalid/maintai-local/business-consumer
-  newName: ghcr.io/chiendz11/maintai-business-consumer
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newName: maintai-local/business-consumer
+  newTag: cloud-native
 - name: registry.invalid/maintai-local/frontend
   newName: ghcr.io/chiendz11/maintai-frontend
   newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/ingestion-api
-  newName: ghcr.io/chiendz11/maintai-ingestion-api
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newName: maintai-local/ingestion-api
+  newTag: cloud-native
 - name: registry.invalid/maintai-local/ml-service
   newName: maintai-local/ml-service
   newTag: image-1f2d0ba8437d57a0d3aeca1c6c29425f1267a8f1dead47f6063463fa6a45a7a5
@@ -361,17 +293,17 @@ images:
   newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
   newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
 - name: registry.invalid/maintai-local/processing-read-api
-  newName: ghcr.io/chiendz11/maintai-processing-read-api
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newName: maintai-local/processing-read-api
+  newTag: cloud-native
 - name: registry.invalid/maintai-local/processing-worker
   newName: maintai-local/processing-worker
-  newTag: image-08230ffbd1ca854ca4ef436586e6491a289bc86ea8a2754c99312080cd771b88
+  newTag: cloud-native
 - name: registry.invalid/maintai-local/rag-service
   newName: maintai-local/rag-service
   newTag: image-1e5c3fe741a5e45d73a0dd500f6717f2f7a5b7574f809fc74b8e3b9a260d3759
 - name: registry.invalid/maintai-local/sensor
-  newName: ghcr.io/chiendz11/maintai-sensor
-  newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
+  newName: maintai-local/sensor
+  newTag: cloud-native
 - name: registry.invalid/maintai-local/simulator-ui
   newName: ghcr.io/chiendz11/maintai-simulator-ui
   newTag: sha-a1addebda5926e88aab3b78bdf93fdac527073d4
