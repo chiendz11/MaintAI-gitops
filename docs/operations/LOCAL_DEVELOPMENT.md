@@ -2,7 +2,7 @@
 
 Tài liệu này mô tả cấu trúc desired state local trong `MaintAI-gitops`, mô hình Pure Declarative Kustomize (CoreDNS + `cert-manager` TLS, không còn loopback adapter sidecars), quy trình phát hành local, auth M5, History M6, và bảng ánh xạ chuyển đổi từ `MaintAI-k3d` cũ sang kiến trúc đa repo hiện tại.
 
-**Trạng thái hiện tại (14/11/2026):** Toàn bộ PR chuẩn hóa kiến trúc declarative và CoreDNS đã được merge vào nhánh **`main`**. CI kiểm tra offline policy, unit tests (`scripts/tests/`), khóa SHA với `MaintAI` (`e67d42d`) và render `kubectl kustomize` trên cả local & production roots (`ci.yml`).
+**Trạng thái hiện tại (14/11/2026):** Toàn bộ PR chuẩn hóa kiến trúc declarative và CoreDNS đã được merge vào nhánh **`main`**. CI kiểm tra offline policy, unit tests (`scripts/tests/`), khóa SHA với `MaintAI` (`ee488ad`) và render `kubectl kustomize` trên cả local & production roots (`ci.yml`).
 
 ---
 
@@ -44,7 +44,7 @@ Từ đợt hợp nhất PR tháng 11/2026 (`b7bce49`, `0de541b`, `59af264`), m�
 
 ## 3. Quy trình Release & Generator Local
 
-1. Cập nhật code tại `MaintAI` (hoặc kiểm tra commit `e67d42d` trên `main`) và đồng bộ `config/local/app-source.lock.json` + `risk-policy.lock.json` (xem [LOCAL_SOURCE_SYNC.md](LOCAL_SOURCE_SYNC.md)).
+1. Cập nhật code tại `MaintAI` (hoặc kiểm tra commit `ee488ad` trên `main`) và đồng bộ `config/local/app-source.lock.json` + `risk-policy.lock.json` (xem [LOCAL_SOURCE_SYNC.md](LOCAL_SOURCE_SYNC.md)).
 2. Với môi trường dùng GHCR images, cập nhật `newTag: sha-...` trong `environments/local/apps/kustomization.yaml` (tự động qua `publish-and-deploy.yml` hoặc chỉnh review qua PR).
 3. Nếu sinh manifests từ reviewed local profile & image receipts:
    ```bash

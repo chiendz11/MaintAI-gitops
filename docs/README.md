@@ -22,7 +22,7 @@ Tài liệu quản lý Desired State (`AWS Production` & `Local k3d + Argo CD`) 
 
 ### Operations & Runbooks
 - [LOCAL_DEVELOPMENT.md](operations/LOCAL_DEVELOPMENT.md) — Cấu trúc local `base/`, `applications/local/`, `environments/local/`, CoreDNS + `cert-manager`, M5 Auth, M6 History & chuyển đổi từ `MaintAI-k3d`.
-- [LOCAL_SOURCE_SYNC.md](operations/LOCAL_SOURCE_SYNC.md) — Đồng bộ SHA giữa `MaintAI` (`e67d42d`) & `MaintAI-gitops`, publication CI và `RISK-POLICY-01`.
+- [LOCAL_SOURCE_SYNC.md](operations/LOCAL_SOURCE_SYNC.md) — Đồng bộ SHA giữa `MaintAI` (`ee488ad`) & `MaintAI-gitops`, publication CI và `RISK-POLICY-01`.
 - [BOOTSTRAP.md](operations/BOOTSTRAP.md) — Trình tự kích hoạt Production GitOps & manual DB bootstrap.
 - [SECRETS.md](operations/SECRETS.md) — Quản lý Secrets, ESO, IRSA, DB owner isolation & KMS.
 - [TRAINING.md](operations/TRAINING.md) — Luồng Argo Events / Argo Workflows batch training & candidate review PR.
