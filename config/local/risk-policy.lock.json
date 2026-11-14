@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "source_repository": "chiendz11/MaintAI",
-  "source_git_sha": "da6dcbfa0c51fde869f5a1ccbfcc51305cb370e3",
+  "source_git_sha": "27e9f5e298aa3930ec1b48faa9fa24d94f8e6d19",
   "policy_version": "demo-risk-v1",
   "path": "processing/config/risk-policies/demo-risk-v1.json",
   "sha256": "254926e93f9a9435bf938c1e4d4f605ada5415f9a024b53aaabf762e963cc588",
