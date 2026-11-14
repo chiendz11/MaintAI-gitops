@@ -1,7 +1,8 @@
 apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
+kind: Issuer
 metadata:
   name: selfsigned-issuer
+  namespace: maintai-local
 spec:
   selfSigned: {}
 ---
@@ -9,7 +10,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: maintai-root-ca
-  namespace: cert-manager
+  namespace: maintai-local
 spec:
   isCA: true
   commonName: maintai-root-ca
@@ -19,13 +20,14 @@ spec:
     size: 256
   issuerRef:
     name: selfsigned-issuer
-    kind: ClusterIssuer
+    kind: Issuer
     group: cert-manager.io
 ---
 apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
+kind: Issuer
 metadata:
   name: maintai-ca-issuer
+  namespace: maintai-local
 spec:
   ca:
     secretName: maintai-root-ca-secret

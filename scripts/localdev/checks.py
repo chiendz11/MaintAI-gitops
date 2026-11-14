@@ -33,7 +33,7 @@ def verify_application_source(app, lock):
 
 
 def check(app=None, companion=None):
-    for path in (ROOT / "localdev").glob("*.py"):
+    for path in (ROOT / "scripts/localdev").glob("*.py"):
         ast.parse(path.read_text(), filename=str(path))
     for filename in ("local-contracts.lock.json", "local-production-baseline.lock.json"):
         for name, expected in load("versions/" + filename)["sha256"].items():

@@ -9,7 +9,7 @@ spec:
     rotationPolicy: Always
   issuerRef:
     name: maintai-ca-issuer
-    kind: ClusterIssuer
+    kind: Issuer
     group: cert-manager.io
   commonName: local-dev.maintai-local.svc.cluster.local
   dnsNames:
@@ -47,7 +47,7 @@ spec:
   secretName: business-api-tls
   issuerRef:
     name: maintai-ca-issuer
-    kind: ClusterIssuer
+    kind: Issuer
     group: cert-manager.io
   commonName: business-api.maintai-local.svc.cluster.local
   dnsNames:
@@ -68,7 +68,7 @@ spec:
   secretName: processing-read-api-tls
   issuerRef:
     name: maintai-ca-issuer
-    kind: ClusterIssuer
+    kind: Issuer
     group: cert-manager.io
   commonName: processing-read-api.maintai-local.svc.cluster.local
   dnsNames:
@@ -89,7 +89,7 @@ spec:
   secretName: keycloak-tls
   issuerRef:
     name: maintai-ca-issuer
-    kind: ClusterIssuer
+    kind: Issuer
     group: cert-manager.io
   commonName: keycloak.maintai-local.svc.cluster.local
   dnsNames:
