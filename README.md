@@ -6,35 +6,37 @@ The AWS baseline remains1.3.1; local source locks track the reviewed application
 commit, native outcome1.4.0, ML inference and RAG. Publishing source does not
 activate workloads or prove a cluster deployment.
 
-**Start here:** [architecture](docs/ARCHITECTURE.md),
-[bootstrap](docs/BOOTSTRAP.md), [application handoff](docs/APP_INTEGRATION.md),
-[training](docs/TRAINING.md), [versioning](docs/VERSIONING.md),
-[secrets](docs/SECRETS.md), [recovery](docs/RECOVERY.md).
+**Start here:** [docs index](docs/README.md), [architecture](docs/architecture/ARCHITECTURE.md),
+[bootstrap](docs/operations/BOOTSTRAP.md), [application handoff](docs/handoffs/APP_INTEGRATION.md),
+[training](docs/operations/TRAINING.md), [versioning](docs/architecture/VERSIONING.md),
+[secrets](docs/operations/SECRETS.md), [recovery](docs/operations/RECOVERY.md).
 
 Kafka handoff now follows application1.4 wire freeze with the shared Python SDK;
-see [Kafka contracts and owners](docs/KAFKA.md). This is a scoped Kafka update,
+see [Kafka contracts and owners](docs/handoffs/KAFKA.md). This is a scoped Kafka update,
 not a claim that all platform/runtime metadata migrated to1.4.
 
 MLflow image source/local dev/publisher now live in `MaintAI/ml-service/mlflow/`.
 This repo keeps its production deployment/config and verifies the app-signed
 digest; GitOps publication is automation-only. See
-[MLflow image migration](docs/MLFLOW_IMAGE_MIGRATION.md) for signer/IAM cutover
+[MLflow image migration](docs/handoffs/MLFLOW_IMAGE_MIGRATION.md) for signer/IAM cutover
 and remaining activation inputs. No MLflow image or workload is enabled here.
 
 ```text
-applications/                 Argo CD AppProject/add-on/child Application sources
+applications/                 Argo CD AppProject/add-on/local/child Application sources
+base/                         Pure declarative Kustomize workload bases (12 services)
+bootstrap/                    Root Application bootstraps for local & production
+docs/                         Organized documentation (architecture, operations, handoffs, locks)
 platform/                     Kafka, secrets, storage, monitoring and MLflow
-workloads/                    13 application runtime manifest packages
-config/                       versioned component/protocol/access/quality policies
-state/production/             reviewed desired image/model/platform state
-environments/production/      active Kustomize roots, initially workloads disabled
-contracts/                    neutral platform, workload, dataset and model schemas
-automation/                   identity checks, renderers, signatures, PR/recovery
-runtime/                      platform helper image, artifact downloader, training ledger
-integrations/MaintAI/         app CI/schema templates; not installed into the app
-operations/                   manual DB bootstrap/owner migrations; outside Argo roots
-versions/                     chart/base-image pins and immutable contract hashes
-.github/workflows/            gated PR receivers, image publication and future CI
+workloads/                    Component patches & runtime overlays
+config/                       Versioned component/protocol/access/quality/local locks
+environments/{local,production}/  Active Kustomize roots (local k3d vs AWS production)
+contracts/                    Neutral platform, workload, dataset, model & local schemas
+scripts/                      Automation, renderers, localdev release/checks & unit tests
+runtime/                      Platform helper image, artifact downloader, training ledger
+integrations/MaintAI/         App CI/schema templates; not installed into the app
+operations/                   Manual DB bootstrap/owner migrations; outside Argo roots
+versions/                     Chart/base-image pins and immutable contract hashes
+.github/workflows/            CI checks, gated PR receivers and image publication
 ```
 
 Production is the only deployment environment; no fictional staging is added.
@@ -50,17 +52,15 @@ DB bootstrap/migrations, TLS CA and resolved protocol metadata.
 
 Iris patterns reused: Terraform/Argo ownership, neutral release intents, receiver-
 owned PRs, protected main, immutable artifacts and independent lifecycle stages.
-Reference main commits are captured in [reference-lock](docs/reference-lock.json).
+Reference main commits are captured in [reference-lock](docs/locks/reference-lock.json).
 This new code does not reuse the old underscore deployment folders as active state.
 
-Đã chạy demo local ngày 30/10/2026 từ nhánh `demo/local-k3d`. Xem
-[báo cáo desired state và kết quả thực](docs/LOCAL_DEMO_RUN_2026-10-30.md);
-không suy kết quả local thành production readiness hoặc chức năng Copilot M7.
+Đã chạy demo local trên `maintai-local` (xem báo cáo thực thi tại [`Maint-infrastructure/docs/demos/LOCAL_DEMO_RUN_2026-10-30.md`](../Maint-infrastructure/docs/demos/LOCAL_DEMO_RUN_2026-10-30.md)), và đã hợp nhất kiến trúc Pure Declarative (`CoreDNS` + `cert-manager` + `main` tracking); không suy kết quả local thành production readiness hoặc chức năng Copilot M7.
 
 ## Application alignment — PROC-ORDER-01,2026-10-23
 
-The current app design is [v1.4 + PROC-ORDER-01](../MaintAI/docs/PROCESSING_CONCURRENCY_AND_ORDERING.md),
-with [SDK0.2/bundle1.1 implementation evidence](../MaintAI/docs/PROCESSING_ORDERING_IMPLEMENTATION_REPORT.md).
+The current app design is [v1.4 + PROC-ORDER-01](../MaintAI/docs/subsystems/PROCESSING_CONCURRENCY_AND_ORDERING.md),
+with [SDK0.2/bundle1.1 implementation evidence](../MaintAI/docs/reports/PROCESSING_ORDERING_IMPLEMENTATION_REPORT.md).
 This supplements the existing platform1.3.1 baseline; it is not a full platform
 migration or deployment. Keyed queues/offset coordinator stay inside Worker;
 ordered key cursor stays with Relay. No new workload/database/UI is introduced.
@@ -75,11 +75,6 @@ platform and app desired state. AWS production sources remain independently
 versioned. Source is published and checked by [GitHub CI](https://github.com/chiendz11/MaintAI-gitops/actions/workflows/ci.yml).
 Image builds, Argo synchronization and a full local demo require separate runtime evidence.
 
-Start with [local development](docs/LOCAL_DEVELOPMENT.md), [migration](docs/LOCAL_MIGRATION.md) and [versioning](docs/LOCAL_VERSIONING.md).
+Start with [local development](docs/operations/LOCAL_DEVELOPMENT.md) (bao gồm cấu trúc pure declarative, M5/M6 và chuyển đổi từ `MaintAI-k3d`) and [versioning](docs/architecture/VERSIONING.md).
 
-See [source synchronization and publication](docs/LOCAL_SOURCE_SYNC.md) for the
-current app revision, ML/RAG runtime inputs and the distinction between source
-CI and running the demo.
-
-[App-owned risk policy](docs/LOCAL_RISK_POLICY.md): GitOps chọn source/version/hash
-và tạo ConfigMap, không quản lý một bản ngưỡng độc lập trong private fixtures.
+See [source synchronization, publication and RISK-POLICY-01](docs/operations/LOCAL_SOURCE_SYNC.md) for the current app revision (`e67d42d`), `processing-risk-policy` ConfigMap và trình tự vận hành.

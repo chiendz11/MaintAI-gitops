@@ -4,8 +4,8 @@
 SDK0.2.0/bundle1.1.0/Processing transport0.1.0. Platform baseline1.3.1 và active
 runtime-config2.0.0 vẫn giữ version riêng. Đây không là bằng chứng rollout.
 
-Nguồn chuẩn: [app decision](../../MaintAI/docs/PROCESSING_CONCURRENCY_AND_ORDERING.md),
-[implementation report](../../MaintAI/docs/PROCESSING_ORDERING_IMPLEMENTATION_REPORT.md),
+Nguồn chuẩn: [app decision](../../../MaintAI/docs/subsystems/PROCESSING_CONCURRENCY_AND_ORDERING.md),
+[implementation report](../../../MaintAI/docs/reports/PROCESSING_ORDERING_IMPLEMENTATION_REPORT.md),
 Contracts §42, Guide §53. Người1 làm app/SQL/callbacks; Người2 thống nhất ML budget;
 Người4 làm Kafka/DB/platform/config/metrics. RAG ngoài critical alert path.
 
@@ -31,10 +31,10 @@ Business inbox/CAS/projection guards và alert lifecycle vẫn bắt buộc.
 
 | Artifact | Vai trò |
 | --- | --- |
-| [Worker config3 schema](../contracts/runtime-config/processing-worker-3.0.0.schema.json) | Keyed mode, factory/callback identities, capacity/deadline budgets |
-| [Relay config3 schema](../contracts/runtime-config/processing-outbox-relay-3.0.0.schema.json) | Ordered mode và batch size, kế thừa lease/poll/Kafka config |
-| [Inactive profile](../config/processing-ordering.json) | Exact schema hashes, SDK/bundle pins, pending activation gates |
-| [Kafka pin](../config/kafka-contracts.json) | Exact bundle1.1 manifest/hash, package0.2, source SHA chưa phát hành |
+| [Worker config3 schema](../../contracts/runtime-config/processing-worker-3.0.0.schema.json) | Keyed mode, factory/callback identities, capacity/deadline budgets |
+| [Relay config3 schema](../../contracts/runtime-config/processing-outbox-relay-3.0.0.schema.json) | Ordered mode và batch size, kế thừa lease/poll/Kafka config |
+| [Inactive profile](../../config/processing-ordering.json) | Exact schema hashes, SDK/bundle pins, pending activation gates |
+| [Kafka pin](../../config/kafka-contracts.json) | Exact bundle1.1 manifest/hash, package0.2, source SHA chưa phát hành |
 | versions/contracts.lock.json | Giữ mọi hash2.0 cũ, thêm immutable3.0 schema hashes |
 | integrations/MaintAI/release/contracts/ | Byte-identical copies của hai schema3 cho bàn giao tương lai |
 
