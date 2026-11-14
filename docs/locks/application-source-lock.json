@@ -7,7 +7,7 @@
     "api-contract-decisions.md": "153aea7b6f92e25fd11e9689092711f9806c59b0204099ae807e113fa830037b"
   },
   "source_checkout_has_uncommitted_changes": true,
-  "simulator_ui_override": "docs/ARCHITECTURE.md",
+  "simulator_ui_override": "docs/architecture/ARCHITECTURE.md",
   "hash_semantics": "Root captured_on/sha256/uncommitted flag preserve the original imported source evidence, including retired filenames. active_application_documents records current committed app bytes at its exact source_git_sha; no image/deployment claim.",
   "active_application_documents": {
     "captured_on": "2026-10-30",

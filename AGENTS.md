@@ -2,17 +2,17 @@
 
 User requested code only: do not run tests, builds, Terraform init/validate/plan/apply,
 Kustomize/Helm render checks, Docker, AWS/Kubernetes mutations or GitHub workflows
-without a later request. Read README.md, docs/ARCHITECTURE.md, docs/VERSIONING.md
+without a later request. Read README.md, docs/architecture/ARCHITECTURE.md, docs/architecture/VERSIONING.md
 and contracts/ before changing code. This initial delivery is unvalidated.
 
 Platform baseline remains revision1.3.1; the application target is now
-../MaintAI/docs/MaintAI_System_Contracts_v1_4_DEPLOYMENT_PROVENANCE.md.
+../MaintAI/docs/architecture/MaintAI_System_Contracts_v1_4_DEPLOYMENT_PROVENANCE.md.
 Kafka wire freeze: ../MaintAI/contracts/kafka/README.md and config/kafka-contracts.json;
-see docs/KAFKA.md. This is not a full platform/runtime1.4 migration.
+see docs/handoffs/KAFKA.md. This is not a full platform/runtime1.4 migration.
 The user's 2026-10-18 decision
 overrides simulator routing: a separate Simulator UI talks to Sensor Simulator
 Control API; Business API/main frontend do not proxy simulator control. Record
-this in docs/ARCHITECTURE.md rather than silently rewriting supplied source docs.
+this in docs/architecture/ARCHITECTURE.md rather than silently rewriting supplied source docs.
 Terraform owns AWS/EKS and Argo CD bootstrap; GitOps owns in-cluster add-ons and
 application workloads. Keep data ownership, outbox/inbox and ordering semantics.
 Drift is outside the alert path and never retrains or promotes a model.
@@ -29,17 +29,17 @@ cross-repository change. Leave old underscore folders and Iris references alone.
 
 ## PROC-ORDER-01 — current app source, not automatic platform activation
 
-Read ../MaintAI/docs/PROCESSING_CONCURRENCY_AND_ORDERING.md, Contracts §42,
-Guide §53 and ../MaintAI/docs/PROCESSING_ORDERING_IMPLEMENTATION_REPORT.md.
+Read ../MaintAI/docs/subsystems/PROCESSING_CONCURRENCY_AND_ORDERING.md, Contracts §42,
+Guide §53 and ../MaintAI/docs/reports/PROCESSING_ORDERING_IMPLEMENTATION_REPORT.md.
 SDK0.2.0/bundle1.1.0 have keyed/fenced/ordered source and tests; full app/prod
-integration remains pending. docs/PROCESSING_ORDERING_HANDOFF.md records owner,
+integration remains pending. docs/handoffs/PROCESSING_ORDERING_HANDOFF.md records owner,
 config3/schema hashes and cutover. Do not add new keys to frozen config2.0.0,
 claim new services from internal modules, or enable workloads from the inactive
 profile. Keep real source SHA/image/migration/health reviews as separate gates.
 
 ## Local k3d + Argo CD — current ownership
 
-Read local/README.md in infrastructure or docs/LOCAL_DEVELOPMENT.md in GitOps,
+Read local/README.md in infrastructure or docs/operations/LOCAL_DEVELOPMENT.md in GitOps,
 plus the local contract/catalog/source locks before local changes. The current
 user authorized implementation in both platform repositories. Infrastructure
 owns cluster/private kubeconfig/secrets/Argo bootstrap; GitOps owns local platform
@@ -62,5 +62,5 @@ merged application, pinning ML/RAG bases in the app, and committing/pushing both
 platform repositories to public remotes. This supersedes the initial no-commit/
 no-push scope for this delivery. Push-triggered source CI is part of publication;
 no cloud provisioning, cluster mutation or workload activation was requested.
-The local app-source lock and LOCAL_SOURCE_SYNC.md record the reviewed commit.
+The local app-source lock and docs/operations/LOCAL_SOURCE_SYNC.md record the reviewed commit.
 Do not replace pending model/image/runtime evidence with example values.
