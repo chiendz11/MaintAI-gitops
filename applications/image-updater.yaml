@@ -1,0 +1,46 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: maintai-production-image-updater
+  namespace: argocd
+spec:
+  commonUpdateSettings:
+    updateStrategy: digest
+    allowTags: regexp:^v[0-9]+\.[0-9]+\.[0-9]+$
+    ignoreTags:
+    - latest
+    - NOT_BUILT
+  writeBackConfig:
+    method: git:secret:argocd-image-updater-git-creds
+    gitConfig:
+      repository: https://github.com/chiendz11/MaintAI-gitops.git
+      branch: main
+      writeBackTarget: kustomization
+      pullRequest:
+        github: {}
+        labels:
+        - automated
+        - production-release
+  applicationRefs:
+  - namePattern: maintai-workloads
+    images:
+    - alias: business-api
+      imageName: ghcr.io/chiendz11/maintai-business-api
+    - alias: business-consumer
+      imageName: ghcr.io/chiendz11/maintai-business-consumer
+    - alias: frontend
+      imageName: ghcr.io/chiendz11/maintai-frontend
+    - alias: ingestion-api
+      imageName: ghcr.io/chiendz11/maintai-ingestion-api
+    - alias: processing-outbox-relay
+      imageName: ghcr.io/chiendz11/maintai-processing-outbox-relay
+    - alias: processing-read-api
+      imageName: ghcr.io/chiendz11/maintai-processing-read-api
+    - alias: processing-worker
+      imageName: ghcr.io/chiendz11/maintai-processing-worker
+    - alias: sensor
+      imageName: ghcr.io/chiendz11/maintai-sensor
+    - alias: simulator-ui
+      imageName: ghcr.io/chiendz11/maintai-simulator-ui
+    - alias: storage-consumer
+      imageName: ghcr.io/chiendz11/maintai-storage-consumer

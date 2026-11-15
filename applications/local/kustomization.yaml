@@ -5,3 +5,4 @@ resources:
 - platform.yaml
 - observability.yaml
 - apps.yaml
+- image-updater.yaml

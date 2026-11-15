@@ -1,28 +1,27 @@
-# Versioning and immutable provenance (MaintAI-gitops)
+# Versioning and Immutable Provenance (`MaintAI-gitops`)
 
-Tài liệu này quy định cơ chế khóa phiên bản và xuất xứ bất biến cho toàn bộ **Desired State (Production & Local)** trong `MaintAI-gitops`.
+Tài liệu này quy định cơ chế khóa phiên bản và cập nhật image cho **Desired State (Production & Local)** trong `MaintAI-gitops`.
 
 ---
 
-## 1. Production / Platform Provenance & Contracts
+## 1. Production Provenance & Immutability
 
-- Repository version: `VERSION` (initial `0.1.0`).
+- Repository version: [`VERSION`](../../VERSION).
 - Platform architectural baseline: `maintai-1.3.1+simulator-ui.1`; application target contracts: `1.4.0` + `PROC-ORDER-01/1.0.0`.
-- Platform handoff schema: **2.0.0** (`contracts/platform-contract-v2.schema.json`); workload/model/dataset/recovery intents: `1.0.0` schemas.
-- Runtime config schemas: **2.0.0** (active/frozen) và **3.0.0** (opt-in `PROC-ORDER-01` trong `config/processing-ordering.json`), bất biến theo filename và SHA-256 trong `versions/contracts.lock.json`.
-- Event contracts: `config/kafka-contracts.json` khóa manifest và bundle hashes (`MaintAI/contracts/kafka/`). Xem [Kafka](../handoffs/KAFKA.md).
-- App image (Production): khóa theo `repository@sha256`, source Git SHA, owner/signature workflow. Nhóm Processing (`worker`, `read-api`, `outbox-relay`) và Business (`api`, `consumer`) cập nhật atomic theo image group.
-- **MLflow image (`MLFLOW-IMAGE-01`):** Dù platform giữ `platform/mlops/`, Dockerfile, pins và keyless publisher thuộc `MaintAI/ml-service/mlflow/` (`maintai-publish.yml`). GitOps chỉ pin signed digest do app phát hành. Xem [MLflow migration](../handoffs/MLFLOW_IMAGE_MIGRATION.md).
-- Chart/provider versions và S3 artifacts (`model`, `preprocessor`, `drift_reference`, `metadata`, `evaluation_report`): khóa chính xác pin, `S3 VersionId + SHA-256` (ETag không thay thế checksum). Không mutate in-place; thay đổi phải đi qua PR mới.
+- App image (Production): khóa theo immutable digest (`updateStrategy: digest` hoặc release tags `^v[0-9]+\.[0-9]+\.[0-9]+$` trong [`applications/image-updater.yaml`](../../applications/image-updater.yaml)). Nhóm Processing (`worker`, `read-api`, `outbox-relay`) và Business (`api`, `consumer`) dùng chung tên image của từng group để rollout đồng bộ qua cùng một PR.
+- **MLflow image (`MLFLOW-IMAGE-01`):** Source và Dockerfile thuộc `MaintAI/ml-service/mlflow/`; GitOps chỉ quản lý manifest K8s dưới `platform/mlops/`. Xem [MLflow migration](../handoffs/MLFLOW_IMAGE_MIGRATION.md).
+- Chart versions và S3 model/dataset artifacts: khóa tường minh version/digest; không auto-promote hoặc mutate artifact in-place.
 
 ---
 
-## 2. Local Environment Versioning (`k3d` + Declarative Overlays)
+## 2. Local Environment Versioning (`k3d` + Argo CD Image Updater)
 
-Phần local được phát triển và khóa độc lập với frozen production contracts (`versions/local-production-baseline.lock.json` xác nhận thay đổi local không tự động sửa AWS/production bytes):
+Môi trường local (`environments/local/`) tách biệt hoàn toàn khỏi production (`environments/production/`):
 
-- **App Source Lock & Policy:** `config/local/app-source.lock.json` khóa commit SHA của `chiendz11/MaintAI` (hiện đồng bộ tại **`ee488adc7707dab61b86538e1a1f0e05b7adf4b5`**, `main`) kèm SHA-256 toàn bộ Dockerfiles, interfaces và config schemas. `config/local/risk-policy.lock.json` khóa `demo-risk-v1` trực tiếp từ `MaintAI/processing/config/risk-policies/`. Chi tiết quy trình đồng bộ xem [LOCAL_SOURCE_SYNC.md](../operations/LOCAL_SOURCE_SYNC.md).
-- **Local Contract Locks:** `versions/local-contracts.lock.json` bảo vệ `contracts/local/*.schema.json` (`1.0.0`).
-- **Actual Local Image Receipts:** Bao gồm Docker image ID, content-derived alias, Git commit, `dirty` flag, source snapshot SHA-256, Dockerfile SHA-256 và imported context (chỉ dùng cho local `k3d`; không dùng tag `:dev` trôi nổi và không thay thế ECR signature cho production).
-- **Kustomize Content Hashes:** `configMapGenerator` tự động sinh suffix hash cho cấu hình app/policy (`processing-risk-policy` v.v.), đảm bảo Pod tự động rollout khi nội dung config hoặc policy thay đổi.
-- **Tách biệt mức độ kiểm chứng:** CI PR (`ci.yml`) kiểm tra offline policy, unit tests (`scripts/tests/`), app source SHA và `kubectl kustomize` render cho cả local & production roots; dispatch ACK ≠ PR merged ≠ Argo convergence ≠ serving a validated model.
+- **Immutable Image Tags trong Kustomize:** [`environments/local/apps/kustomization.yaml`](../../environments/local/apps/kustomization.yaml) định nghĩa khối `images:` chuẩn Kustomize gắn tag SHA commit (`sha-<git-sha>` hoặc pinned tag) — cấm `:latest` trong `environments/local/` (kiểm tra tự động bởi `.github/workflows/ci.yml`).
+- **Automated Image PR Loop (`Argo CD Image Updater v1.5.0`):**
+  - [`applications/local/image-updater.yaml`](../../applications/local/image-updater.yaml) cấu hình `ImageUpdater` (`argocd-image-updater.argoproj.io/v1alpha1`) theo dõi các image `ghcr.io/chiendz11/maintai-*` theo pattern `^sha-[0-9a-f]{40}$` (`updateStrategy: newest-build`).
+  - Khi phát hiện tag `sha-*` mới trên GHCR, controller ghi thay đổi vào `environments/local/apps/kustomization.yaml` trên một nhánh tạm (`image-updater-...`) và **tạo Pull Request vào `main`** (`pullRequest.github: {}`), tuyệt đối không commit trực tiếp vào `main`.
+  - Fine-grained PAT phục vụ tạo PR được nạp vào Secret `argocd-image-updater-git-creds` trong namespace `argocd`, tách khỏi Git.
+- **Kustomize Content Hashes:** `configMapGenerator` tự động sinh suffix hash cho cấu hình/policy (`processing-risk-policy`), đảm bảo Pod rollout ngay khi nội dung config đổi.
+- **Tách biệt mức độ kiểm chứng:** CI PR (`ci.yml`) chạy `kubectl kustomize` trên toàn bộ 18 Kustomize roots, `kubeconform` schema validation và policy guards (`Secret`, `:latest`, link integrity). CI xanh không đồng nghĩa với Argo CD `Synced/Healthy` hay E2E cluster tests.

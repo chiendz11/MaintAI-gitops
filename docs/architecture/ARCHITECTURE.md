@@ -1,13 +1,14 @@
 # MaintAI Desired State & GitOps Architecture (`MaintAI-gitops`)
 
-Tài liệu này mô tả kiến trúc trạng thái khai báo (Kubernetes Desired State) do `MaintAI-gitops` quản lý: phân tách ranh giới `base/` + `environments/{local,production}`, luồng dữ liệu qua các dịch vụ, ranh giới 5 databases & Kafka, `UI-01`, `PROC-ORDER-01` và triển khai `MLflow` / `Shadow ML`.
+Tài liệu này mô tả kiến trúc trạng thái khai báo (Kubernetes Desired State) do `MaintAI-gitops` quản lý: phân tách ranh giới `base/` + `environments/{local,production}`, luồng dữ liệu qua các dịch vụ, ranh giới 5 databases & Kafka, `UI-01`, `PROC-ORDER-01`, `MLflow` / `Shadow ML` và tự động cập nhật image qua Argo CD Image Updater.
 
 ---
 
-## 1. Cấu trúc Kustomize & Ranh giới 2 Repository Hạ tầng
+## 1. Cấu trúc Kustomize & Ranh giới 3 Repository
 
-- **`MaintAI-gitops` (Desired State trong Kubernetes):** Sở hữu `base/` (12 workload base manifests), `applications/` & `applications/local/` (Argo CD `AppProject` và `Application` cho add-ons/workloads/observability/local), `platform/` (Strimzi Kafka, External Secrets, MinIO/Storage, MLflow, NetworkPolicies), `config/` & `contracts/` (runtime config schemas `2.0.0`/`3.0.0`, policy & source locks), `environments/local/` (chạy thực trên `k3d`) và `environments/production/` (desired state AWS EKS, workloads mặc định `enabled=false` đến khi có production image digests & approval).
-- **`Maint-infrastructure` (Infrastructure & Bootstrap):** Sở hữu Terraform AWS (`bootstrap`, `domain`, `platform`, `argocd`), Terraform Local (`terraform/local/`), `k3d` cluster, LocalStack Secrets Manager, kubeconfig cô lập và xuất `platform-contract-v2` cho GitOps tiêu thụ. Hai repo không apply cạnh tranh cùng một resource.
+- **`MaintAI` (Application & Images):** Sở hữu mã nguồn microservices, Dockerfiles, contracts (`1.4.0`), risk policies (`processing/config/risk-policies/`), DB migrations và GitHub Actions workflow build/push container images lên GHCR/ECR. Không trực tiếp commit vào repo GitOps.
+- **`MaintAI-gitops` (Desired State trong Kubernetes):** Sở hữu Pure Declarative YAML gồm `base/` (12 workload base manifests), `applications/` & `applications/local/` (Argo CD `AppProject`, child `Application`, `ImageUpdater` CRs), `platform/` & `local/` (Strimzi Kafka / local Kafka KRaft, External Secrets, MinIO/Storage, MLflow, Observability), `environments/local/` (chạy thực trên `k3d`) và `environments/production/` (desired state AWS EKS, workloads mặc định chưa kích hoạt đến khi có production ECR digests & approval).
+- **`Maint-infrastructure` (Infrastructure & Bootstrap):** Sở hữu Terraform AWS (`bootstrap`, `domain`, `platform`, `argocd`), Terraform Local (`terraform/local/`), cụm `k3d`, LocalStack Secrets Manager, kubeconfig cô lập, cài đặt Argo CD + Argo CD Image Updater và nạp Secret Fine-grained PAT (`argocd-image-updater-git-creds`).
 
 ---
 
@@ -53,24 +54,24 @@ Một cụm PostgreSQL 17 logic chứa 5 databases độc lập, mỗi owner có
 
 ---
 
-## 4. Bản đồ 13+ Workloads Ứng dụng & Nền tảng
+## 4. Bản đồ Workloads Ứng dụng & Nền tảng
 
-| Runtime | Loại Kubernetes | Image Group | Database / Storage |
+| Runtime | Loại Kubernetes | Image Name | Database / Storage |
 | :--- | :--- | :--- | :--- |
-| `ingestion-api` | Deployment | `ingestion-api` | Kafka producer (no DB) |
-| `processing-worker` / `read-api` / `outbox-relay` | 3 Deployments | `processing` | `processing_db` |
-| `storage-consumer` | Deployment | `storage-consumer` | S3 / MinIO (`maintai-raw*`) |
-| `business-api` / `business-consumer` | 2 Deployments | `business-backend` | `business_db` |
-| `ml-service` & `ml-service-shadow` | 2 Deployments | `ml-service` | Local/S3 bundle (`logreg-baseline-v0` / `hgb-candidate`) |
-| `rag-service` | Deployment | `rag-service` | `knowledge_db` (`pgvector`) + cache PVC |
-| `frontend` | Deployment | `frontend` | Static Nginx + runtime config |
-| `simulator-ui` | Deployment | `simulator-ui` | Static Nginx + runtime config |
-| `sensor` | Deployment (`Recreate`, 1 replica) | `sensor` | Durable PVC (SQLite state/spool) |
-| `drift-worker` | CronJob | `drift-worker` | `drift_db` + S3 |
-| `training` | Argo Workflow Task | `training` | MLflow HTTP API + S3 |
+| `ingestion-api` | Deployment | `maintai-ingestion-api` | Kafka producer (no DB) |
+| `processing-worker` / `read-api` / `outbox-relay` | 3 Deployments | `maintai-processing` | `processing_db` |
+| `storage-consumer` | Deployment | `maintai-storage-consumer` | S3 / MinIO (`maintai-raw*`) |
+| `business-api` / `business-consumer` | 2 Deployments | `maintai-business-backend` | `business_db` |
+| `ml-service` & `ml-service-shadow` | 2 Deployments | `maintai-ml-service` | Local/S3 bundle (`logreg-baseline-v0` / `hgb-candidate`) |
+| `rag-service` | Deployment | `maintai-rag-service` | `knowledge_db` (`pgvector`) + cache PVC |
+| `frontend` | Deployment | `maintai-frontend` | Static Nginx + runtime config |
+| `simulator-ui` | Deployment | `maintai-simulator-ui` | Static Nginx + runtime config |
+| `sensor` | Deployment (`Recreate`, 1 replica) | `maintai-sensor` | Durable PVC (SQLite state/spool) |
+| `drift-worker` | CronJob | `maintai-drift-worker` | `drift_db` + S3 |
+| `training` | Argo Workflow Task | `maintai-training` | MLflow HTTP API + S3 |
 
 - **Kiến trúc Shadow Rollout (`ml-service-shadow`):** Triển khai pod shadow (`SERVICE_ROLE=shadow`) song song với Champion; Processing/proxy nhân bản traffic (`Traffic Mirroring`) để đánh giá thực nghiệm mà không ảnh hưởng kết quả dự báo chính và cảnh báo người dùng.
-- **MLflow Image Ownership:** Source Dockerfile và publisher workflow thuộc `MaintAI/ml-service/mlflow/` (`maintai-publish.yml`); GitOps chỉ quản lý Deployment/IRSA/config dưới `platform/mlops/` và verify signed digest. Chi tiết cutover xem [MLFLOW_IMAGE_MIGRATION.md](../handoffs/MLFLOW_IMAGE_MIGRATION.md).
+- **MLflow Image Ownership:** Source Dockerfile thuộc `MaintAI/ml-service/mlflow/`; GitOps quản lý Deployment/IRSA/config dưới `platform/mlops/` (production) và `environments/local/apps/mlflow.yaml` (local). Chi tiết xem [MLFLOW_IMAGE_MIGRATION.md](../handoffs/MLFLOW_IMAGE_MIGRATION.md).
 
 ---
 
@@ -78,4 +79,4 @@ Một cụm PostgreSQL 17 logic chứa 5 databases độc lập, mỗi owner có
 
 - **At-least-once & Idempotency:** Worker commit `processing_db` + outbox trước khi commit Kafka offset; Relay chỉ đánh dấu published sau broker ACK; Business inbox + projection/alert + audit commit trước offset; Storage commit sau khi object + manifest bền vững. SSE reconnect dùng REST snapshot resync (PG NOTIFY không phải replay log).
 - **HTTP & Probes:** Mọi HTTP service có `readinessProbe`/`startupProbe`/`livenessProbe`, rolling update `maxUnavailable: 0, maxSurge: 1` kết hợp `PodDisruptionBudget` và Zero-Trust `NetworkPolicy`.
-- **Keyed Processing (`PROC-ORDER-01`):** Worker xử lý FIFO theo từng `machine_id`, song song nhiều máy trong budget cấu hình và chỉ commit safe completed prefix mỗi partition; Relay chỉ gửi head chưa published theo key/topic. Cấu hình `config3.0.0` cho production được quản lý riêng biệt trong `contracts/runtime-config/` và [PROCESSING_ORDERING_HANDOFF.md](../handoffs/PROCESSING_ORDERING_HANDOFF.md) — không chèn field mới vào schema `2.0.0` đã freeze.
+- **Keyed Processing (`PROC-ORDER-01`):** Worker xử lý FIFO theo từng `machine_id`, song song nhiều máy trong budget cấu hình và chỉ commit safe completed prefix mỗi partition; Relay chỉ gửi head chưa published theo key/topic. Chi tiết cutover cấu hình `PROC-ORDER-01` xem [PROCESSING_ORDERING_HANDOFF.md](../handoffs/PROCESSING_ORDERING_HANDOFF.md).
