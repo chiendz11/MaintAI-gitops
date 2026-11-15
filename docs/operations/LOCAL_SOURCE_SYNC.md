@@ -17,7 +17,7 @@ Thay cho các script release/commit chéo repo trước đây, luồng cập nh�
 1. **Authentication:** Operator tạo một GitHub **Fine-grained Personal Access Token (PAT)** chỉ cấp quyền:
    - Repository access: `Only select repositories` → `chiendz11/MaintAI-gitops`
    - Permissions: `Contents: Read and write` + `Pull requests: Read and write`
-   Token được nạp trực tiếp vào Secret `argocd-image-updater-git-creds` trong namespace `argocd` qua lệnh `python -m localdev image-updater-pat` (từ `Maint-infrastructure`), **không bao giờ lưu trong Git**.
+   Token được nạp vào LocalStack Secrets Manager (`maintai/local/gitops`) và lưu private ở `local/.local/secrets/` (`0600`) qua lệnh `python -m localdev image-updater-pat` (từ `Maint-infrastructure`), sau đó ESO `ExternalSecret` (`applications/local/image-updater-git-creds.yaml`) đồng bộ thành Secret `argocd-image-updater-git-creds` trong namespace `argocd`, **không bao giờ lưu trong Git**.
 2. **Watch & Write-back:** [`applications/local/image-updater.yaml`](../../applications/local/image-updater.yaml) cấu hình `ImageUpdater` (`v1alpha1`) theo dõi `maintai-local-apps`, dùng chiến lược `newest-build` khớp pattern `^sha-[0-9a-f]{40}$` với `writeBackConfig.method: git:secret:argocd-image-updater-git-creds` và `pullRequest.github: {}`.
 3. **Review Gate:** Mọi cập nhật `images:` trong [`environments/local/apps/kustomization.yaml`](../../environments/local/apps/kustomization.yaml) đều đi qua **Pull Request** với đầy đủ CI checks (`kubectl kustomize` + `kubeconform`), đảm bảo nhánh `main` luôn sạch và có thể rollback qua `git revert`.
 

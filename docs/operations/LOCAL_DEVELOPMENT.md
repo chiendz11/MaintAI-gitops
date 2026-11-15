@@ -15,7 +15,7 @@ Tài liệu này mô tả cấu trúc desired state local trong `MaintAI-gitops`
 | [`environments/local/apps/`](../../environments/local/apps/) | Argo source path 3: Overlays ứng dụng, PreSync DB Migration Hooks, ExternalSecrets (ESO), Ingress, HPA, PDB, NetworkPolicies, `ml-service-shadow`, `images` tags trong `kustomization.yaml`. |
 
 **Ranh giới sở hữu:**
-- **Infrastructure (`Maint-infrastructure`)** tạo cụm `k3d`, kubeconfig cô lập, LocalStack secrets, ESO, Ingress-NGINX, `cert-manager`, Argo CD và Argo CD Image Updater (`v1.5.0`) + Secret PAT (`argocd-image-updater-git-creds`).
+- **Infrastructure (`Maint-infrastructure`)** tạo cụm `k3d`, kubeconfig cô lập, LocalStack secrets (gồm `maintai/local/gitops`), ESO (`aws-secrets-manager`, `aws-secrets-manager-argocd`), Ingress-NGINX, `cert-manager`, Argo CD và Argo CD Image Updater (`v1.5.0`). `argocd/argocd-image-updater-git-creds` được sync declaratively bởi `ExternalSecret` (`applications/local/image-updater-git-creds.yaml`).
 - **GitOps (`MaintAI-gitops`)** giữ toàn bộ desired state K8s trong cluster dưới dạng Pure Kustomize YAML (`selfHeal: true`).
 - Platform sử dụng sync waves theo dependency: Namespace (`-60`) → ConfigMaps (`-50`) → Services (`-40`) → Datastores/Keycloak (`-30`) → TLS/Gateway (`-20`) → Bootstrap Jobs (`-10`).
 

@@ -1,0 +1,22 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: argocd-image-updater-git-creds
+  namespace: argocd
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-secrets-manager-argocd
+  target:
+    name: argocd-image-updater-git-creds
+    creationPolicy: Owner
+  data:
+  - secretKey: username
+    remoteRef:
+      key: maintai/local/gitops
+      property: username
+  - secretKey: password
+    remoteRef:
+      key: maintai/local/gitops
+      property: password
