@@ -18,6 +18,7 @@ Tài liệu quản lý Desired State (`AWS Production` & `Local k3d + Argo CD`) 
 ### Architecture & Provenance
 - [ARCHITECTURE.md](architecture/ARCHITECTURE.md) — Topology Kustomize (`base/` + `environments/`), 13 workloads, `ml-service-shadow`, failure semantics & `UI-01`.
 - [VERSIONING.md](architecture/VERSIONING.md) — Quy ước tag/digest, Kustomize image overrides, Argo CD Image Updater strategy & phân tách kiểm chứng.
+- [GITOPS_BLUEPRINT.md](architecture/GITOPS_BLUEPRINT.md) — Tài liệu mẫu chuẩn (project-agnostic) để tái sử dụng kiến trúc Pure Declarative GitOps + Argo CD Image Updater cho các dự án khác.
 - [REFERENCES.md](architecture/REFERENCES.md) — Nguồn tham khảo kiến trúc Iris & tài liệu chuẩn Strimzi/EKS/Argo.
 
 ### Operations & Runbooks
