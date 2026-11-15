@@ -6,8 +6,17 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: alb
     nginx.ingress.kubernetes.io/proxy-body-size: "64m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: alb
+  tls:
+  - hosts:
+    - app.maintai.local
+    - simulator.maintai.local
+    - api.maintai.local
+    - ingest.maintai.local
+    - processing.maintai.local
+    secretName: maintai-ingress-tls
   rules:
   - host: app.maintai.local
     http:

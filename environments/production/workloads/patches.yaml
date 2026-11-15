@@ -1,0 +1,179 @@
+# Production overlay patches replacing local-only secrets, hostPaths, and initContainers.
+# Review and wire real ConfigMaps, IRSA serviceAccounts, and EFS/EBS PVCs before setting replicas > 0.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: business-api
+spec:
+  template:
+    spec:
+      volumes:
+      - name: tokens
+        secret:
+          secretName: REPLACE_WITH_SERVICE_TOKENS_SECRET
+          defaultMode: 288
+      - name: history-keys
+        secret:
+          secretName: processing-api-auth
+          defaultMode: 288
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: business-consumer
+spec:
+  template:
+    spec:
+      volumes:
+      - name: tokens
+        secret:
+          secretName: REPLACE_WITH_SERVICE_TOKENS_SECRET
+          defaultMode: 288
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingestion-api
+spec:
+  template:
+    spec:
+      volumes:
+      - name: tokens
+        secret:
+          secretName: REPLACE_WITH_SERVICE_TOKENS_SECRET
+          defaultMode: 288
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-service
+spec:
+  template:
+    spec:
+      initContainers: null
+      volumes:
+      - name: models
+        hostPath: null
+        emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processing-outbox-relay
+spec:
+  template:
+    spec:
+      volumes:
+      - name: tokens
+        secret:
+          secretName: REPLACE_WITH_SERVICE_TOKENS_SECRET
+          defaultMode: 288
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processing-read-api
+spec:
+  template:
+    spec:
+      volumes:
+      - name: tokens
+        secret:
+          secretName: REPLACE_WITH_SERVICE_TOKENS_SECRET
+          defaultMode: 288
+      - name: history-keys
+        secret:
+          secretName: processing-api-auth
+          defaultMode: 288
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processing-worker
+spec:
+  template:
+    spec:
+      initContainers: null
+      volumes:
+      - name: tokens
+        secret:
+          secretName: REPLACE_WITH_SERVICE_TOKENS_SECRET
+          defaultMode: 288
+      - name: oidc-registry
+        secret:
+          secretName: REPLACE_WITH_OIDC_REGISTRY_SECRET
+          defaultMode: 288
+      - name: oidc-ml
+        secret:
+          secretName: REPLACE_WITH_OIDC_ML_SECRET
+          defaultMode: 288
+      - name: fixtures
+        hostPath: null
+        emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rag-service
+spec:
+  template:
+    spec:
+      containers:
+      - name: rag-service
+        env:
+        - name: GROQ_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: llm-provider
+              key: api_key
+      volumes:
+      - name: embedding-cache
+        persistentVolumeClaim: null
+        emptyDir: {}
+      - name: datasets
+        hostPath: null
+        emptyDir: {}
+      - name: manuals
+        hostPath: null
+        emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor
+spec:
+  template:
+    spec:
+      initContainers: null
+      volumes:
+      - name: tls
+        secret:
+          secretName: aws-rds-ca
+          defaultMode: 288
+      - name: tokens
+        secret:
+          secretName: REPLACE_WITH_SERVICE_TOKENS_SECRET
+          defaultMode: 288
+      - name: datasets
+        hostPath: null
+        emptyDir: {}
+      - name: sensor-client
+        secret:
+          secretName: REPLACE_WITH_OIDC_SENSOR_SECRET
+          defaultMode: 288
+      - name: state
+        persistentVolumeClaim: null
+        emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-consumer
+spec:
+  template:
+    spec:
+      volumes:
+      - name: tokens
+        secret:
+          secretName: REPLACE_WITH_SERVICE_TOKENS_SECRET
+          defaultMode: 288
