@@ -21,7 +21,7 @@ Tài liệu này quy định cơ chế khóa phiên bản và xuất xứ bất 
 
 Phần local được phát triển và khóa độc lập với frozen production contracts (`versions/local-production-baseline.lock.json` xác nhận thay đổi local không tự động sửa AWS/production bytes):
 
-- **App Source Lock & Policy:** `config/local/app-source.lock.json` khóa commit SHA của `chiendz11/MaintAI` (hiện đồng bộ tại **`e67d42d0d2fd347c686a39928906c20b68f03992`**, `main`) kèm SHA-256 toàn bộ Dockerfiles, interfaces và config schemas. `config/local/risk-policy.lock.json` khóa `demo-risk-v1` trực tiếp từ `MaintAI/processing/config/risk-policies/`. Chi tiết quy trình đồng bộ xem [LOCAL_SOURCE_SYNC.md](../operations/LOCAL_SOURCE_SYNC.md).
+- **App Source Lock & Policy:** `config/local/app-source.lock.json` khóa commit SHA của `chiendz11/MaintAI` (hiện đồng bộ tại **`ee488adc7707dab61b86538e1a1f0e05b7adf4b5`**, `main`) kèm SHA-256 toàn bộ Dockerfiles, interfaces và config schemas. `config/local/risk-policy.lock.json` khóa `demo-risk-v1` trực tiếp từ `MaintAI/processing/config/risk-policies/`. Chi tiết quy trình đồng bộ xem [LOCAL_SOURCE_SYNC.md](../operations/LOCAL_SOURCE_SYNC.md).
 - **Local Contract Locks:** `versions/local-contracts.lock.json` bảo vệ `contracts/local/*.schema.json` (`1.0.0`).
 - **Actual Local Image Receipts:** Bao gồm Docker image ID, content-derived alias, Git commit, `dirty` flag, source snapshot SHA-256, Dockerfile SHA-256 và imported context (chỉ dùng cho local `k3d`; không dùng tag `:dev` trôi nổi và không thay thế ECR signature cho production).
 - **Kustomize Content Hashes:** `configMapGenerator` tự động sinh suffix hash cho cấu hình app/policy (`processing-risk-policy` v.v.), đảm bảo Pod tự động rollout khi nội dung config hoặc policy thay đổi.

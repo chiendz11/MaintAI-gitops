@@ -77,4 +77,4 @@ Image builds, Argo synchronization and a full local demo require separate runtim
 
 Start with [local development](docs/operations/LOCAL_DEVELOPMENT.md) (bao gồm cấu trúc pure declarative, M5/M6 và chuyển đổi từ `MaintAI-k3d`) and [versioning](docs/architecture/VERSIONING.md).
 
-See [source synchronization, publication and RISK-POLICY-01](docs/operations/LOCAL_SOURCE_SYNC.md) for the current app revision (`e67d42d`), `processing-risk-policy` ConfigMap và trình tự vận hành.
+See [source synchronization, publication and RISK-POLICY-01](docs/operations/LOCAL_SOURCE_SYNC.md) for the current app revision (`ee488ad`), `processing-risk-policy` ConfigMap và trình tự vận hành.

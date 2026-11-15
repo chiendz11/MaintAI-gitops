@@ -20,7 +20,7 @@ Hai bản lock ở 2 repo phải khớp nhau:
 - **GitOps:** `config/local/app-source.lock.json`
 - **Infrastructure:** `local/versions/app-source.lock.json`
 
-Lock hiện tại khóa **Git SHA `e67d42d0d2fd347c686a39928906c20b68f03992`** (`chiendz11/MaintAI`, nhánh `main` — tổng hợp đầy đủ M5 Alert Lifecycle, M6 History/Export + Catalog EOF fix `#40/#41`, CoreDNS networking `#42`, RAG Groq `#35`, ML Shadow `SERVICE_ROLE` & reproducible candidate bundle `#37/#39`), cùng SHA-256 của 40+ Dockerfiles, settings, contracts và policy files.
+Lock hiện tại khóa **Git SHA `ee488adc7707dab61b86538e1a1f0e05b7adf4b5`** (`chiendz11/MaintAI`, nhánh `main` — tổng hợp đầy đủ M5 Alert Lifecycle, M6 History/Export + Catalog EOF fix `#40/#41`, CoreDNS networking `#42`, RAG Groq `#35`, ML Shadow `SERVICE_ROLE` & reproducible candidate bundle `#37/#39`, Graceful Degradation UI & docs `#43/#44`), cùng SHA-256 của 40+ Dockerfiles, settings, contracts và policy files.
 
 **Quy tắc đồng bộ:**
 - GitHub Actions CI (`ci.yml`) ở cả `MaintAI-gitops` và `Maint-infrastructure` đều checkout chính xác SHA trong `app-source.lock.json` vào `.ci-app` và chạy `scripts/localdev/checks.py --app-root .ci-app` để kiểm tra từng byte hash.
@@ -32,7 +32,7 @@ Lock hiện tại khóa **Git SHA `e67d42d0d2fd347c686a39928906c20b68f03992`** (
 
 ### 3.1. Nguồn chuẩn và Lock GitOps
 - **Source chuẩn:** `MaintAI/processing/config/risk-policies/` (gồm JSON policy, JSON schema và catalog). Không chỉnh sửa hay tạo bản ngưỡng riêng trong `MaintAI-gitops` hoặc `Maint-infrastructure/local/.local/data/fixtures/`.
-- **Selector GitOps:** `config/local/risk-policy.lock.json` khóa `source_git_sha` (`e67d42d0d2fd347c686a39928906c20b68f03992`), `policy_version` (`demo-risk-v1`), `policy_path`, raw file SHA-256 và canonical policy SHA-256.
+- **Selector GitOps:** `config/local/risk-policy.lock.json` khóa `source_git_sha` (`ee488adc7707dab61b86538e1a1f0e05b7adf4b5`), `policy_version` (`demo-risk-v1`), `policy_path`, raw file SHA-256 và canonical policy SHA-256.
 - `demo-risk-v1` là policy tham khảo phục vụ demo (chưa calibration production); mọi thay đổi ngưỡng nghiệp vụ phải tạo version mới trong `MaintAI` trước khi đổi selector.
 
 ### 3.2. Cách Chuẩn Bị & Rollout ConfigMap `processing-risk-policy`
