@@ -6,7 +6,7 @@ Read [README.md](README.md), [docs/architecture/ARCHITECTURE.md](docs/architectu
 
 1. **Pure Declarative Kustomize Only:** This repository holds only Kubernetes/Kustomize YAML, Argo CD Application/AppProject/ImageUpdater manifests, and documentation. Do not reintroduce Python compilers, JSON state generators, shell deployment scripts, or committed `kind: Secret` resources.
 2. **Never Commit Sensitive Material:** Never commit real passwords, Fine-grained PATs, OIDC client secrets, private TLS keys, AWS secrets, Terraform state, or raw datasets.
-   - Secret `argocd-image-updater-git-creds` (Fine-grained PAT for Argo CD Image Updater PR creation) is provisioned directly into the `argocd` namespace by operators using `Maint-infrastructure` CLI (`python -m localdev image-updater-pat`) or KMS/ESO, never inside Git manifests.
+   - Secret `argocd-image-updater-git-creds` (Fine-grained PAT for Argo CD Image Updater PR creation) is synced into the `argocd` namespace via External Secrets Operator (`ExternalSecret` reading AWS Secrets Manager in Production or LocalStack `maintai/local/gitops` in local dev, seeded via `Maint-infrastructure` CLI `python -m localdev image-updater-pat`), never committed inside Git manifests.
    - Runtime credentials come from External Secrets Operator (`ExternalSecret` -> AWS Secrets Manager / LocalStack) and Strimzi / `cert-manager`.
 3. **Pull Request Discipline for Image Updates:**
    - Application CI (`MaintAI`) only builds and pushes container images to the registry (`ghcr.io` / ECR); it never pushes commits directly to `MaintAI-gitops`.

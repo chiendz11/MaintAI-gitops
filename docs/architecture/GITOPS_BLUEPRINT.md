@@ -262,14 +262,35 @@ Khuyến nghị có 2 lựa chọn tùy quy mô team:
 | **Cấu trúc Secret `argocd/argocd-image-updater-git-creds`** | Keys: `username` (`<github-user>`), `password` (`github_pat_...`) | Keys: `githubAppID`, `githubAppInstallationID`, `githubAppPrivateKey` |
 | **Rủi ro & Bảo trì** | Hết hạn định kỳ (30–90 ngày), gắn với account tạo PAT | Không phụ thuộc nhân sự nghỉ việc, audit log riêng theo tên App (`app[bot]`) |
 
-Ví dụ nạp Secret cho Option A (không bao giờ commit file này vào Git):
+Nạp Secret bằng ESO `ExternalSecret` (ưu tiên cho cả LocalStack & AWS Secrets Manager để giữ 100% pure declarative) hoặc tạo Secret out-of-band khi bootstrap (không bao giờ commit secret plaintext vào Git):
 
-```bash
-kubectl -n argocd create secret generic argocd-image-updater-git-creds \
-  --from-literal=username="<github-username>" \
-  --from-literal=password="<fine-grained-pat>" \
-  --dry-run=client -o yaml | kubectl apply -f -
+```yaml
+# ExternalSecret trong applications/local/ (LocalStack) hoặc platform/secrets/ (AWS Secrets Manager)
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: argocd-image-updater-git-creds
+  namespace: argocd
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-secrets-manager-argocd # prod: <project>-aws
+  target:
+    name: argocd-image-updater-git-creds
+    creationPolicy: Owner
+  data:
+    - secretKey: username
+      remoteRef:
+        key: <project>/<env>/gitops # prod: AWS Secret ARN
+        property: username
+    - secretKey: password
+      remoteRef:
+        key: <project>/<env>/gitops # prod: AWS Secret ARN
+        property: password
 ```
+
+*(Hoặc nạp nhanh Secret trực tiếp bằng CLI khi chưa có Secrets Manager: `kubectl -n argocd create secret generic argocd-image-updater-git-creds --from-literal=username="<github-username>" --from-literal=password="<fine-grained-pat>" --dry-run=client -o yaml | kubectl apply -f -`)*
 
 ---
 
