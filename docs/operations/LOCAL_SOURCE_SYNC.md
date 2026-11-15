@@ -1,60 +1,38 @@
-# Đồng bộ Source Local, Public Remotes & App-Owned Risk Policy (`RISK-POLICY-01`)
-
-**Cập nhật:** 14/11/2026 (sau khi merge toàn bộ PR vào nhánh `main` trên cả 3 repository).
+# Tách biệt Repo CI/CD, Argo CD Image Updater & Risk Policy (`RISK-POLICY-01`)
 
 ---
 
-## 1. Hệ 3 Repository & Nguồn Argo CD Theo Dõi
+## 1. Hệ 3 Repository & Ranh giới Tự động hóa
 
-- **App Repo:** `https://github.com/chiendz11/MaintAI` — mã nguồn microservices, Dockerfiles, contracts, ML bundles và risk policies.
-- **GitOps Repo:** `https://github.com/chiendz11/MaintAI-gitops` — desired state Kubernetes (`base/`, `environments/{local,production}/`, `applications/`) và release/policy tools (`scripts/`).
-- **Infrastructure Repo:** `https://github.com/chiendz11/Maint-infrastructure` — AWS Terraform, `k3d` bootstrap, LocalStack/ESO/cert-manager, private credentials và Argo CD root bootstrap.
-
-Cụm `maintai-local` theo dõi trực tiếp nhánh **`main`** của `https://github.com/chiendz11/MaintAI-gitops.git` (`targetRevision: main` trong `applications/local/` và `bootstrap/local/`). Argo CD chỉ đọc commit đã push lên remote.
+- **App Repo (`https://github.com/chiendz11/MaintAI`):** Mã nguồn microservices, Dockerfiles, contracts, ML bundles và risk policies. CI workflow (`publish-and-deploy.yml`) **chỉ build & push images** lên GHCR (`ghcr.io/chiendz11/maintai-*:sha-<commit>`); không giữ token ghi ngược sang GitOps.
+- **GitOps Repo (`https://github.com/chiendz11/MaintAI-gitops`):** Pure Declarative Kubernetes YAML (`base/`, `environments/{local,production}/`, `applications/`). Cụm `maintai-local` theo dõi trực tiếp nhánh **`main`** (`targetRevision: main`).
+- **Infrastructure Repo (`https://github.com/chiendz11/Maint-infrastructure`):** AWS Terraform, `k3d` bootstrap, LocalStack/ESO/cert-manager, cài đặt Argo CD + Argo CD Image Updater (`v1.5.0`) và nạp Fine-grained PAT vào cluster Secret.
 
 ---
 
-## 2. Cơ Chế Khóa Source (`app-source.lock.json`)
+## 2. Cơ chế Argo CD Image Updater (`Fine-grained PAT` + PR Mode)
 
-Hai bản lock ở 2 repo phải khớp nhau:
-- **GitOps:** `config/local/app-source.lock.json`
-- **Infrastructure:** `local/versions/app-source.lock.json`
+Thay cho các script release/commit chéo repo trước đây, luồng cập nhật image dùng chuẩn **GitOps Pull Request**:
 
-Lock hiện tại khóa **Git SHA `ee488adc7707dab61b86538e1a1f0e05b7adf4b5`** (`chiendz11/MaintAI`, nhánh `main` — tổng hợp đầy đủ M5 Alert Lifecycle, M6 History/Export + Catalog EOF fix `#40/#41`, CoreDNS networking `#42`, RAG Groq `#35`, ML Shadow `SERVICE_ROLE` & reproducible candidate bundle `#37/#39`, Graceful Degradation UI & docs `#43/#44`), cùng SHA-256 của 40+ Dockerfiles, settings, contracts và policy files.
-
-**Quy tắc đồng bộ:**
-- GitHub Actions CI (`ci.yml`) ở cả `MaintAI-gitops` và `Maint-infrastructure` đều checkout chính xác SHA trong `app-source.lock.json` vào `.ci-app` và chạy `scripts/localdev/checks.py --app-root .ci-app` để kiểm tra từng byte hash.
-- Khi `MaintAI` có commit mới trên `main`, cần chạy đồng bộ lại `app-source.lock.json` và `risk-policy.lock.json` ở cả 2 repo platform rồi push; không sửa tay checksum để bỏ qua khác biệt mã nguồn.
+1. **Authentication:** Operator tạo một GitHub **Fine-grained Personal Access Token (PAT)** chỉ cấp quyền:
+   - Repository access: `Only select repositories` → `chiendz11/MaintAI-gitops`
+   - Permissions: `Contents: Read and write` + `Pull requests: Read and write`
+   Token được nạp trực tiếp vào Secret `argocd-image-updater-git-creds` trong namespace `argocd` qua lệnh `python -m localdev image-updater-pat` (từ `Maint-infrastructure`), **không bao giờ lưu trong Git**.
+2. **Watch & Write-back:** [`applications/local/image-updater.yaml`](../../applications/local/image-updater.yaml) cấu hình `ImageUpdater` (`v1alpha1`) theo dõi `maintai-local-apps`, dùng chiến lược `newest-build` khớp pattern `^sha-[0-9a-f]{40}$` với `writeBackConfig.method: git:secret:argocd-image-updater-git-creds` và `pullRequest.github: {}`.
+3. **Review Gate:** Mọi cập nhật `images:` trong [`environments/local/apps/kustomization.yaml`](../../environments/local/apps/kustomization.yaml) đều đi qua **Pull Request** với đầy đủ CI checks (`kubectl kustomize` + `kubeconform`), đảm bảo nhánh `main` luôn sạch và có thể rollback qua `git revert`.
 
 ---
 
 ## 3. Chính Sách Rủi Ro Do App Sở Hữu (`RISK-POLICY-01`)
 
-### 3.1. Nguồn chuẩn và Lock GitOps
-- **Source chuẩn:** `MaintAI/processing/config/risk-policies/` (gồm JSON policy, JSON schema và catalog). Không chỉnh sửa hay tạo bản ngưỡng riêng trong `MaintAI-gitops` hoặc `Maint-infrastructure/local/.local/data/fixtures/`.
-- **Selector GitOps:** `config/local/risk-policy.lock.json` khóa `source_git_sha` (`ee488adc7707dab61b86538e1a1f0e05b7adf4b5`), `policy_version` (`demo-risk-v1`), `policy_path`, raw file SHA-256 và canonical policy SHA-256.
-- `demo-risk-v1` là policy tham khảo phục vụ demo (chưa calibration production); mọi thay đổi ngưỡng nghiệp vụ phải tạo version mới trong `MaintAI` trước khi đổi selector.
-
-### 3.2. Cách Chuẩn Bị & Rollout ConfigMap `processing-risk-policy`
-Operator từ `Maint-infrastructure` tự động truyền `--app-root` tới GitOps generator, hoặc chạy trực tiếp từ root `MaintAI-gitops`:
-
-```bash
-PYTHONPATH=scripts python -m localdev.release apps \
-  --receipts /absolute/path/to/actual-release-receipts.json \
-  --profile /absolute/path/to/reviewed-local-profile.json \
-  --app-root /absolute/path/to/MaintAI
-```
-
-**Cơ chế kiểm chứng & phát hành:**
-1. Generator đối chiếu `HEAD` của `--app-root` với `app-source.lock.json`, xác thực catalog, JSON schema, selector, `raw_sha256` và `canonical_sha256`. Sai lệch SHA hoặc JSON lỗi sẽ bị từ chối ngay (`fail closed`).
-2. Nội dung hợp lệ được đưa vào Kustomize `configMapGenerator` tên `processing-risk-policy` (gắn content hash hậu tố). Worker mount read-only tại `/local/config/risk-policy.json` với biến môi trường `PROCESSING_RISK_POLICY_FILE=/local/config/risk-policy.json`.
-3. Mọi profile cũ khai báo `files.risk_policy` hoặc override `PROCESSING_RISK_POLICY_FILE` qua env đều bị từ chối để đảm bảo duy nhất 1 nguồn policy.
-4. Khi policy thay đổi, content hash đổi theo khiến Pod Worker tự động rollout qua GitOps PR. Model identity (`/local/fixtures/model-identity.json`) vẫn được giữ tách biệt với risk policy.
+- **Source chuẩn:** `MaintAI/processing/config/risk-policies/` (gồm JSON policy, JSON schema và catalog). Không tạo bản ngưỡng chỉnh tay khác biệt trong infrastructure fixtures.
+- **Mount & Runtime:** ConfigMap `processing-risk-policy` trong `environments/local/apps/` được Worker mount read-only tại `/local/config/risk-policy.json` với `PROCESSING_RISK_POLICY_FILE=/local/config/risk-policy.json`.
+- `demo-risk-v1` là policy tham khảo cho demo local (chưa calibration production); mọi thay đổi ngưỡng nghiệp vụ phải review ở `MaintAI` trước khi cập nhật desired state.
 
 ---
 
-## 4. Tích hợp Dữ liệu ML, RAG & Trình tự Vận hành Sau Khi Sync
+## 4. Tích hợp Dữ liệu ML, RAG & Trình tự Vận hành
 
-- **ML Local Baseline & Shadow:** Worker dùng policy ConfigMap từ `RISK-POLICY-01`; `ml-service` dùng bundle `logreg-baseline-v0` (`pipeline.joblib`, `metadata.json`, `evaluation.json`, `drift_reference.json`), và `ml-service-shadow` chạy song song (`SERVICE_ROLE=shadow`) với `hgb-interactions-candidate-v1`. Dataset AI4I 10.000 dòng nằm tại `Maint-infrastructure/local/.local/data/datasets/ai4i2020.csv` (ngoài Git).
-- **RAG (`rag-service`):** Sử dụng embedding MiniLM multilingual (`rag-service/embedding-lock.json`) cache trên PVC dùng chung với PreSync/Owner Job `prepare_demo`, và sinh câu trả lời qua Groq HTTPS (`Secret rag-groq`). Chi tiết quy trình model identity và seed knowledge xem tại [`MaintAI/docs/operations/LOCAL_DEMO_PREPARATION.md`](../../../MaintAI/docs/operations/LOCAL_DEMO_PREPARATION.md).
-- **Trình tự chuẩn:** Pull cả 3 repo trên nhánh `main` → khởi tạo cụm/secrets bằng Terraform hoặc `Maint-infrastructure` CLI → Argo CD reconcile `platform`, `observability`, `apps` (tự động chạy PreSync DB migrations & grants) → kiểm tra `Synced / Healthy` → mở Simulator UI (`:18081`) chuyển từ `PAUSED` sang `RUNNING`.
+- **ML Local Baseline & Shadow:** `ml-service` dùng bundle `logreg-baseline-v0`, và `ml-service-shadow` chạy song song (`SERVICE_ROLE=shadow`) với `hgb-interactions-candidate-v1`. Dataset AI4I 10.000 dòng nằm tại `Maint-infrastructure/local/.local/data/datasets/ai4i2020.csv` (ngoài Git).
+- **RAG (`rag-service`):** Sử dụng embedding MiniLM multilingual cache trên PVC dùng chung với Job `prepare_demo`, và sinh câu trả lời qua Groq HTTPS (`Secret rag-groq`). Chi tiết model identity và seed knowledge xem tại [`MaintAI/docs/operations/LOCAL_DEMO_PREPARATION.md`](../../../MaintAI/docs/operations/LOCAL_DEMO_PREPARATION.md).
+- **Trình tự chuẩn:** Khởi tạo cụm/secrets/Argo CD bằng `Maint-infrastructure` → nạp `image-updater-pat` → Argo CD reconcile `platform`, `observability`, `apps` (PreSync DB migrations & grants) → kiểm tra `Synced / Healthy` → mở Simulator UI (`:18081`).

@@ -10,49 +10,95 @@ jobs:
   required:
     name: CI / required
     runs-on: ubuntu-24.04
-    env:
-      PYTHONPATH: scripts
     steps:
     - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
       with:
         persist-credentials: false
-    - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
-      with:
-        python-version: '3.12'
-    - run: python -m pip install -r requirements-local.lock
-    - run: python -m automation.policy
-    - name: Install checksum-pinned kubectl for offline Kustomize rendering
-      run: python scripts/install_local_ci_kubectl.py
-    - name: Offline release, policy and image ownership checks
-      run: python -m unittest discover -s scripts/tests -p 'test_*.py'
-    - name: Check local contracts and protect production desired state
-      run: python -m localdev.checks
-    - name: Render separate local and production roots without a cluster
+    - name: Install checksum-pinned kubectl and kubeconform
       run: |
-        kubectl kustomize environments/local/platform > /tmp/maintai-local-platform.yaml
-        kubectl kustomize environments/local/observability > /tmp/maintai-local-observability.yaml
-        kubectl kustomize environments/local/apps > /tmp/maintai-local-apps.yaml
-        kubectl kustomize applications > /tmp/maintai-production-applications.yaml
-        kubectl kustomize environments/production/workloads > /tmp/maintai-production-workloads.yaml
-    - name: Read the reviewed application revision
-      id: app_source
+        set -euo pipefail
+        mkdir -p "${RUNNER_TEMP}/bin"
+        curl -fsSL "https://dl.k8s.io/release/v1.35.5/bin/linux/amd64/kubectl" -o "${RUNNER_TEMP}/bin/kubectl"
+        echo "90f75ea6ecc9ea5633262e1c0b83a40560003b30fc94a04cb099404fcef0c224  ${RUNNER_TEMP}/bin/kubectl" | sha256sum -c -
+        chmod +x "${RUNNER_TEMP}/bin/kubectl"
+
+        curl -fsSL "https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz" -o "${RUNNER_TEMP}/kubeconform.tar.gz"
+        echo "9bc2bffbf71f261128533edaf912153948b7ff238f9a531ae6d34466ec287883  ${RUNNER_TEMP}/kubeconform.tar.gz" | sha256sum -c -
+        tar -xzf "${RUNNER_TEMP}/kubeconform.tar.gz" -C "${RUNNER_TEMP}/bin" kubeconform
+        chmod +x "${RUNNER_TEMP}/bin/kubeconform"
+        echo "${RUNNER_TEMP}/bin" >> "${GITHUB_PATH}"
+    - name: Render and validate all Kustomize roots
       run: |
-        python - <<'PYTHON'
-        import json, os, re
+        set -euo pipefail
+        ROOTS=(
+          bootstrap/local
+          bootstrap/production
+          applications/local
+          applications
+          environments/local/platform
+          environments/local/observability
+          environments/local/applications
+          environments/local/apps
+          environments/production/config
+          environments/production/edge
+          environments/production/mlops
+          environments/production/training
+          environments/production/workloads
+          operations/database-bootstrap
+        )
+        mkdir -p "${RUNNER_TEMP}/rendered"
+        for root in "${ROOTS[@]}"; do
+          out="${RUNNER_TEMP}/rendered/${root//\//_}.yaml"
+          echo "=== Rendering ${root} ==="
+          if [ "${root}" = "operations/database-bootstrap" ]; then
+            kubectl kustomize --load-restrictor=LoadRestrictionsNone "${root}" > "${out}"
+          else
+            kubectl kustomize "${root}" > "${out}"
+          fi
+          kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.35.0 -summary "${out}"
+        done
+        for standalone in operations/migrations/*/*.yaml applications/addons/*.yaml; do
+          echo "=== Validating ${standalone} ==="
+          kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.35.0 -summary "${standalone}"
+        done
+    - name: Guard against committed Secret values and broken documentation links
+      run: |
+        python3 - <<'PYTHON'
+        import json, re
         from pathlib import Path
-        lock = json.loads(Path("config/local/app-source.lock.json").read_text())
-        sha = lock["source_git_sha"]
-        assert lock["source_repository"] == "chiendz11/MaintAI"
-        assert re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", sha)
-        with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
-            output.write("sha=" + sha + "\n")
+        from urllib.parse import unquote, urlsplit
+
+        root = Path(".").resolve()
+        for path in sorted(root.rglob("*.yaml")):
+            text = path.read_text(encoding="utf-8")
+            if re.search(r"(?m)^kind:\s*Secret\b", text):
+                raise ValueError(f"Committed Kubernetes Secret manifest is forbidden: {path.relative_to(root)}")
+            if re.search(r"(?m)^kind:\s*Namespace\b", text) and "platform/namespaces" not in path.as_posix():
+                raise ValueError(f"Duplicate Namespace owner outside platform/namespaces: {path.relative_to(root)}")
+        for path in sorted(root.glob("local/**/*.yaml")):
+            text = path.read_text(encoding="utf-8")
+            if re.search(r"image:\s*[^\n]*:latest\b", text):
+                raise ValueError(f"Mutable :latest image is forbidden in local manifests: {path.relative_to(root)}")
+        realm = json.loads((root / "local/platform/maintai-realm.json").read_text(encoding="utf-8"))
+        for client in realm.get("clients", []):
+            if not client.get("publicClient") and not client["secret"].startswith("${"):
+                raise ValueError(f"Keycloak client secret must remain tokenized: {client.get('clientId')}")
+        for md in [root / "README.md", root / "AGENTS.md", *sorted((root / "docs").rglob("*.md"))]:
+            clean = re.sub(r"^```[^\n]*\n.*?^```\s*$", "", md.read_text(encoding="utf-8"), flags=re.M | re.S)
+            for target in re.findall(r"\]\((<[^>]+>|[^\s)]+)(?:\s+\"[^\"]*\")?\)", clean):
+                target = target.strip("<>")
+                if urlsplit(target).scheme:
+                    continue
+                name, _, _ = target.partition("#")
+                if not name:
+                    continue
+                candidate = (md.parent / unquote(name)).resolve()
+                if not candidate.is_relative_to(root) and (
+                    candidate.is_relative_to(root.parent / "MaintAI")
+                    or candidate.is_relative_to(root.parent / "Maint-infrastructure")
+                ):
+                    continue
+                if not candidate.exists():
+                    raise ValueError(f"Broken markdown link in {md.relative_to(root)}: {target}")
+        print("All Kustomize roots, Secret/Namespace guards, and markdown links passed.")
         PYTHON
-    - name: Check out the pinned public application source
-      uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
-      with:
-        repository: chiendz11/MaintAI
-        ref: ${{ steps.app_source.outputs.sha }}
-        path: .ci-app
-        persist-credentials: false
-    - name: Verify application Git revision and reviewed file hashes
-      run: python -m localdev.checks --app-root .ci-app

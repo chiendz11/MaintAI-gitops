@@ -1,66 +1,27 @@
-# MaintAI platform - code-first scope
+# MaintAI-gitops — Repository Rules & Boundaries
 
-User requested code only: do not run tests, builds, Terraform init/validate/plan/apply,
-Kustomize/Helm render checks, Docker, AWS/Kubernetes mutations or GitHub workflows
-without a later request. Read README.md, docs/architecture/ARCHITECTURE.md, docs/architecture/VERSIONING.md
-and contracts/ before changing code. This initial delivery is unvalidated.
+Read [README.md](README.md), [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md), and [docs/architecture/VERSIONING.md](docs/architecture/VERSIONING.md) before modifying manifests.
 
-Platform baseline remains revision1.3.1; the application target is now
-../MaintAI/docs/architecture/MaintAI_System_Contracts_v1_4_DEPLOYMENT_PROVENANCE.md.
-Kafka wire freeze: ../MaintAI/contracts/kafka/README.md and config/kafka-contracts.json;
-see docs/handoffs/KAFKA.md. This is not a full platform/runtime1.4 migration.
-The user's 2026-10-18 decision
-overrides simulator routing: a separate Simulator UI talks to Sensor Simulator
-Control API; Business API/main frontend do not proxy simulator control. Record
-this in docs/architecture/ARCHITECTURE.md rather than silently rewriting supplied source docs.
-Terraform owns AWS/EKS and Argo CD bootstrap; GitOps owns in-cluster add-ons and
-application workloads. Keep data ownership, outbox/inbox and ordering semantics.
-Drift is outside the alert path and never retrains or promotes a model.
-Only approved versioned dataset manifests trigger batch training. Training creates
-candidates; model deployment requires a reviewed GitOps PR. No automatic merge,
-cluster patching or registry champion promotion before a confirmed deployment.
-Pin images by digest; S3 objects by VersionId and SHA-256. Never commit secret
-values, actual datasets, Terraform state, private keys or real environment tfvars.
-MLflow image source/pins/publisher now live in ../MaintAI/ml-service/mlflow/.
-GitOps owns its production desired state only; verify the MaintAI maintai-publish.yml
-signer and app publisher actor for that image group. This move does not enable it.
-Do not alter sibling repositories unless the current user explicitly requests a
-cross-repository change. Leave old underscore folders and Iris references alone.
+## Core Principles
 
-## PROC-ORDER-01 — current app source, not automatic platform activation
+1. **Pure Declarative Kustomize Only:** This repository holds only Kubernetes/Kustomize YAML, Argo CD Application/AppProject/ImageUpdater manifests, and documentation. Do not reintroduce Python compilers, JSON state generators, shell deployment scripts, or committed `kind: Secret` resources.
+2. **Never Commit Sensitive Material:** Never commit real passwords, Fine-grained PATs, OIDC client secrets, private TLS keys, AWS secrets, Terraform state, or raw datasets.
+   - Secret `argocd-image-updater-git-creds` (Fine-grained PAT for Argo CD Image Updater PR creation) is provisioned directly into the `argocd` namespace by operators using `Maint-infrastructure` CLI (`python -m localdev image-updater-pat`) or KMS/ESO, never inside Git manifests.
+   - Runtime credentials come from External Secrets Operator (`ExternalSecret` -> AWS Secrets Manager / LocalStack) and Strimzi / `cert-manager`.
+3. **Pull Request Discipline for Image Updates:**
+   - Application CI (`MaintAI`) only builds and pushes container images to the registry (`ghcr.io` / ECR); it never pushes commits directly to `MaintAI-gitops`.
+   - Argo CD Image Updater (`ImageUpdater` CRD) proposes image updates via native GitHub Pull Requests (`pullRequest.github: {}`) against `main` so CI (`kustomize` + `kubeconform`) runs before merge.
+4. **Repository Ownership Split:**
+   - **MaintAI:** Application source code, Dockerfiles, contracts (`1.4.0`), ML inference/training, risk policies, DB migrations, and container image publishing CI.
+   - **MaintAI-gitops:** Kubernetes desired state (`base/`, `environments/`, `applications/`, `bootstrap/`, `platform/`, `local/`, `operations/`).
+   - **Maint-infrastructure:** Cluster provisioning (AWS EKS / local `k3d`), LocalStack, ESO/cert-manager/Ingress/Argo CD/Image Updater bootstrap, kubeconfig isolation, and local secret injection.
+5. **Architectural Invariants:**
+   - Separate Simulator UI (`sensor` control API) from Main UI (`business-api` REST/SSE) (`UI-01`).
+   - Strict 5-database owner isolation (`processing_db`, `business_db`, `drift_db`, `knowledge_db`, `mlflow_db`); no cross-owner SQL.
+   - Production workloads in `environments/production/` keep `enabled`/replicas disabled until real ECR digests, DB bootstrap, and reviews are complete.
+   - Local overlays (`environments/local/`) must never leak plaintext secrets, `:latest` application tags, or `replication: 1` assumptions into `environments/production/`.
+   - Preserve `PROC-ORDER-01` failure semantics, Kafka `OUTCOME-14-ONLY` contract compatibility, and drift/training isolation (drift never auto-promotes or retrains a model).
 
-Read ../MaintAI/docs/subsystems/PROCESSING_CONCURRENCY_AND_ORDERING.md, Contracts §42,
-Guide §53 and ../MaintAI/docs/reports/PROCESSING_ORDERING_IMPLEMENTATION_REPORT.md.
-SDK0.2.0/bundle1.1.0 have keyed/fenced/ordered source and tests; full app/prod
-integration remains pending. docs/handoffs/PROCESSING_ORDERING_HANDOFF.md records owner,
-config3/schema hashes and cutover. Do not add new keys to frozen config2.0.0,
-claim new services from internal modules, or enable workloads from the inactive
-profile. Keep real source SHA/image/migration/health reviews as separate gates.
+## Verification Scope
 
-## Local k3d + Argo CD — current ownership
-
-Read local/README.md in infrastructure or docs/operations/LOCAL_DEVELOPMENT.md in GitOps,
-plus the local contract/catalog/source locks before local changes. The current
-user authorized implementation in both platform repositories. Infrastructure
-owns cluster/private kubeconfig/secrets/Argo bootstrap; GitOps owns local platform
-and application desired state. Do not apply the same workload from both owners.
-Local pins/contracts are separate from frozen AWS/production state. SDK0.3.0,
-bundle2.0.0 and native outcome1.4.0 are authoritative for this local handoff; the
-older SDK/legacy-reader paragraphs are historical production baselines.
-Keep all app profiles disabled until real image receipts, artifacts/auth and owner
-operations are reviewed. Adapter sidecars are explicit local compatibility for
-loopback guards, not a production auth bypass or fabricated provider. M5 evidence
-requires a scoped service token file that is refreshed before expiry.
-Keep code-first scope: authoring CI/tests does not authorize running tests, builds,
-Kustomize/Helm render, Docker, cluster/cloud operations, commit or push in this turn.
-Do not delete MaintAI-k3d or modify the app/PDF checkout without a scoped request.
-
-## Publication and source synchronization — 2026-10-29
-
-The user subsequently authorized synchronizing local platform source with the
-merged application, pinning ML/RAG bases in the app, and committing/pushing both
-platform repositories to public remotes. This supersedes the initial no-commit/
-no-push scope for this delivery. Push-triggered source CI is part of publication;
-no cloud provisioning, cluster mutation or workload activation was requested.
-The local app-source lock and docs/operations/LOCAL_SOURCE_SYNC.md record the reviewed commit.
-Do not replace pending model/image/runtime evidence with example values.
+Running [`.github/workflows/ci.yml`](.github/workflows/ci.yml) (`kubectl kustomize` + `kubeconform`) verifies manifest structure and repository safety rules offline. It does not prove live Argo CD convergence, database readiness, or E2E application behavior.

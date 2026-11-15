@@ -1,0 +1,92 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: maintai-local-image-updater
+  namespace: argocd
+spec:
+  commonUpdateSettings:
+    updateStrategy: newest-build
+    allowTags: regexp:^sha-[0-9a-f]{40}$
+    ignoreTags:
+    - latest
+    - NOT_BUILT
+    forceUpdate: true
+  writeBackConfig:
+    method: git:secret:argocd-image-updater-git-creds
+    gitConfig:
+      repository: https://github.com/chiendz11/MaintAI-gitops.git
+      branch: main
+      writeBackTarget: kustomization
+      pullRequest:
+        github: {}
+        labels:
+        - automated
+        - image-update
+  applicationRefs:
+  - namePattern: maintai-local-apps
+    images:
+    - alias: business-api
+      imageName: ghcr.io/chiendz11/maintai-business-api
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/business-api
+    - alias: business-consumer
+      imageName: ghcr.io/chiendz11/maintai-business-consumer
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/business-consumer
+    - alias: frontend
+      imageName: ghcr.io/chiendz11/maintai-frontend
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/frontend
+    - alias: ingestion-api
+      imageName: ghcr.io/chiendz11/maintai-ingestion-api
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/ingestion-api
+    - alias: ml-service
+      imageName: ghcr.io/chiendz11/maintai-ml-service
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/ml-service
+    - alias: ml-service-shadow
+      imageName: ghcr.io/chiendz11/maintai-ml-service
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/ml-service-shadow
+    - alias: processing-outbox-relay
+      imageName: ghcr.io/chiendz11/maintai-processing-outbox-relay
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/processing-outbox-relay
+    - alias: processing-read-api
+      imageName: ghcr.io/chiendz11/maintai-processing-read-api
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/processing-read-api
+    - alias: processing-worker
+      imageName: ghcr.io/chiendz11/maintai-processing-worker
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/processing-worker
+    - alias: rag-service
+      imageName: ghcr.io/chiendz11/maintai-rag-service
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/rag-service
+    - alias: sensor
+      imageName: ghcr.io/chiendz11/maintai-sensor
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/sensor
+    - alias: simulator-ui
+      imageName: ghcr.io/chiendz11/maintai-simulator-ui
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/simulator-ui
+    - alias: storage-consumer
+      imageName: ghcr.io/chiendz11/maintai-storage-consumer
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/storage-consumer
