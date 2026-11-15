@@ -26,7 +26,7 @@ Tài liệu này mô tả cấu trúc desired state local trong `MaintAI-gitops`
 Môi trường local sử dụng mô hình **cloud-native Kubernetes** thuần túy (không còn loopback adapter sidecars):
 
 - **Service Discovery trực tiếp qua CoreDNS:** Các service gọi nhau theo chuẩn Kubernetes DNS nội bộ (`postgres:5432`, `kafka:9092`, `ml-service:8000`, `ml-service-shadow:8000`, `processing-read-api:8004`, `keycloak:8080`).
-- **TLS nội bộ bằng `cert-manager`:** Sử dụng namespaced Issuer & Certificate resources để cấp phát chứng chỉ TLS cho giao tiếp nội bộ (`sensor`, `processing`, `business`) và Keycloak issuer HTTPS (`https://127.0.0.1:18490/realms/maintai`). Browser trên laptop cần tin cậy `ca.crt` do `Maint-infrastructure` tạo.
+- **TLS bằng `cert-manager`:** Sử dụng namespaced Issuer & Certificate resources để cấp phát chứng chỉ TLS cho **Ingress local** (`maintai-ingress-tls` cho `*.maintai.local`) và **Keycloak issuer HTTPS** (`local-dev-tls` trên `https://127.0.0.1:18490/realms/maintai`); service-to-service nội bộ giữ HTTP qua CoreDNS + `NetworkPolicy` + JWT. Browser trên laptop cần tin cậy `ca.crt` do `Maint-infrastructure` tạo.
 - **OIDC / M5 Token Flows:**
   - **Business UI / Simulator UI:** Public PKCE clients độc lập; Business edge `/api` trỏ tới `business-api:8003`, Simulator edge `/api` trỏ tới `sensor:8005`.
   - **Sensor → Ingestion API:** OAuth2 `client_credentials` (`SENSOR_SERVICE`, audience `ingestion`).

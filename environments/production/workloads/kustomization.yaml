@@ -1,3 +1,141 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-resources: []
+namespace: maintai
+resources:
+- ../../../base
+images:
+- name: registry.invalid/maintai-local/business-api
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-business-api
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/business-consumer
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-business-consumer
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/frontend
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-frontend
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/ingestion-api
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-ingestion-api
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/ml-service
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-ml-service
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/processing-outbox-relay
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-processing-outbox-relay
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/processing-read-api
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-processing-read-api
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/processing-worker
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-processing-worker
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/rag-service
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-rag-service
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/sensor
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-sensor
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/simulator-ui
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-simulator-ui
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/storage-consumer
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-storage-consumer
+  newTag: REPLACE_WITH_RELEASE_TAG
+patches:
+# Keep production workloads disabled until ECR digests, ConfigMaps, Secrets, and DB migrations are reviewed.
+- target:
+    kind: Deployment
+  patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 0
+- target:
+    kind: Deployment
+    name: business-api
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/envFrom
+      value:
+        - configMapRef:
+            name: business-api-config
+        - secretRef:
+            name: business-database
+- target:
+    kind: Deployment
+    name: business-consumer
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/envFrom
+      value:
+        - configMapRef:
+            name: business-consumer-config
+        - secretRef:
+            name: business-database
+- target:
+    kind: Deployment
+    name: ml-service
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/envFrom
+      value:
+        - configMapRef:
+            name: ml-service-config
+        - secretRef:
+            name: ml-api-auth
+- target:
+    kind: Deployment
+    name: processing-outbox-relay
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/envFrom
+      value:
+        - configMapRef:
+            name: processing-outbox-relay-config
+        - secretRef:
+            name: processing-database
+- target:
+    kind: Deployment
+    name: processing-read-api
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/envFrom
+      value:
+        - configMapRef:
+            name: processing-read-api-config
+        - secretRef:
+            name: processing-database
+        - secretRef:
+            name: processing-api-auth
+- target:
+    kind: Deployment
+    name: processing-worker
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/envFrom
+      value:
+        - configMapRef:
+            name: processing-worker-config
+        - secretRef:
+            name: processing-database
+- target:
+    kind: Deployment
+    name: rag-service
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/envFrom
+      value:
+        - configMapRef:
+            name: rag-service-config
+        - secretRef:
+            name: knowledge-database
+- target:
+    kind: Deployment
+    name: storage-consumer
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/envFrom
+      value:
+        - configMapRef:
+            name: storage-consumer-config
+        - secretRef:
+            name: REPLACE_WITH_STORAGE_AWS_SECRET
+- path: patches.yaml
