@@ -32,12 +32,18 @@ spec:
       imageName: ghcr.io/chiendz11/maintai-frontend
     - alias: ingestion-api
       imageName: ghcr.io/chiendz11/maintai-ingestion-api
+    - alias: ml-service
+      imageName: ghcr.io/chiendz11/maintai-ml-service
+    - alias: ml-service-shadow
+      imageName: ghcr.io/chiendz11/maintai-ml-service
     - alias: processing-outbox-relay
       imageName: ghcr.io/chiendz11/maintai-processing-outbox-relay
     - alias: processing-read-api
       imageName: ghcr.io/chiendz11/maintai-processing-read-api
     - alias: processing-worker
       imageName: ghcr.io/chiendz11/maintai-processing-worker
+    - alias: rag-service
+      imageName: ghcr.io/chiendz11/maintai-rag-service
     - alias: sensor
       imageName: ghcr.io/chiendz11/maintai-sensor
     - alias: simulator-ui
