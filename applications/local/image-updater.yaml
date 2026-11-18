@@ -35,6 +35,11 @@ spec:
       manifestTargets:
         kustomize:
           name: registry.invalid/maintai-local/business-consumer
+    - alias: drift-worker
+      imageName: ghcr.io/chiendz11/maintai-drift-worker
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/drift-worker
     - alias: frontend
       imageName: ghcr.io/chiendz11/maintai-frontend
       manifestTargets:
