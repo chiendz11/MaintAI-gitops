@@ -29,6 +29,27 @@ spec:
         severity: warning
       annotations:
         summary: Drift checkpoint is stale; do not infer STABLE
+    - alert: MaintAIDataDriftWarning
+      expr: maintai_drift_overall_status{status="WARNING"} == 1
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Data drift status is WARNING (PSI warning threshold exceeded)
+    - alert: MaintAIDataDriftCritical
+      expr: maintai_drift_overall_status{status="CRITICAL"} == 1
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: Data drift status is CRITICAL (PSI critical threshold exceeded)
+    - alert: MaintAIDriftWorkerError
+      expr: maintai_drift_overall_status{status="ERROR"} == 1
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Drift worker reported an evaluation or processing Read API error
     - alert: MaintAIKafkaConsumerLag
       expr: sum by (consumergroup) (kafka_consumergroup_lag) > 1000
       for: 5m

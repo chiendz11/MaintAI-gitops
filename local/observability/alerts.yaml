@@ -1,0 +1,34 @@
+groups:
+- name: maintai-drift-alerts
+  rules:
+  - alert: MaintAIDataDriftWarning
+    expr: maintai_drift_overall_status{status="WARNING"} == 1
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: MaintAI data drift status is WARNING (PSI threshold exceeded)
+      description: Latest drift-worker evaluation reported WARNING on environment {{ $labels.environment }}.
+  - alert: MaintAIDataDriftCritical
+    expr: maintai_drift_overall_status{status="CRITICAL"} == 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: MaintAI data drift status is CRITICAL
+      description: Latest drift-worker evaluation reported CRITICAL on environment {{ $labels.environment }}.
+  - alert: MaintAIDriftWorkerError
+    expr: maintai_drift_overall_status{status="ERROR"} == 1
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: MaintAI drift-worker reported an evaluation or dependency error
+      description: Inspect drift-worker CronJob logs and drift_reports error reason.
+  - alert: MaintAIDriftWorkerStale
+    expr: time() - maintai_drift_worker_last_success_timestamp_seconds > 300
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: Drift checkpoint is stale in local cluster; do not infer STABLE

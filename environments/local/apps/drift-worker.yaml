@@ -1,0 +1,107 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: drift-worker
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: drift-worker
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  schedule: "*/1 * * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 60
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 120
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: drift-worker
+            app.kubernetes.io/part-of: maintai-local
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+          - name: drift-worker
+            image: registry.invalid/maintai-local/drift-worker:NOT_BUILT
+            imagePullPolicy: IfNotPresent
+            args:
+            - run
+            - --output
+            - /tmp/drift-report.json
+            envFrom:
+            - secretRef:
+                name: local-drift-worker-env
+            env:
+            - name: ENVIRONMENT
+              value: local-k3d
+            - name: DRIFT_MODEL_VERSION
+              value: logreg-baseline-v0
+            - name: DRIFT_DATASET_VERSION
+              value: ai4i2020-train-split-v1-seed42
+            - name: DRIFT_RUNTIME_DATASET_VERSION
+              value: ai4i2020-local-replay-v1
+            - name: DRIFT_REFERENCE_PATH
+              value: /local/models/logreg-baseline-v0/drift_reference.json
+            - name: DRIFT_PROCESSING_READ_URL
+              value: http://processing-read-api:8004
+            - name: DRIFT_OIDC_TOKEN_URL
+              value: http://keycloak:8080/realms/maintai/protocol/openid-connect/token
+            - name: DRIFT_OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: local-oidc-processing
+                  key: client_id
+            - name: DRIFT_OIDC_CLIENT_SECRET_FILE
+              value: /oidc/client_secret
+            - name: DRIFT_PUSHGATEWAY_URL
+              value: http://pushgateway:9091
+            - name: DRIFT_PUSHGATEWAY_REQUIRED
+              value: "true"
+            - name: DRIFT_WINDOW_SIZE
+              value: "500"
+            - name: DRIFT_MINIMUM_SAMPLES
+              value: "200"
+            - name: DRIFT_WINDOW_LOOKBACK_HOURS
+              value: "24"
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                - ALL
+            volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: models
+              mountPath: /local/models
+              readOnly: true
+            - name: oidc
+              mountPath: /oidc
+              readOnly: true
+          volumes:
+          - name: tmp
+            emptyDir: {}
+          - name: models
+            hostPath:
+              path: /mnt/maintai-local/models
+              type: Directory
+          - name: oidc
+            secret:
+              secretName: local-oidc-processing

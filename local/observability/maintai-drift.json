@@ -17,7 +17,7 @@
       "gridPos": {"x": 0, "y": 0, "w": 8, "h": 6},
       "targets": [
         {
-          "expr": "maintai_drift_overall_state or vector(0)",
+          "expr": "max((maintai_drift_overall_status{status=\"CRITICAL\"} == 1) * 2 or (maintai_drift_overall_status{status=\"WARNING\"} == 1) * 1 or (maintai_drift_overall_status{status=\"ERROR\"} == 1) * 3 or (maintai_drift_overall_status{status=\"INSUFFICIENT_DATA\"} == 1) * 4 or (maintai_drift_overall_status{status=\"STABLE\"} == 1) * 0 or vector(0))",
           "refId": "A"
         }
       ],
@@ -29,11 +29,13 @@
             "steps": [
               {"color": "green", "value": null},
               {"color": "yellow", "value": 1},
-              {"color": "red", "value": 2}
+              {"color": "red", "value": 2},
+              {"color": "purple", "value": 3},
+              {"color": "blue", "value": 4}
             ]
           },
           "mappings": [
-            {"type": "value", "options": {"0": {"text": "NORMAL / NO DRIFT"}, "1": {"text": "WARNING (PSI > 0.1)"}, "2": {"text": "CRITICAL (PSI > 0.2)"}}}
+            {"type": "value", "options": {"0": {"text": "STABLE / NO DRIFT"}, "1": {"text": "WARNING (PSI > 0.1)"}, "2": {"text": "CRITICAL (PSI > 0.2)"}, "3": {"text": "ERROR"}, "4": {"text": "INSUFFICIENT_DATA"}}}
           ]
         }
       }
@@ -109,8 +111,8 @@
       "gridPos": {"x": 0, "y": 6, "w": 14, "h": 10},
       "targets": [
         {
-          "expr": "maintai_drift_score",
-          "legendFormat": "{{feature}} (PSI)",
+          "expr": "maintai_drift_feature_score",
+          "legendFormat": "{{feature}} ({{metric}})",
           "refId": "A"
         }
       ],
@@ -144,7 +146,7 @@
       "gridPos": {"x": 14, "y": 6, "w": 10, "h": 10},
       "targets": [
         {
-          "expr": "maintai_drift_feature_state",
+          "expr": "max by (feature) ((maintai_drift_feature_status{status=\"CRITICAL\"} == 1) * 2 or (maintai_drift_feature_status{status=\"WARNING\"} == 1) * 1 or (maintai_drift_feature_status{status=\"ERROR\"} == 1) * 3 or (maintai_drift_feature_status{status=\"STABLE\"} == 1) * 0)",
           "legendFormat": "{{feature}} State",
           "refId": "A"
         }
@@ -152,7 +154,7 @@
       "fieldConfig": {
         "defaults": {
           "min": 0,
-          "max": 2,
+          "max": 3,
           "unit": "short"
         }
       }
@@ -160,7 +162,7 @@
     {
       "id": 6,
       "type": "timeseries",
-      "title": "Total Drift Evaluation Batches Run",
+      "title": "Persisted Unique Drift Reports by Status",
       "datasource": {
         "type": "prometheus",
         "uid": "maintai-prometheus"
@@ -168,8 +170,8 @@
       "gridPos": {"x": 0, "y": 16, "w": 24, "h": 7},
       "targets": [
         {
-          "expr": "sum(rate(maintai_drift_runs_total[5m])) or vector(0)",
-          "legendFormat": "Drift Checks / sec",
+          "expr": "sum by (status) (maintai_drift_reports_total)",
+          "legendFormat": "{{status}}",
           "refId": "A"
         }
       ],

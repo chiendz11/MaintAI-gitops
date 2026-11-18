@@ -8,6 +8,7 @@ configMapGenerator:
 - name: local-prometheus
   files:
   - prometheus.yaml
+  - alerts.yaml
 - name: local-grafana-datasources
   files:
   - datasources.yaml
