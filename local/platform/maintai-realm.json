@@ -1,5 +1,14 @@
 {
   "realm": "maintai",
+  "displayName": "MaintAI",
+  "displayNameHtml": "<div class=\"kc-logo-text\"><span>MaintAI</span></div>",
+  "loginTheme": "maintai",
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "vi",
+    "en"
+  ],
+  "defaultLocale": "vi",
   "enabled": true,
   "sslRequired": "none",
   "registrationAllowed": false,
