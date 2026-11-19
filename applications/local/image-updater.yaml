@@ -95,3 +95,10 @@ spec:
       manifestTargets:
         kustomize:
           name: registry.invalid/maintai-local/storage-consumer
+  - namePattern: maintai-local-platform
+    images:
+    - alias: keycloak
+      imageName: ghcr.io/chiendz11/maintai-keycloak
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai-local/keycloak
