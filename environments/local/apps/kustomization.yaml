@@ -6,6 +6,7 @@ resources:
   - sensor-pvc.yaml
   - mlflow.yaml
   - ml-service-shadow.yaml
+  - ml-traffic-mirror.yaml
   - business-edge.yaml
   - simulator-edge.yaml
   - drift-worker.yaml
@@ -16,6 +17,7 @@ resources:
   - external-secrets.yaml
   - ingress.yaml
   - hpa.yaml
+  - keda.yaml
   - pdb.yaml
   - network-policies.yaml
   - certs/certificates.yaml
@@ -86,11 +88,7 @@ configMapGenerator:
       - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
   - name: ml-service-artifacts
     literals:
-      - 'artifacts.json=[{"path": "/local/models/logreg-baseline-v0/pipeline.joblib",
-        "sha256": "163967932a2c4774c55539cad4bb64099baa7d252e8f472261b6f672ade91f44"},
-        {"path": "/local/models/logreg-baseline-v0/metadata.json", "sha256": "821b32a0f9db0ffe79dbc196c160732a3802eb349e48f52d905bd3713be1b9c8"},
-        {"path": "/local/models/logreg-baseline-v0/evaluation.json", "sha256": "5c797c56ad4faeb84d3b2d44cb910c36242c20aa8bbdd501cb1f3b4b835038db"},
-        {"path": "/local/models/logreg-baseline-v0/drift_reference.json", "sha256": "ba9cac5d5ebae48cd5b68fe8710758d53e3b976af4131bd2ea2e2d843d3fea71"}]'
+      - 'artifacts.json=[{"bucket": "maintai-models", "key": "models/logreg-baseline-v0/pipeline.joblib", "version_id": "BOOTSTRAP_UPLOAD_REQUIRED", "path": "/local/models/logreg-baseline-v0/pipeline.joblib", "sha256": "163967932a2c4774c55539cad4bb64099baa7d252e8f472261b6f672ade91f44"}, {"bucket": "maintai-models", "key": "models/logreg-baseline-v0/metadata.json", "version_id": "BOOTSTRAP_UPLOAD_REQUIRED", "path": "/local/models/logreg-baseline-v0/metadata.json", "sha256": "821b32a0f9db0ffe79dbc196c160732a3802eb349e48f52d905bd3713be1b9c8"}, {"bucket": "maintai-models", "key": "models/logreg-baseline-v0/evaluation.json", "version_id": "BOOTSTRAP_UPLOAD_REQUIRED", "path": "/local/models/logreg-baseline-v0/evaluation.json", "sha256": "5c797c56ad4faeb84d3b2d44cb910c36242c20aa8bbdd501cb1f3b4b835038db"}, {"bucket": "maintai-models", "key": "models/logreg-baseline-v0/drift_reference.json", "version_id": "BOOTSTRAP_UPLOAD_REQUIRED", "path": "/local/models/logreg-baseline-v0/drift_reference.json", "sha256": "ba9cac5d5ebae48cd5b68fe8710758d53e3b976af4131bd2ea2e2d843d3fea71"}]'
   - name: ml-service-config
     literals:
       - AWS_DEFAULT_REGION=us-east-1
@@ -103,13 +101,7 @@ configMapGenerator:
       - S3_ENDPOINT_URL=http://minio:9000
   - name: ml-service-shadow-artifacts
     literals:
-      - 'artifacts.json=[{"path": "/local/models/hgb-interactions-candidate-v1/pipeline.joblib",
-        "sha256": "eb96429b8fa5896f8b4f43d23b2df7499a9e25a6f67ffcbaf272d8e6656f4599"},
-        {"path": "/local/models/hgb-interactions-candidate-v1/metadata.json", "sha256":
-        "034c84233af9e2c3b1a0960deb66324259736f362ecb83aa4fa230998c976805"}, {"path":
-        "/local/models/hgb-interactions-candidate-v1/evaluation.json", "sha256": "d09679f27a448d5aed5ed72af6256265afa68865e2e63192fdb5b44dbeb2c6ce"},
-        {"path": "/local/models/hgb-interactions-candidate-v1/drift_reference.json", "sha256":
-        "76ce402c7c42c3267524bccc133d4383166f07d9f804b0aa650723574db46543"}]'
+      - 'artifacts.json=[{"bucket": "maintai-models", "key": "models/hgb-interactions-candidate-v1/pipeline.joblib", "version_id": "BOOTSTRAP_UPLOAD_REQUIRED", "path": "/local/models/hgb-interactions-candidate-v1/pipeline.joblib", "sha256": "eb96429b8fa5896f8b4f43d23b2df7499a9e25a6f67ffcbaf272d8e6656f4599"}, {"bucket": "maintai-models", "key": "models/hgb-interactions-candidate-v1/metadata.json", "version_id": "BOOTSTRAP_UPLOAD_REQUIRED", "path": "/local/models/hgb-interactions-candidate-v1/metadata.json", "sha256": "034c84233af9e2c3b1a0960deb66324259736f362ecb83aa4fa230998c976805"}, {"bucket": "maintai-models", "key": "models/hgb-interactions-candidate-v1/evaluation.json", "version_id": "BOOTSTRAP_UPLOAD_REQUIRED", "path": "/local/models/hgb-interactions-candidate-v1/evaluation.json", "sha256": "d09679f27a448d5aed5ed72af6256265afa68865e2e63192fdb5b44dbeb2c6ce"}, {"bucket": "maintai-models", "key": "models/hgb-interactions-candidate-v1/drift_reference.json", "version_id": "BOOTSTRAP_UPLOAD_REQUIRED", "path": "/local/models/hgb-interactions-candidate-v1/drift_reference.json", "sha256": "76ce402c7c42c3267524bccc133d4383166f07d9f804b0aa650723574db46543"}]'
   - name: ml-service-shadow-config
     literals:
       - AWS_DEFAULT_REGION=us-east-1
@@ -164,7 +156,7 @@ configMapGenerator:
       - KAFKA_GROUP_PREFIX=local-
       - KAFKA_LOCAL_MODE=true
       - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
-      - ML_BASE_URL=http://ml-service:8001
+      - ML_BASE_URL=http://ml-service-mirror:8001
       - PROCESSING_EXECUTION_MODE=keyed
       - PROCESSING_HEALTH_HOST=0.0.0.0
       - PROCESSING_HEALTH_PORT=8081
@@ -278,19 +270,19 @@ images:
     newTag: image-49caa80f93c6ac68ed249619e474eb4fdfe627ddf582753c4d6bc4b1fb8004a3
   - name: registry.invalid/maintai-local/business-api
     newName: ghcr.io/chiendz11/maintai-business-api
-    newTag: sha-e365af548ec1c0fbd7017cd2cb921a30872f2c95
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/business-consumer
     newName: ghcr.io/chiendz11/maintai-business-consumer
-    newTag: sha-e365af548ec1c0fbd7017cd2cb921a30872f2c95
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/drift-worker
     newName: ghcr.io/chiendz11/maintai-drift-worker
-    newTag: sha-e365af548ec1c0fbd7017cd2cb921a30872f2c95
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/frontend
     newName: ghcr.io/chiendz11/maintai-frontend
-    newTag: sha-e365af548ec1c0fbd7017cd2cb921a30872f2c95
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/ingestion-api
     newName: ghcr.io/chiendz11/maintai-ingestion-api
-    newTag: sha-e365af548ec1c0fbd7017cd2cb921a30872f2c95
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/ml-service
     newName: maintai-local/ml-service
     newTag: image-1f2d0ba8437d57a0d3aeca1c6c29425f1267a8f1dead47f6063463fa6a45a7a5
@@ -299,25 +291,28 @@ images:
     newTag: image-1f2d0ba8437d57a0d3aeca1c6c29425f1267a8f1dead47f6063463fa6a45a7a5
   - name: registry.invalid/maintai-local/processing-outbox-relay
     newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
-    newTag: sha-e365af548ec1c0fbd7017cd2cb921a30872f2c95
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/processing-read-api
     newName: ghcr.io/chiendz11/maintai-processing-read-api
-    newTag: sha-e365af548ec1c0fbd7017cd2cb921a30872f2c95
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/processing-worker
     newName: ghcr.io/chiendz11/maintai-processing-worker
-    newTag: sha-e365af548ec1c0fbd7017cd2cb921a30872f2c95
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/rag-service
     newName: maintai-local/rag-service
     newTag: image-1e5c3fe741a5e45d73a0dd500f6717f2f7a5b7574f809fc74b8e3b9a260d3759
   - name: registry.invalid/maintai-local/sensor
     newName: ghcr.io/chiendz11/maintai-sensor
-    newTag: sha-e365af548ec1c0fbd7017cd2cb921a30872f2c95
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/simulator-ui
     newName: ghcr.io/chiendz11/maintai-simulator-ui
-    newTag: sha-e365af548ec1c0fbd7017cd2cb921a30872f2c95
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/storage-consumer
     newName: ghcr.io/chiendz11/maintai-storage-consumer
-    newTag: sha-e365af548ec1c0fbd7017cd2cb921a30872f2c95
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
+  - name: registry.invalid/maintai/automation
+    newName: ghcr.io/chiendz11/maintai-automation
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
 patches:
   - target:
       kind: Deployment

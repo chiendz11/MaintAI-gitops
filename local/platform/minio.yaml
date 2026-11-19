@@ -63,6 +63,14 @@ spec:
             secretKeyRef:
               name: local-minio-admin
               key: secret_key
+        - name: MINIO_NOTIFY_WEBHOOK_ENABLE_ARGO
+          value: "on"
+        - name: MINIO_NOTIFY_WEBHOOK_ENDPOINT_ARGO
+          value: "http://approved-dataset-webhook-eventsource-svc.argo-events.svc.cluster.local:12000/approved-datasets"
+        - name: MINIO_NOTIFY_WEBHOOK_QUEUE_DIR_ARGO
+          value: "/data/.minio-webhook-queue"
+        - name: MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT_ARGO
+          value: "1000"
         ports:
         - containerPort: 9000
         - containerPort: 9001

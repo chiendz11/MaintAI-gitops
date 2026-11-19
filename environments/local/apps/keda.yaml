@@ -1,0 +1,93 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: processing-worker-scaledobject
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: processing-worker
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: processing-worker
+  pollingInterval: 15
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 4
+  advanced:
+    horizontalPodAutoscalerConfig:
+      name: keda-hpa-processing-worker
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 30
+          policies:
+          - type: Pods
+            value: 2
+            periodSeconds: 60
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+          - type: Pods
+            value: 1
+            periodSeconds: 120
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: kafka.maintai-local.svc.cluster.local:9092
+      consumerGroup: local-processing-v1
+      topic: sensor.readings
+      lagThreshold: '20'
+      offsetResetPolicy: latest
+      allowIdleConsumers: 'false'
+  - type: cpu
+    metricType: Utilization
+    metadata:
+      value: '70'
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: business-consumer-scaledobject
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: business-consumer
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: business-consumer
+  pollingInterval: 15
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 4
+  advanced:
+    horizontalPodAutoscalerConfig:
+      name: keda-hpa-business-consumer
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 30
+          policies:
+          - type: Pods
+            value: 2
+            periodSeconds: 60
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+          - type: Pods
+            value: 1
+            periodSeconds: 120
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: kafka.maintai-local.svc.cluster.local:9092
+      consumerGroup: local-business-prediction-v1
+      topic: inference.results
+      lagThreshold: '20'
+      offsetResetPolicy: latest
+      allowIdleConsumers: 'false'
+  - type: cpu
+    metricType: Utilization
+    metadata:
+      value: '70'

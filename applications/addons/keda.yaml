@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: maintai-keda
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '-35'
+spec:
+  project: maintai-production
+  source:
+    repoURL: https://kedacore.github.io/charts
+    chart: keda
+    targetRevision: 2.21.1
+    helm:
+      releaseName: keda
+      valuesObject:
+        crds:
+          install: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: keda
+  syncPolicy:
+    syncOptions:
+    - ServerSideApply=true
+    retry:
+      limit: 5

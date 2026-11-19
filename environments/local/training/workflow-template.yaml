@@ -1,0 +1,327 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: maintai-approved-dataset-training
+  namespace: argo
+spec:
+  serviceAccountName: maintai-training
+  entrypoint: envelope
+  onExit: release-failed
+  parallelism: 1
+  activeDeadlineSeconds: 3600
+  ttlStrategy:
+    secondsAfterCompletion: 604800
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  arguments:
+    parameters:
+    - name: event-body
+      value: '{}'
+    - name: dataset-manifest
+      value: ''
+    - name: manifest-version-id
+      value: ''
+    - name: min-recall
+      value: '0.85'
+    - name: min-precision
+      value: '0.50'
+  volumes:
+  - name: context
+    configMap:
+      name: maintai-training-context
+  - name: tmp
+    emptyDir: {}
+  volumeClaimTemplates:
+  - metadata:
+      name: workspace
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
+  volumeClaimGC:
+    strategy: OnWorkflowCompletion
+  templates:
+  - name: envelope
+    steps:
+    - - name: normalize
+        template: normalize
+    - - name: dataset
+        template: dataset
+        withParam: '{{steps.normalize.outputs.parameters.records}}'
+        arguments:
+          parameters:
+          - name: slot
+            value: '{{item.slot}}'
+          - name: record
+            value: '{{item}}'
+  - name: normalize
+    container:
+      image: registry.invalid/maintai/automation:NOT_BUILT
+      imagePullPolicy: IfNotPresent
+      command: &auto_cmd
+      - python
+      - -m
+      - maintai_automation
+      args:
+      - normalize
+      - --event-body
+      - '{{workflow.parameters.event-body}}'
+      - --dataset-manifest
+      - '{{workflow.parameters.dataset-manifest}}'
+      - --manifest-version-id
+      - '{{workflow.parameters.manifest-version-id}}'
+      - --output
+      - /tmp/records.json
+      resources: &auto_res
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: '1'
+          memory: 1Gi
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: tmp
+        mountPath: /tmp
+    outputs:
+      parameters:
+      - name: records
+        valueFrom:
+          path: /tmp/records.json
+  - name: dataset
+    inputs:
+      parameters:
+      - name: slot
+      - name: record
+    steps:
+    - - name: prepare
+        template: prepare
+        arguments:
+          parameters:
+          - name: slot
+            value: '{{inputs.parameters.slot}}'
+          - name: record
+            value: '{{inputs.parameters.record}}'
+    - - name: train
+        template: train
+        when: '''{{steps.prepare.outputs.parameters.train-required}}'' == ''true'''
+        arguments:
+          parameters:
+          - name: slot
+            value: '{{inputs.parameters.slot}}'
+    - - name: save
+        template: save-result
+        when: '''{{steps.prepare.outputs.parameters.train-required}}'' == ''true'''
+        arguments:
+          parameters:
+          - name: slot
+            value: '{{inputs.parameters.slot}}'
+    - - name: publish
+        template: publish
+        when: '''{{steps.prepare.outputs.parameters.publish-required}}'' == ''true'''
+        arguments:
+          parameters:
+          - name: slot
+            value: '{{inputs.parameters.slot}}'
+  - name: prepare
+    inputs:
+      parameters:
+      - name: slot
+      - name: record
+    retryStrategy:
+      limit: '2'
+      retryPolicy: Always
+    outputs:
+      parameters:
+      - name: train-required
+        valueFrom:
+          path: /workspace/{{inputs.parameters.slot}}/train-required.txt
+      - name: publish-required
+        valueFrom:
+          path: /workspace/{{inputs.parameters.slot}}/publish-required.txt
+    container:
+      image: registry.invalid/maintai/automation:NOT_BUILT
+      imagePullPolicy: IfNotPresent
+      command: *auto_cmd
+      args:
+      - prepare
+      - --record
+      - '{{inputs.parameters.record}}'
+      - --context
+      - /release/context.json
+      - --directory
+      - /workspace/{{inputs.parameters.slot}}
+      env:
+      - name: S3_ENDPOINT_URL
+        value: http://minio.maintai-local.svc.cluster.local:9000
+      envFrom:
+      - secretRef:
+          name: local-training-s3
+      resources: *auto_res
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: workspace
+        mountPath: /workspace
+      - name: context
+        mountPath: /release
+        readOnly: true
+      - name: tmp
+        mountPath: /tmp
+  - name: train
+    inputs:
+      parameters:
+      - name: slot
+    container:
+      image: registry.invalid/maintai/training:NOT_BUILT
+      imagePullPolicy: IfNotPresent
+      command:
+      - python
+      - -m
+      - maintai_training
+      args:
+      - --context
+      - /workspace/{{inputs.parameters.slot}}/context.json
+      - --output
+      - /workspace/{{inputs.parameters.slot}}/model-result.json
+      resources:
+        requests:
+          cpu: 500m
+          memory: 512Mi
+        limits:
+          cpu: '2'
+          memory: 3Gi
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: workspace
+        mountPath: /workspace
+      - name: context
+        mountPath: /release
+        readOnly: true
+      - name: tmp
+        mountPath: /tmp
+  - name: save-result
+    inputs:
+      parameters:
+      - name: slot
+    retryStrategy:
+      limit: '2'
+      retryPolicy: Always
+    container:
+      image: registry.invalid/maintai/automation:NOT_BUILT
+      imagePullPolicy: IfNotPresent
+      command: *auto_cmd
+      args:
+      - save-result
+      - --directory
+      - /workspace/{{inputs.parameters.slot}}
+      - --context
+      - /release/context.json
+      - --min-recall
+      - '{{workflow.parameters.min-recall}}'
+      - --min-precision
+      - '{{workflow.parameters.min-precision}}'
+      env:
+      - name: S3_ENDPOINT_URL
+        value: http://minio.maintai-local.svc.cluster.local:9000
+      - name: MLFLOW_TRACKING_URI
+        value: http://mlflow.maintai-local.svc.cluster.local:5000
+      - name: MLFLOW_PUBLIC_URL
+        value: http://127.0.0.1:15000
+      envFrom:
+      - secretRef:
+          name: local-training-s3
+      resources: *auto_res
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: workspace
+        mountPath: /workspace
+      - name: context
+        mountPath: /release
+        readOnly: true
+      - name: tmp
+        mountPath: /tmp
+  - name: publish
+    inputs:
+      parameters:
+      - name: slot
+    retryStrategy:
+      limit: '3'
+      retryPolicy: Always
+      backoff:
+        duration: 15s
+        factor: 2
+        maxDuration: 2m
+    container:
+      image: registry.invalid/maintai/automation:NOT_BUILT
+      imagePullPolicy: IfNotPresent
+      command: *auto_cmd
+      args:
+      - publish
+      - --directory
+      - /workspace/{{inputs.parameters.slot}}
+      - --context
+      - /release/context.json
+      envFrom:
+      - secretRef:
+          name: local-gitops-pat
+      resources: *auto_res
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: workspace
+        mountPath: /workspace
+      - name: context
+        mountPath: /release
+        readOnly: true
+      - name: tmp
+        mountPath: /tmp
+  - name: release-failed
+    container:
+      image: registry.invalid/maintai/automation:NOT_BUILT
+      imagePullPolicy: IfNotPresent
+      command: *auto_cmd
+      args:
+      - release-failed
+      - --directory
+      - /workspace
+      - --owner
+      - '{{workflow.uid}}'
+      - --status
+      - '{{workflow.status}}'
+      resources: *auto_res
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: workspace
+        mountPath: /workspace
+      - name: tmp
+        mountPath: /tmp

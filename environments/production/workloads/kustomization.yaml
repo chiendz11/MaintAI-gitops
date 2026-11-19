@@ -3,6 +3,16 @@ kind: Kustomization
 namespace: maintai
 resources:
 - ../../../base
+- keda.yaml
+configMapGenerator:
+- name: keda-kafka-auth-config
+  options:
+    disableNameSuffixHash: true
+  literals:
+  - KAFKA_SASL=scram_sha512
+  - KAFKA_TLS=enable
+  - PROCESSING_KAFKA_USERNAME=maintai-processing
+  - BUSINESS_KAFKA_USERNAME=maintai-business
 images:
 - name: registry.invalid/maintai-local/business-api
   newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-business-api

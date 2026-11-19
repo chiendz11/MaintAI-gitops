@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: keda
+  labels:
+    kubernetes.io/metadata.name: keda
+    app.kubernetes.io/part-of: maintai
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false

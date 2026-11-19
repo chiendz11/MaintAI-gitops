@@ -88,30 +88,45 @@ spec:
       - name: tmp
         emptyDir: {}
       - name: models
-        hostPath:
-          path: /mnt/maintai-local/models
-          type: Directory
+        emptyDir: {}
       - name: artifact-lock
         configMap:
           name: ml-service-artifacts
       initContainers:
-      - name: verify-artifact-checksums
-        image: registry.invalid/maintai-local/dev-tools:NOT_BUILT
-        imagePullPolicy: Never
+      - name: fetch-and-verify-models
+        image: registry.invalid/maintai/automation:NOT_BUILT
+        imagePullPolicy: IfNotPresent
+        command:
+        - python
+        - -m
+        - maintai_automation
         args:
-        - verify-files
+        - fetch-artifacts
         - --config
         - /artifact-lock/artifacts.json
+        envFrom:
+        - configMapRef:
+            name: ml-service-config
+        - secretRef:
+            name: local-ml-service-env
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
         volumeMounts:
+        - name: tmp
+          mountPath: /tmp
         - name: models
           mountPath: /local/models
-          readOnly: true
         - name: artifact-lock
           mountPath: /artifact-lock
           readOnly: true
         resources:
           requests:
-            cpu: 25m
-            memory: 32Mi
-          limits:
+            cpu: 50m
             memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi

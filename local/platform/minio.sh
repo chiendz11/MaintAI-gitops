@@ -45,4 +45,7 @@ mc admin policy attach local maintai-processing-reader --user maintai-processing
 mc admin user add local maintai-history "$(cat /secrets/history_password)" >/dev/null
 mc admin policy create local maintai-history /policies/history.json >/dev/null
 mc admin policy attach local maintai-history --user maintai-history >/dev/null
+if ! mc event list local/maintai-approved arn:minio:sqs::ARGO:webhook 2>/dev/null | grep -q 'datasets/approved/'; then
+  mc event add local/maintai-approved arn:minio:sqs::ARGO:webhook --prefix datasets/approved/ --suffix .manifest.json --event put >/dev/null
+fi
 echo 'Versioned buckets and scoped local users initialized; no lifecycle deletion configured.'
