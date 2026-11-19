@@ -13,6 +13,7 @@ spec:
   - https://kubernetes-sigs.github.io/external-dns/
   - https://prometheus-community.github.io/helm-charts
   - https://strimzi.io/charts/
+  - https://kedacore.github.io/charts
   destinations:
   - server: https://kubernetes.default.svc
     namespace: maintai
@@ -28,6 +29,8 @@ spec:
     namespace: external-dns
   - server: https://kubernetes.default.svc
     namespace: strimzi
+  - server: https://kubernetes.default.svc
+    namespace: keda
   - server: https://kubernetes.default.svc
     namespace: kube-system
   - server: https://kubernetes.default.svc

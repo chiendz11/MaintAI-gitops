@@ -39,6 +39,7 @@ jobs:
           environments/local/observability
           environments/local/applications
           environments/local/apps
+          environments/local/training
           environments/production/config
           environments/production/edge
           environments/production/mlops
@@ -55,11 +56,33 @@ jobs:
           else
             kubectl kustomize "${root}" > "${out}"
           fi
-          kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.35.0 -summary "${out}"
+          kubeconform \
+            -strict \
+            -ignore-missing-schemas \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/keda.sh/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            -kubernetes-version 1.35.0 \
+            -summary "${out}"
         done
+        echo "=== Strictly validating KEDA CRDs (no ignored schemas) ==="
+        kubeconform \
+          -strict \
+          -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/keda.sh/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+          -summary environments/local/apps/keda.yaml environments/production/workloads/keda.yaml
+        echo "=== Strictly validating Argo Workflows/Events CRDs (no ignored schemas) ==="
+        kubeconform \
+          -strict \
+          -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/argoproj.io/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+          -summary environments/local/training/eventbus.yaml environments/local/training/eventsource.yaml environments/local/training/sensor.yaml environments/local/training/workflow-template.yaml
         for standalone in operations/migrations/*/*.yaml applications/addons/*.yaml; do
           echo "=== Validating ${standalone} ==="
-          kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.35.0 -summary "${standalone}"
+          kubeconform \
+            -strict \
+            -ignore-missing-schemas \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/keda.sh/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            -kubernetes-version 1.35.0 \
+            -summary "${standalone}"
         done
     - name: Guard against committed Secret values and broken documentation links
       run: |

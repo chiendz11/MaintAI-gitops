@@ -21,10 +21,16 @@ spec:
     syncOptions:
     - FailOnSharedResource=true
     - PruneLast=true
+    - RespectIgnoreDifferences=true
   ignoreDifferences:
   - group: apps
     kind: Deployment
     name: business-api
+    jsonPointers:
+    - /spec/replicas
+  - group: apps
+    kind: Deployment
+    name: business-consumer
     jsonPointers:
     - /spec/replicas
   - group: apps

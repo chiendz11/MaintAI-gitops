@@ -17,5 +17,17 @@ spec:
   syncPolicy:
     syncOptions:
     - ServerSideApply=true
+    - RespectIgnoreDifferences=true
     retry:
       limit: 5
+  ignoreDifferences:
+  - group: apps
+    kind: Deployment
+    name: business-consumer
+    jsonPointers:
+    - /spec/replicas
+  - group: apps
+    kind: Deployment
+    name: processing-worker
+    jsonPointers:
+    - /spec/replicas

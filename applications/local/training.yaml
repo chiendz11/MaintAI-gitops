@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: maintai-local-training
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '-10'
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  project: maintai-local
+  source:
+    repoURL: https://github.com/chiendz11/MaintAI-gitops.git
+    targetRevision: main
+    path: environments/local/training
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+    - FailOnSharedResource=true
+    - PruneLast=true
+    retry:
+      limit: 5

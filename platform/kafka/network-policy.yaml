@@ -19,6 +19,20 @@ spec:
     - namespaceSelector:
         matchLabels:
           kubernetes.io/metadata.name: monitoring
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: keda
+      podSelector:
+        matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+          - keda-operator
+          - keda-operator-metrics-apiserver
+    ports:
+    - protocol: TCP
+      port: 9093
   egress:
   - to:
     - podSelector: {}

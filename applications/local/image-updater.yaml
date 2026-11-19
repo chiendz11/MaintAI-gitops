@@ -95,6 +95,23 @@ spec:
       manifestTargets:
         kustomize:
           name: registry.invalid/maintai-local/storage-consumer
+    - alias: automation
+      imageName: ghcr.io/chiendz11/maintai-automation
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai/automation
+  - namePattern: maintai-local-training
+    images:
+    - alias: training
+      imageName: ghcr.io/chiendz11/maintai-training
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai/training
+    - alias: automation
+      imageName: ghcr.io/chiendz11/maintai-automation
+      manifestTargets:
+        kustomize:
+          name: registry.invalid/maintai/automation
   - namePattern: maintai-local-platform
     images:
     - alias: keycloak

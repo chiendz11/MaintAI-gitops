@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maintai-training-context
+  namespace: argo
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+data:
+  context.json: '{"approved_bucket":"maintai-approved","environment":"local-k3d","gitops_branch":"main","gitops_repo":"chiendz11/MaintAI-gitops","mlflow_experiment":"maintai-local-training","mlflow_model_name":"maintai-classifier","models_bucket":"maintai-models"}'

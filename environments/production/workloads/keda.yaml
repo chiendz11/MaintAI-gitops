@@ -1,0 +1,153 @@
+# Production KEDA Kafka lag autoscaling using Strimzi SCRAM-SHA-512 + TLS.
+# Paused at 0 replicas until production ECR digests, Secrets, and DB migrations are reviewed.
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: keda-kafka-processing-auth
+  namespace: maintai
+spec:
+  configMapTargetRef:
+  - parameter: sasl
+    name: keda-kafka-auth-config
+    key: KAFKA_SASL
+  - parameter: tls
+    name: keda-kafka-auth-config
+    key: KAFKA_TLS
+  - parameter: username
+    name: keda-kafka-auth-config
+    key: PROCESSING_KAFKA_USERNAME
+  secretTargetRef:
+  - parameter: password
+    name: maintai-processing
+    key: password
+  - parameter: ca
+    name: maintai-kafka-cluster-ca-cert
+    key: ca.crt
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: keda-kafka-business-auth
+  namespace: maintai
+spec:
+  configMapTargetRef:
+  - parameter: sasl
+    name: keda-kafka-auth-config
+    key: KAFKA_SASL
+  - parameter: tls
+    name: keda-kafka-auth-config
+    key: KAFKA_TLS
+  - parameter: username
+    name: keda-kafka-auth-config
+    key: BUSINESS_KAFKA_USERNAME
+  secretTargetRef:
+  - parameter: password
+    name: maintai-business
+    key: password
+  - parameter: ca
+    name: maintai-kafka-cluster-ca-cert
+    key: ca.crt
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: processing-worker-scaledobject
+  namespace: maintai
+  annotations:
+    autoscaling.keda.sh/paused: 'true'
+    autoscaling.keda.sh/paused-replicas: '0'
+  labels:
+    app.kubernetes.io/name: processing-worker
+    app.kubernetes.io/part-of: maintai
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: processing-worker
+  pollingInterval: 15
+  cooldownPeriod: 300
+  minReplicaCount: 1
+  maxReplicaCount: 12
+  advanced:
+    horizontalPodAutoscalerConfig:
+      name: keda-hpa-processing-worker
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 30
+          policies:
+          - type: Pods
+            value: 2
+            periodSeconds: 60
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+          - type: Pods
+            value: 1
+            periodSeconds: 120
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: maintai-kafka-kafka-bootstrap.maintai.svc.cluster.local:9093
+      consumerGroup: processing-v1
+      topic: sensor.readings
+      lagThreshold: '50'
+      offsetResetPolicy: latest
+      allowIdleConsumers: 'false'
+    authenticationRef:
+      name: keda-kafka-processing-auth
+  - type: cpu
+    metricType: Utilization
+    metadata:
+      value: '70'
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: business-consumer-scaledobject
+  namespace: maintai
+  annotations:
+    autoscaling.keda.sh/paused: 'true'
+    autoscaling.keda.sh/paused-replicas: '0'
+  labels:
+    app.kubernetes.io/name: business-consumer
+    app.kubernetes.io/part-of: maintai
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: business-consumer
+  pollingInterval: 15
+  cooldownPeriod: 300
+  minReplicaCount: 1
+  maxReplicaCount: 12
+  advanced:
+    horizontalPodAutoscalerConfig:
+      name: keda-hpa-business-consumer
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 30
+          policies:
+          - type: Pods
+            value: 2
+            periodSeconds: 60
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+          - type: Pods
+            value: 1
+            periodSeconds: 120
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: maintai-kafka-kafka-bootstrap.maintai.svc.cluster.local:9093
+      consumerGroup: business-prediction-v1
+      topic: inference.results
+      lagThreshold: '50'
+      offsetResetPolicy: latest
+      allowIdleConsumers: 'false'
+    authenticationRef:
+      name: keda-kafka-business-auth
+  - type: cpu
+    metricType: Utilization
+    metadata:
+      value: '70'

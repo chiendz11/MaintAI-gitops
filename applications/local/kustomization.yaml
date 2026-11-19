@@ -4,6 +4,9 @@ resources:
 - project.yaml
 - platform.yaml
 - observability.yaml
+- argo-workflows.yaml
+- argo-events.yaml
 - apps.yaml
+- training.yaml
 - image-updater-git-creds.yaml
 - image-updater.yaml

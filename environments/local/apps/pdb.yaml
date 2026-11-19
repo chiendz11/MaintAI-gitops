@@ -12,6 +12,17 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
+  name: business-consumer-pdb
+  namespace: maintai-local
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: business-consumer
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
   name: processing-worker-pdb
   namespace: maintai-local
 spec:
