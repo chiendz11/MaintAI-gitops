@@ -220,7 +220,7 @@ configMapGenerator:
       - SIM_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
       - SIM_PORT=8005
       - SIM_ROLES_CLAIM=roles
-      - SIM_SEND_WORKERS=16
+      - SIM_SEND_WORKERS=32
       - SIM_STATE_PATH=/state/state.sqlite3
       - SSL_CERT_FILE=/tls/ca.crt
   - name: simulator-ui-config
