@@ -125,7 +125,7 @@ configMapGenerator:
       - KAFKA_GROUP_PREFIX=local-
       - KAFKA_LOCAL_MODE=true
       - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
-      - OUTBOX_BATCH_SIZE=32
+      - OUTBOX_BATCH_SIZE=64
       - OUTBOX_CLAIM_LEASE_SECONDS=120
       - OUTBOX_EXECUTION_MODE=ordered
       - OUTBOX_POLL_INTERVAL_MS=10
@@ -171,6 +171,8 @@ configMapGenerator:
       - PROCESSING_EXECUTION_MODE=keyed
       - PROCESSING_HEALTH_HOST=0.0.0.0
       - PROCESSING_HEALTH_PORT=8081
+      - PROCESSING_MAX_ACTIVE_KEYS=16
+      - PROCESSING_MAX_UNCOMMITTED_PER_PARTITION=256
       - PROCESSING_MODEL_IDENTITY_FIXTURE=/local/fixtures/model-identity.json
       - PROCESSING_PROFILE=local-fixture
       - PROCESSING_REGISTRY_CACHE_SECONDS=30
@@ -371,4 +373,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/replicas
-        value: 3
+        value: 6
