@@ -24,9 +24,7 @@ resources:
 configMapGenerator:
   - name: processing-risk-policy
     literals:
-      - "risk-policy.json={\n  \"policy_version\": \"demo-risk-v1\",\n  \"thresholds\"\
-        : {\n    \"watch\": 0.40,\n    \"high\": 0.65,\n    \"critical\": 0.85\n  },\n\
-        \  \"create_alert_for\": [\"HIGH\", \"CRITICAL\"]\n}\n"
+      - "risk-policy.json={\n  \"policy_version\": \"demo-risk-v1\",\n  \"thresholds\": {\n    \"watch\": 0.40,\n    \"high\": 0.65,\n    \"critical\": 0.85\n  },\n  \"create_alert_for\": [\"HIGH\", \"CRITICAL\"]\n}\n"
   - name: business-api-config
     literals:
       - BUSINESS_ALERT_NOTIFY_CHANNEL=maintai_business_alert_v1
@@ -65,10 +63,7 @@ configMapGenerator:
       - PRODUCER_GIT_SHA=2df0a914287a86f3500731ba05a2ba866bbee160
   - name: frontend-config
     literals:
-      - 'runtime-config.json={"apiBaseUrl": "/api/v1", "auth": {"audience": "maintai-business-local",
-        "authority": "https://127.0.0.1:18490/realms/maintai", "clientId": "maintai-business-ui",
-        "rolesClaim": "roles", "scope": "openid profile"}, "freshMs": 2000, "mode": "live",
-        "staleMs": 5000}'
+      - 'runtime-config.json={"apiBaseUrl": "/api/v1", "auth": {"audience": "maintai-business-local", "authority": "https://127.0.0.1:18490/realms/maintai", "clientId": "maintai-business-ui", "rolesClaim": "roles", "scope": "openid profile"}, "freshMs": 2000, "mode": "live", "staleMs": 5000}'
   - name: ingestion-api-config
     literals:
       - AUTH_MODE=oidc
@@ -212,12 +207,7 @@ configMapGenerator:
       - SSL_CERT_FILE=/tls/ca.crt
   - name: simulator-ui-config
     literals:
-      - 'runtime-config.json={"apiBaseUrl": "", "auth": {"audience": "simulator-control",
-        "authority": "https://127.0.0.1:18490/realms/maintai", "clientId": "maintai-simulator-ui",
-        "mode": "oidc", "scope": "openid profile simulator:control"}, "links": {"business":
-        "http://127.0.0.1:18080", "grafana": "http://127.0.0.1:13000", "mlflow": "http://127.0.0.1:15000"},
-        "mode": "live", "pollIntervalMs": 5000, "requestTimeoutMs": 8000, "staleAfterMs":
-        20000}'
+      - 'runtime-config.json={"apiBaseUrl": "", "auth": {"audience": "simulator-control", "authority": "https://127.0.0.1:18490/realms/maintai", "clientId": "maintai-simulator-ui", "mode": "oidc", "scope": "openid profile simulator:control"}, "links": {"business": "http://127.0.0.1:18080", "grafana": "http://127.0.0.1:13000", "mlflow": "http://127.0.0.1:15000"}, "mode": "live", "pollIntervalMs": 5000, "requestTimeoutMs": 8000, "staleAfterMs": 20000}'
   - name: storage-consumer-config
     literals:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
@@ -244,26 +234,16 @@ configMapGenerator:
       - profile-sha256=623e527d22e462628afb31913a0f2eb594d0ccbaa9ebc07fbd665063746f2b8a
   - name: local-history-jwks
     literals:
-      - 'jwks.json={"keys": [{"alg": "RS256", "e": "AQAB", "kid": "history-66da4408f7354908",
-        "kty": "RSA", "n": "k4DFMu6gzJQyuEX1lTLAtWbrtAWuszmNNckpGPgB4zmauUOPrks3qoPU1Y0VKEkpevAVcReKAZmdWRvRHFERuSKxAyqoIQ-z5Cga-For0NqQKh8CxdHLN0LKFuhffJ_dHllq-2dtXPATRmsyAq55geOhcTeh2zVg6px3e7S4D0KF2oDrXd7S-h0X6KEuFq26hZoNxcVJwiLG8xhV6fl3lc-7UhwdxDqhRJYKtKRUlthA7k-Y4lL0W9urJ-kgP1_K-MZr_ReBOf6TlhWTMCAslIgu10AQqPhy3T0eoEAGX2rS1WtJpef6ZjDyhWNShiAhDIPcg_SLVopcTrjwdQ-fDOqZWF5IxxmllmyobkLNjln3pX6Qj0zL51idjLz5juRFlq6xASQt5AoMGFyO9h11-wKjums4bx6E7UCfwkWczH_7hZs7D2-F-5-wIbJ7UWI7OUJjBkj0KgAOPmH1BhqkY-ko3XZ6bOkTiRY2brJ3465OCtnBqpxevkVcGPk-6mXr",
-        "use": "sig"}]}'
+      - 'jwks.json={"keys": [{"alg": "RS256", "e": "AQAB", "kid": "history-66da4408f7354908", "kty": "RSA", "n": "k4DFMu6gzJQyuEX1lTLAtWbrtAWuszmNNckpGPgB4zmauUOPrks3qoPU1Y0VKEkpevAVcReKAZmdWRvRHFERuSKxAyqoIQ-z5Cga-For0NqQKh8CxdHLN0LKFuhffJ_dHllq-2dtXPATRmsyAq55geOhcTeh2zVg6px3e7S4D0KF2oDrXd7S-h0X6KEuFq26hZoNxcVJwiLG8xhV6fl3lc-7UhwdxDqhRJYKtKRUlthA7k-Y4lL0W9urJ-kgP1_K-MZr_ReBOf6TlhWTMCAslIgu10AQqPhy3T0eoEAGX2rS1WtJpef6ZjDyhWNShiAhDIPcg_SLVopcTrjwdQ-fDOqZWF5IxxmllmyobkLNjln3pX6Qj0zL51idjLz5juRFlq6xASQt5AoMGFyO9h11-wKjums4bx6E7UCfwkWczH_7hZs7D2-F-5-wIbJ7UWI7OUJjBkj0KgAOPmH1BhqkY-ko3XZ6bOkTiRY2brJ3465OCtnBqpxevkVcGPk-6mXr", "use": "sig"}]}'
   - name: local-reviewed-machines
     literals:
-      - 'machines.json=[{"machine_id": "M-001", "display_name": "Simulated machine 1"},
-        {"machine_id": "M-002", "display_name": "Simulated machine 2"}, {"machine_id":
-        "M-003", "display_name": "Simulated machine 3"}, {"machine_id": "M-004", "display_name":
-        "Simulated machine 4"}, {"machine_id": "M-005", "display_name": "Simulated machine
-        5"}]'
+      - 'machines.json=[{"machine_id": "M-001", "display_name": "Simulated machine 1"}, {"machine_id": "M-002", "display_name": "Simulated machine 2"}, {"machine_id": "M-003", "display_name": "Simulated machine 3"}, {"machine_id": "M-004", "display_name": "Simulated machine 4"}, {"machine_id": "M-005", "display_name": "Simulated machine 5"}]'
   - name: business-edge-config
     literals:
-      - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "0.0.0.0", "port":
-        8080, "routes": [{"prefix": "/api/", "target_host": "business-api", "target_port":
-        8003}, {"prefix": "/", "target_host": "frontend", "target_port": 8080}]}]}'
+      - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "0.0.0.0", "port": 8080, "routes": [{"prefix": "/api/", "target_host": "business-api", "target_port": 8003}, {"prefix": "/", "target_host": "frontend", "target_port": 8080}]}]}'
   - name: simulator-edge-config
     literals:
-      - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "0.0.0.0", "port":
-        8080, "routes": [{"prefix": "/api/", "target_host": "sensor", "target_port": 8005},
-        {"prefix": "/", "target_host": "simulator-ui", "target_port": 8080}]}]}'
+      - 'bridge.json={"environment": "local-k3d", "http": [{"bind": "0.0.0.0", "port": 8080, "routes": [{"prefix": "/api/", "target_host": "sensor", "target_port": 8005}, {"prefix": "/", "target_host": "simulator-ui", "target_port": 8080}]}]}'
 images:
   - name: registry.invalid/maintai-local/dev-tools
     newName: maintai-local/dev-tools
@@ -284,11 +264,11 @@ images:
     newName: ghcr.io/chiendz11/maintai-ingestion-api
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/ml-service
-    newName: maintai-local/ml-service
-    newTag: image-1f2d0ba8437d57a0d3aeca1c6c29425f1267a8f1dead47f6063463fa6a45a7a5
+    newName: ghcr.io/chiendz11/maintai-ml-service
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/ml-service-shadow
-    newName: maintai-local/ml-service
-    newTag: image-1f2d0ba8437d57a0d3aeca1c6c29425f1267a8f1dead47f6063463fa6a45a7a5
+    newName: ghcr.io/chiendz11/maintai-ml-service
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/processing-outbox-relay
     newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
@@ -299,8 +279,8 @@ images:
     newName: ghcr.io/chiendz11/maintai-processing-worker
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/rag-service
-    newName: maintai-local/rag-service
-    newTag: image-1e5c3fe741a5e45d73a0dd500f6717f2f7a5b7574f809fc74b8e3b9a260d3759
+    newName: ghcr.io/chiendz11/maintai-rag-service
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/sensor
     newName: ghcr.io/chiendz11/maintai-sensor
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
@@ -316,6 +296,4 @@ images:
 patches:
   - target:
       kind: Deployment
-    patch:
-      "- op: replace\n  path: /spec/template/spec/containers/0/imagePullPolicy\n\
-      \  value: IfNotPresent"
+    patch: "- op: replace\n  path: /spec/template/spec/containers/0/imagePullPolicy\n  value: IfNotPresent"
