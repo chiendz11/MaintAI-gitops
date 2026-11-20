@@ -9,7 +9,7 @@ metadata:
 data:
   default.conf: |
     split_clients "$msec$connection_requests" $shadow_sample {
-      20% 1;
+      5% 1;
       *   0;
     }
 
