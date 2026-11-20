@@ -58,7 +58,7 @@ spec:
         - name: KAFKA_LISTENERS
           value: INTERNAL://:9092,EXTERNAL://:19092,CONTROLLER://:9093
         - name: KAFKA_ADVERTISED_LISTENERS
-          value: INTERNAL://kafka:9092,EXTERNAL://127.0.0.1:19092
+          value: INTERNAL://kafka.maintai-local.svc.cluster.local:9092,EXTERNAL://127.0.0.1:19092
         - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
           value: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
         - name: KAFKA_CONTROLLER_LISTENER_NAMES
