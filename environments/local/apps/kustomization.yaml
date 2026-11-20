@@ -99,6 +99,8 @@ configMapGenerator:
       - MAINTAI_LOCAL_ONLY=1
       - MLFLOW_TRACKING_URI=http://mlflow:5000
       - MODEL_DIR=/local/models/logreg-baseline-v0
+      - OMP_NUM_THREADS=1
+      - OPENBLAS_NUM_THREADS=1
       - SERVICE_ROLE=champion
       - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
       - S3_ENDPOINT_URL=http://minio:9000
@@ -112,6 +114,8 @@ configMapGenerator:
       - MAINTAI_LOCAL_ONLY=1
       - MLFLOW_TRACKING_URI=http://mlflow:5000
       - MODEL_DIR=/local/models/hgb-interactions-candidate-v1
+      - OMP_NUM_THREADS=1
+      - OPENBLAS_NUM_THREADS=1
       - SERVICE_ROLE=shadow
       - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
       - S3_ENDPOINT_URL=http://minio:9000
@@ -361,3 +365,10 @@ patches:
           name: oidc-processing
           mountPath: /credentials/processing
           readOnly: true
+  - target:
+      kind: Deployment
+      name: processing-outbox-relay
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
