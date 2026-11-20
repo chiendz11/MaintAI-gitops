@@ -88,8 +88,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: ml-service-shadow
-  minReplicas: 1
-  maxReplicas: 2
+  minReplicas: 4
+  maxReplicas: 4
   metrics:
   - type: Resource
     resource:
