@@ -1,7 +1,15 @@
 #!/bin/sh
 set -eu
 export MC_CONFIG_DIR=/tmp/mc
-mc alias set local http://minio:9000 "$(cat /secrets/root_access_key)" "$(cat /secrets/root_secret_key)" >/dev/null
+for attempt in $(seq 1 30); do
+  if mc alias set local http://minio:9000 "$(cat /secrets/root_access_key)" "$(cat /secrets/root_secret_key)" >/dev/null 2>&1; then
+    break
+  fi
+  if [ "$attempt" -eq 30 ]; then
+    mc alias set local http://minio:9000 "$(cat /secrets/root_access_key)" "$(cat /secrets/root_secret_key)" >/dev/null
+  fi
+  sleep 2
+done
 mc mb --ignore-existing local/maintai-raw >/dev/null
 mc version enable local/maintai-raw >/dev/null
 mc mb --ignore-existing local/maintai-processed >/dev/null
