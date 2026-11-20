@@ -14,12 +14,9 @@ spec:
   - name: http
     port: 9000
     targetPort: 9000
-    nodePort: 30990
   - name: console
     port: 9001
     targetPort: 9001
-    nodePort: 30991
-  type: NodePort
 ---
 apiVersion: apps/v1
 kind: StatefulSet

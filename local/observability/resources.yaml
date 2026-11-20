@@ -53,8 +53,6 @@ spec:
   - name: http
     port: 9090
     targetPort: 9090
-    nodePort: 30900
-  type: NodePort
 ---
 apiVersion: v1
 kind: Service
@@ -70,8 +68,6 @@ spec:
   - name: http
     port: 3000
     targetPort: 3000
-    nodePort: 30000
-  type: NodePort
 ---
 apiVersion: v1
 kind: Service

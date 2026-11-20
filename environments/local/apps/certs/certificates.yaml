@@ -51,10 +51,27 @@ spec:
     name: maintai-ca-issuer
     kind: Issuer
     group: cert-manager.io
-  commonName: app.maintai.local
+  commonName: app.maintai.localhost
   dnsNames:
+  - app.maintai.localhost
+  - simulator.maintai.localhost
+  - auth.maintai.localhost
+  - api.maintai.localhost
+  - ingest.maintai.localhost
+  - processing.maintai.localhost
+  - grafana.maintai.localhost
+  - mlflow.maintai.localhost
+  - prometheus.maintai.localhost
+  - minio.maintai.localhost
+  - minio-console.maintai.localhost
   - app.maintai.local
   - simulator.maintai.local
+  - auth.maintai.local
   - api.maintai.local
   - ingest.maintai.local
   - processing.maintai.local
+  - grafana.maintai.local
+  - mlflow.maintai.local
+  - prometheus.maintai.local
+  - minio.maintai.local
+  - minio-console.maintai.local
