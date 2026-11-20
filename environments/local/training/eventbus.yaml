@@ -7,6 +7,8 @@ spec:
   jetstream:
     version: 2.10.10
     replicas: 1
+    streamConfig: |
+      replicas: 1
     persistence:
       accessMode: ReadWriteOnce
       volumeSize: 1Gi
