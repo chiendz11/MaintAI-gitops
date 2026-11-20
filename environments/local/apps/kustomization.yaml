@@ -43,8 +43,10 @@ configMapGenerator:
       - BUSINESS_OIDC_ISSUER=https://127.0.0.1:18490/realms/maintai
       - BUSINESS_OIDC_JWKS_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/certs
       - BUSINESS_PORT=8003
+      - BUSINESS_PROCESSING_OAUTH_CLIENT_ID=maintai-processing
+      - BUSINESS_PROCESSING_OAUTH_SECRET_FILE=/credentials/processing/client_secret
+      - BUSINESS_PROCESSING_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
       - BUSINESS_PROCESSING_READ_URL=http://processing-read-api:8004
-      - BUSINESS_PROCESSING_TOKEN_FILE=/tokens/processing.jwt
       - BUSINESS_PROFILE=local-test
       - BUSINESS_ROLES_CLAIM=roles
       - PRODUCER_GIT_SHA=2df0a914287a86f3500731ba05a2ba866bbee160
@@ -55,8 +57,10 @@ configMapGenerator:
       - BUSINESS_CONSUMER_PORT=8083
       - BUSINESS_CONSUMER_PROFILE=local-test
       - BUSINESS_NOTIFY_CHANNEL=maintai_business_live_v1
+      - BUSINESS_PROCESSING_OAUTH_CLIENT_ID=maintai-processing
+      - BUSINESS_PROCESSING_OAUTH_SECRET_FILE=/credentials/processing/client_secret
+      - BUSINESS_PROCESSING_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
       - BUSINESS_PROCESSING_READ_URL=http://processing-read-api:8004
-      - BUSINESS_PROCESSING_TOKEN_FILE=/tokens/processing.jwt
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - KAFKA_GROUP_PREFIX=local-
       - KAFKA_LOCAL_MODE=true
@@ -272,10 +276,10 @@ images:
     newTag: image-49caa80f93c6ac68ed249619e474eb4fdfe627ddf582753c4d6bc4b1fb8004a3
   - name: registry.invalid/maintai-local/business-api
     newName: ghcr.io/chiendz11/maintai-business-api
-    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
+    newTag: sha-f3466035b61c09ab81751afbe004be959747178f
   - name: registry.invalid/maintai-local/business-consumer
     newName: ghcr.io/chiendz11/maintai-business-consumer
-    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
+    newTag: sha-f3466035b61c09ab81751afbe004be959747178f
   - name: registry.invalid/maintai-local/drift-worker
     newName: ghcr.io/chiendz11/maintai-drift-worker
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
@@ -299,7 +303,7 @@ images:
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/processing-worker
     newName: ghcr.io/chiendz11/maintai-processing-worker
-    newTag: sha-b41b60746ea7a268b9d48bfcf2a39ac982d184fd
+    newTag: sha-f3466035b61c09ab81751afbe004be959747178f
   - name: registry.invalid/maintai-local/rag-service
     newName: maintai-local/rag-service
     newTag: image-1e5c3fe741a5e45d73a0dd500f6717f2f7a5b7574f809fc74b8e3b9a260d3759
@@ -311,7 +315,7 @@ images:
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/storage-consumer
     newName: ghcr.io/chiendz11/maintai-storage-consumer
-    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
+    newTag: sha-f3466035b61c09ab81751afbe004be959747178f
   - name: registry.invalid/maintai/automation
     newName: ghcr.io/chiendz11/maintai-automation
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
@@ -330,4 +334,38 @@ patches:
         value:
           name: oidc-registry
           mountPath: /credentials/registry
+          readOnly: true
+  - target:
+      kind: Deployment
+      name: business-api
+    patch: |-
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: oidc-processing
+          secret:
+            secretName: local-oidc-processing
+            defaultMode: 288
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: oidc-processing
+          mountPath: /credentials/processing
+          readOnly: true
+  - target:
+      kind: Deployment
+      name: business-consumer
+    patch: |-
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: oidc-processing
+          secret:
+            secretName: local-oidc-processing
+            defaultMode: 288
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: oidc-processing
+          mountPath: /credentials/processing
           readOnly: true
