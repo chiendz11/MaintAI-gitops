@@ -171,7 +171,7 @@ configMapGenerator:
       - PROCESSING_EXECUTION_MODE=keyed
       - PROCESSING_HEALTH_HOST=0.0.0.0
       - PROCESSING_HEALTH_PORT=8081
-      - PROCESSING_MAX_ACTIVE_KEYS=20
+      - PROCESSING_MAX_ACTIVE_KEYS=12
       - PROCESSING_MAX_UNCOMMITTED_PER_PARTITION=256
       - PROCESSING_MODEL_IDENTITY_FIXTURE=/local/fixtures/model-identity.json
       - PROCESSING_PROFILE=local-fixture
@@ -295,7 +295,7 @@ images:
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/processing-outbox-relay
     newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
-    newTag: sha-648f1ef36bc8181b59bd4ebec44bef5d76cf96f8
+    newTag: sha-05fb470eacf2d54478d24510d849ac688eade8b4
   - name: registry.invalid/maintai-local/processing-read-api
     newName: ghcr.io/chiendz11/maintai-processing-read-api
     newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
