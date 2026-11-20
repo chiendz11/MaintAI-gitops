@@ -60,8 +60,8 @@ spec:
     name: business-consumer
   pollingInterval: 15
   cooldownPeriod: 180
-  minReplicaCount: 1
-  maxReplicaCount: 6
+  minReplicaCount: 12
+  maxReplicaCount: 12
   advanced:
     horizontalPodAutoscalerConfig:
       name: keda-hpa-business-consumer
