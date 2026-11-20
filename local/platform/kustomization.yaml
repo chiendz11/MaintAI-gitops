@@ -11,15 +11,11 @@ resources:
 - kafka.yaml
 - minio.yaml
 - keycloak.yaml
-- idp-gateway.yaml
 - bootstrap.yaml
 configMapGenerator:
 - name: local-keycloak-realm
   files:
   - maintai-realm.json
-- name: local-idp-bridge
-  files:
-  - bridge.json=idp-bridge.json
 - name: local-postgres-bootstrap
   files:
   - postgres.sh

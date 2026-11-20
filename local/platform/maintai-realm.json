@@ -92,12 +92,12 @@
         }
       ],
       "redirectUris": [
-        "http://127.0.0.1:18080/*",
-        "http://localhost:18080/*"
+        "https://app.maintai.localhost/*",
+        "https://app.maintai.local/*"
       ],
       "webOrigins": [
-        "http://127.0.0.1:18080",
-        "http://localhost:18080"
+        "https://app.maintai.localhost",
+        "https://app.maintai.local"
       ],
       "defaultClientScopes": [
         "profile",
@@ -157,12 +157,12 @@
         }
       ],
       "redirectUris": [
-        "http://127.0.0.1:18081/*",
-        "http://localhost:18081/*"
+        "https://simulator.maintai.localhost/*",
+        "https://simulator.maintai.local/*"
       ],
       "webOrigins": [
-        "http://127.0.0.1:18081",
-        "http://localhost:18081"
+        "https://simulator.maintai.localhost",
+        "https://simulator.maintai.local"
       ],
       "defaultClientScopes": [
         "profile",

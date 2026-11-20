@@ -10,9 +10,6 @@ images:
 - name: registry.invalid/maintai-local/mc
   newName: maintai-local/mc
   newTag: image-42c701c16209efaaa3cc4665639a94d7efed8f4d36c45dc5a1df0df68cb1ff24
-- name: registry.invalid/maintai-local/dev-tools
-  newName: maintai-local/dev-tools
-  newTag: image-3452f8dc4b6b02d921a48a784ba0142abf3b7a36d9fc0571ee5f41a0165c06bb
 - name: registry.invalid/maintai-local/keycloak
   newName: ghcr.io/chiendz11/maintai-keycloak
   newTag: sha-9ea2d1cae68adec44fe267bdf7a45dabf50d2d65

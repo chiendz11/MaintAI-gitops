@@ -46,7 +46,7 @@ spec:
         - --import-realm
         env:
         - name: KC_HOSTNAME
-          value: https://127.0.0.1:18490
+          value: https://auth.maintai.localhost
         - name: KC_HTTP_ENABLED
           value: 'true'
         - name: KC_HEALTH_ENABLED

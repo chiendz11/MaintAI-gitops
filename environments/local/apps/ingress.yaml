@@ -7,17 +7,54 @@ metadata:
     kubernetes.io/ingress.class: alb
     nginx.ingress.kubernetes.io/proxy-body-size: "64m"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
 spec:
   ingressClassName: alb
   tls:
   - hosts:
+    - app.maintai.localhost
+    - simulator.maintai.localhost
+    - auth.maintai.localhost
+    - api.maintai.localhost
+    - ingest.maintai.localhost
+    - processing.maintai.localhost
+    - grafana.maintai.localhost
+    - mlflow.maintai.localhost
+    - prometheus.maintai.localhost
+    - minio.maintai.localhost
+    - minio-console.maintai.localhost
     - app.maintai.local
     - simulator.maintai.local
+    - auth.maintai.local
     - api.maintai.local
     - ingest.maintai.local
     - processing.maintai.local
+    - grafana.maintai.local
+    - mlflow.maintai.local
+    - prometheus.maintai.local
+    - minio.maintai.local
+    - minio-console.maintai.local
     secretName: maintai-ingress-tls
   rules:
+  - host: app.maintai.localhost
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: business-api
+            port:
+              number: 8003
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 8080
   - host: app.maintai.local
     http:
       paths:
@@ -33,6 +70,23 @@ spec:
         backend:
           service:
             name: frontend
+            port:
+              number: 8080
+  - host: simulator.maintai.localhost
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: sensor
+            port:
+              number: 8005
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: simulator-ui
             port:
               number: 8080
   - host: simulator.maintai.local
@@ -52,6 +106,36 @@ spec:
             name: simulator-ui
             port:
               number: 8080
+  - host: auth.maintai.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: keycloak
+            port:
+              number: 8080
+  - host: auth.maintai.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: keycloak
+            port:
+              number: 8080
+  - host: api.maintai.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: business-api
+            port:
+              number: 8003
   - host: api.maintai.local
     http:
       paths:
@@ -62,6 +146,16 @@ spec:
             name: business-api
             port:
               number: 8003
+  - host: ingest.maintai.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ingestion-api
+            port:
+              number: 8000
   - host: ingest.maintai.local
     http:
       paths:
@@ -72,6 +166,16 @@ spec:
             name: ingestion-api
             port:
               number: 8000
+  - host: processing.maintai.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: processing-read-api
+            port:
+              number: 8004
   - host: processing.maintai.local
     http:
       paths:
@@ -82,3 +186,103 @@ spec:
             name: processing-read-api
             port:
               number: 8004
+  - host: grafana.maintai.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
+  - host: grafana.maintai.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
+  - host: mlflow.maintai.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mlflow
+            port:
+              number: 5000
+  - host: mlflow.maintai.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mlflow
+            port:
+              number: 5000
+  - host: prometheus.maintai.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus
+            port:
+              number: 9090
+  - host: prometheus.maintai.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus
+            port:
+              number: 9090
+  - host: minio.maintai.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: minio
+            port:
+              number: 9000
+  - host: minio.maintai.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: minio
+            port:
+              number: 9000
+  - host: minio-console.maintai.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: minio
+            port:
+              number: 9001
+  - host: minio-console.maintai.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: minio
+            port:
+              number: 9001
