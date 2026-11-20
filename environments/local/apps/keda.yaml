@@ -61,7 +61,7 @@ spec:
   pollingInterval: 15
   cooldownPeriod: 180
   minReplicaCount: 1
-  maxReplicaCount: 4
+  maxReplicaCount: 6
   advanced:
     horizontalPodAutoscalerConfig:
       name: keda-hpa-business-consumer
@@ -79,6 +79,14 @@ spec:
             value: 1
             periodSeconds: 120
   triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: kafka.maintai-local.svc.cluster.local:9092
+      consumerGroup: local-business-live-v1
+      topic: sensor.readings
+      lagThreshold: '20'
+      offsetResetPolicy: latest
+      allowIdleConsumers: 'false'
   - type: kafka
     metadata:
       bootstrapServers: kafka.maintai-local.svc.cluster.local:9092
