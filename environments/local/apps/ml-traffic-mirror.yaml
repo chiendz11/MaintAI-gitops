@@ -16,11 +16,13 @@ data:
     upstream champion_backend {
       server ml-service.maintai-local.svc.cluster.local:8001;
       keepalive 64;
+      keepalive_requests 50;
     }
 
     upstream shadow_backend {
       server ml-service-shadow.maintai-local.svc.cluster.local:8001;
       keepalive 32;
+      keepalive_requests 25;
     }
 
     server {
@@ -119,7 +121,7 @@ spec:
             cpu: 25m
             memory: 32Mi
           limits:
-            cpu: 250m
+            cpu: 1000m
             memory: 128Mi
         livenessProbe:
           httpGet:
