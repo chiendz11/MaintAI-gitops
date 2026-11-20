@@ -77,6 +77,7 @@ configMapGenerator:
       - BUSINESS_PUBLIC_ORIGIN=https://app.maintai.localhost
       - INGESTION_ENV=local
       - INGESTION_HOST=0.0.0.0
+      - INGESTION_MAX_INFLIGHT=64
       - INGESTION_PORT=8000
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - KAFKA_GROUP_PREFIX=local-
@@ -269,7 +270,7 @@ images:
     newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
   - name: registry.invalid/maintai-local/business-consumer
     newName: ghcr.io/chiendz11/maintai-business-consumer
-    newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
+    newTag: sha-1a9cc14b75554bd62494b3bf3855f3035e29f9e3
   - name: registry.invalid/maintai-local/drift-worker
     newName: ghcr.io/chiendz11/maintai-drift-worker
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
