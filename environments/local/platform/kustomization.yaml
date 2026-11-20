@@ -15,4 +15,4 @@ images:
   newTag: image-3452f8dc4b6b02d921a48a784ba0142abf3b7a36d9fc0571ee5f41a0165c06bb
 - name: registry.invalid/maintai-local/keycloak
   newName: ghcr.io/chiendz11/maintai-keycloak
-  newTag: sha-9ea2d1cae68adec44fe267bdf7a45dabf50d2d65
+  newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
