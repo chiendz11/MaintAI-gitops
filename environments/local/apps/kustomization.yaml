@@ -283,11 +283,11 @@ images:
     newName: ghcr.io/chiendz11/maintai-ingestion-api
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/ml-service
-    newName: maintai-local/ml-service
-    newTag: image-1f2d0ba8437d57a0d3aeca1c6c29425f1267a8f1dead47f6063463fa6a45a7a5
+    newName: ghcr.io/chiendz11/maintai-ml-service
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/ml-service-shadow
-    newName: maintai-local/ml-service
-    newTag: image-1f2d0ba8437d57a0d3aeca1c6c29425f1267a8f1dead47f6063463fa6a45a7a5
+    newName: ghcr.io/chiendz11/maintai-ml-service
+    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/processing-outbox-relay
     newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
