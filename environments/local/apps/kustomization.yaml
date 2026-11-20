@@ -152,6 +152,9 @@ configMapGenerator:
   - name: processing-worker-config
     literals:
       - BUSINESS_BASE_URL=http://business-api:8003
+      - BUSINESS_OAUTH_CLIENT_ID=maintai-registry
+      - BUSINESS_OAUTH_SECRET_FILE=/credentials/registry/client_secret
+      - BUSINESS_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - KAFKA_GROUP_PREFIX=local-
       - KAFKA_LOCAL_MODE=true
@@ -296,7 +299,7 @@ images:
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/processing-worker
     newName: ghcr.io/chiendz11/maintai-processing-worker
-    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
+    newTag: sha-b41b60746ea7a268b9d48bfcf2a39ac982d184fd
   - name: registry.invalid/maintai-local/rag-service
     newName: maintai-local/rag-service
     newTag: image-1e5c3fe741a5e45d73a0dd500f6717f2f7a5b7574f809fc74b8e3b9a260d3759
@@ -318,3 +321,13 @@ patches:
     patch:
       "- op: replace\n  path: /spec/template/spec/containers/0/imagePullPolicy\n\
       \  value: IfNotPresent"
+  - target:
+      kind: Deployment
+      name: processing-worker
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: oidc-registry
+          mountPath: /credentials/registry
+          readOnly: true
