@@ -120,6 +120,7 @@ configMapGenerator:
       - KAFKA_GROUP_PREFIX=local-
       - KAFKA_LOCAL_MODE=true
       - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
+      - OUTBOX_BATCH_SIZE=32
       - OUTBOX_CLAIM_LEASE_SECONDS=120
       - OUTBOX_EXECUTION_MODE=ordered
       - OUTBOX_POLL_INTERVAL_MS=10
@@ -213,6 +214,7 @@ configMapGenerator:
       - SIM_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
       - SIM_PORT=8005
       - SIM_ROLES_CLAIM=roles
+      - SIM_SEND_WORKERS=16
       - SIM_STATE_PATH=/state/state.sqlite3
       - SSL_CERT_FILE=/tls/ca.crt
   - name: simulator-ui-config
@@ -297,7 +299,7 @@ images:
     newTag: image-1e5c3fe741a5e45d73a0dd500f6717f2f7a5b7574f809fc74b8e3b9a260d3759
   - name: registry.invalid/maintai-local/sensor
     newName: ghcr.io/chiendz11/maintai-sensor
-    newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
+    newTag: sha-4195ce678b6cabaf763d5b96031daa6143c3b140
   - name: registry.invalid/maintai-local/simulator-ui
     newName: ghcr.io/chiendz11/maintai-simulator-ui
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
