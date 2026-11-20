@@ -169,6 +169,7 @@ configMapGenerator:
       - PROCESSING_HEALTH_PORT=8081
       - PROCESSING_MODEL_IDENTITY_FIXTURE=/local/fixtures/model-identity.json
       - PROCESSING_PROFILE=local-fixture
+      - PROCESSING_REGISTRY_CACHE_SECONDS=30
       - PROCESSING_RISK_POLICY_FILE=/local/config/risk-policy.json
       - PROCESSING_SCHEMA_DIRECTORY=/app/http-contracts
       - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
@@ -267,10 +268,10 @@ images:
     newTag: image-49caa80f93c6ac68ed249619e474eb4fdfe627ddf582753c4d6bc4b1fb8004a3
   - name: registry.invalid/maintai-local/business-api
     newName: ghcr.io/chiendz11/maintai-business-api
-    newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
+    newTag: sha-648f1ef36bc8181b59bd4ebec44bef5d76cf96f8
   - name: registry.invalid/maintai-local/business-consumer
     newName: ghcr.io/chiendz11/maintai-business-consumer
-    newTag: sha-1a9cc14b75554bd62494b3bf3855f3035e29f9e3
+    newTag: sha-648f1ef36bc8181b59bd4ebec44bef5d76cf96f8
   - name: registry.invalid/maintai-local/drift-worker
     newName: ghcr.io/chiendz11/maintai-drift-worker
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
@@ -288,13 +289,13 @@ images:
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/processing-outbox-relay
     newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
-    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
+    newTag: sha-648f1ef36bc8181b59bd4ebec44bef5d76cf96f8
   - name: registry.invalid/maintai-local/processing-read-api
     newName: ghcr.io/chiendz11/maintai-processing-read-api
     newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
   - name: registry.invalid/maintai-local/processing-worker
     newName: ghcr.io/chiendz11/maintai-processing-worker
-    newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
+    newTag: sha-648f1ef36bc8181b59bd4ebec44bef5d76cf96f8
   - name: registry.invalid/maintai-local/rag-service
     newName: maintai-local/rag-service
     newTag: image-1e5c3fe741a5e45d73a0dd500f6717f2f7a5b7574f809fc74b8e3b9a260d3759
