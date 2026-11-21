@@ -49,14 +49,22 @@ Môi trường local sử dụng mô hình **cloud-native Kubernetes** thuần t
 ## 4. Platform Dữ liệu, Bốn UI & History M6
 
 - **Kafka 4 KRaft:** 1 broker local, 4 topics canonical × 12 partitions (`sensor.readings`, `sensor.rejected`, `inference.results`, `alert.signals`).
-- **PostgreSQL 17 + pgvector:** 5 databases độc lập (`processing_db`, `business_db`, `drift_db`, `knowledge_db`, `mlflow_db`) với owner logins riêng cho migrations và runtime logins quyền hẹp cho ứng dụng (không cross-owner SQL).
+- **PostgreSQL 17 + pgvector:** 5 databases độc lập (`processing_db`, `business_db`, `drift_db`, `knowledge_db`, `mlflow_db`) với owner logins riêng cho migrations và runtime logins quyền hẹp cho ứng dụng (không cross-owner SQL). Local tuning trên `postgres-0`: `max_connections=300`, `synchronous_commit=off`, `shared_buffers=512MB`, `wal_buffers=16MB`, `max_wal_size=2GB`, `checkpoint_timeout=15min`, `wal_writer_delay=20ms`, `limits.memory=2Gi`.
 - **MinIO (7 versioned buckets + scoped owner policies):** `raw`, `processed`, `models`, `approved`, `manuals`, `drift`, `mlflow`.
 - **4 Giao diện (UI-01):** Business UI (`:18080`), Simulator UI (`:18081`), Grafana native UI (`:13000`, Dual Datasource Prometheus + Loki), MLflow native UI (`:15000`).
 - **History M6:** `BUSINESS_HISTORY_ENABLED` và `PROCESSING_HISTORY_ENABLED` bật trong overlays, dùng ExternalSecrets cho RSA signing/cursor keys và `processing_history_meta` credentials. Quy trình tạo khóa và seed LocalStack/ESO nằm ở [`Maint-infrastructure/docs/operations/LOCAL_M6_HISTORY.md`](../../../Maint-infrastructure/docs/operations/LOCAL_M6_HISTORY.md).
 
+## 5. Baseline Vận hành Local 50 máy (`k3d` Laptop `15–16 GiB RAM`)
+
+- **Inventory & Tải chuẩn:** `SIM_MACHINE_COUNT=50` (`M-001`..`M-050`), `SIM_INTERVAL_MS=1000` (`1 reading/s/máy`, tổng `50 readings/s`), đồng bộ giữa `sensor-config`, `local-reviewed-machines` và claims `machine_ids` trong `local/platform/maintai-realm.json`. (Thiết kế kiến trúc vẫn giữ khả năng mở rộng cho mốc `100` máy và `X > 100` trên hạ tầng lớn hơn.)
+- **Replicas right-sized trong `environments/local/apps/`:** `processing-worker=6`, `business-consumer=4`, `ingestion-api=2`, `ml-service=2`, `ml-service-shadow=1` (Nginx `ml-service-mirror` lấy mẫu `5%` + keepalive), `processing-outbox-relay=2`, `sensor=1`, `business-api=1–4` (`2` chạy thực), các workload nền còn lại `1`.
+- **Lưu ý `sensor` `source_identity` & `/data` `DiskPressure`:**
+  1. Đổi `SIM_MACHINE_COUNT=100 -> 50` trên PVC `/state/state.sqlite3` cũ sẽ vấp `source_identity` guard của `sensor`; cần PVC mới hoặc reset/archive state volume rõ ràng (và re-import Keycloak realm nếu realm cũ đã bootstrap).
+  2. Trên node đơn local, k3s kích hoạt `DiskPressure=True` khi phân vùng chứa kubelet/storage vượt `85%` (`<15%` trống), làm pod mới bị `Pending`; hãy giữ `/data` dưới ngưỡng `85%` và Pause các máy trên Simulator UI khi không cần chạy liên tục.
+
 ---
 
-## 5. Phân chia Khả năng Infrastructure vs GitOps
+## 6. Phân chia Khả năng Infrastructure vs GitOps
 
 | Thành phần | Vị trí chuẩn hiện tại (`Maint-infrastructure` & `MaintAI-gitops`) |
 | :--- | :--- |
