@@ -166,6 +166,7 @@ configMapGenerator:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - KAFKA_GROUP_PREFIX=local-
       - KAFKA_LOCAL_MODE=true
+      - KAFKA_POLL_INTERVAL_SECONDS=0.01
       - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
       - ML_BASE_URL=http://ml-service-mirror:8001
       - PROCESSING_EXECUTION_MODE=keyed
@@ -307,7 +308,7 @@ images:
     newTag: image-1e5c3fe741a5e45d73a0dd500f6717f2f7a5b7574f809fc74b8e3b9a260d3759
   - name: registry.invalid/maintai-local/sensor
     newName: ghcr.io/chiendz11/maintai-sensor
-    newTag: sha-4195ce678b6cabaf763d5b96031daa6143c3b140
+    newTag: sha-aaa05bab08a219047389d8ab4826510189a14eb2
   - name: registry.invalid/maintai-local/simulator-ui
     newName: ghcr.io/chiendz11/maintai-simulator-ui
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
