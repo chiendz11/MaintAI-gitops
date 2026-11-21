@@ -13,8 +13,8 @@ spec:
     name: processing-worker
   pollingInterval: 15
   cooldownPeriod: 180
-  minReplicaCount: 6
-  maxReplicaCount: 6
+  minReplicaCount: 12
+  maxReplicaCount: 12
   advanced:
     horizontalPodAutoscalerConfig:
       name: keda-hpa-processing-worker
