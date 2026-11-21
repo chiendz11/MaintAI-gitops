@@ -296,7 +296,7 @@ images:
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/processing-outbox-relay
     newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
-    newTag: sha-05fb470eacf2d54478d24510d849ac688eade8b4
+    newTag: sha-3b47520ef87cbed0f8f567696ef43db86206306b
   - name: registry.invalid/maintai-local/processing-read-api
     newName: ghcr.io/chiendz11/maintai-processing-read-api
     newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
