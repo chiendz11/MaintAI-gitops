@@ -172,7 +172,7 @@ configMapGenerator:
       - PROCESSING_EXECUTION_MODE=keyed
       - PROCESSING_HEALTH_HOST=0.0.0.0
       - PROCESSING_HEALTH_PORT=8081
-      - PROCESSING_MAX_ACTIVE_KEYS=12
+      - PROCESSING_MAX_ACTIVE_KEYS=8
       - PROCESSING_MAX_UNCOMMITTED_PER_PARTITION=256
       - PROCESSING_MODEL_IDENTITY_FIXTURE=/local/fixtures/model-identity.json
       - PROCESSING_PROFILE=local-fixture
@@ -374,4 +374,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/replicas
-        value: 6
+        value: 2
