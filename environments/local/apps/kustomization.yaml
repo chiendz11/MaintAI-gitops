@@ -284,7 +284,7 @@ images:
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/frontend
     newName: ghcr.io/chiendz11/maintai-frontend
-    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
+    newTag: sha-57169209bd959156e1c923c79b672b4d98a871ce
   - name: registry.invalid/maintai-local/ingestion-api
     newName: ghcr.io/chiendz11/maintai-ingestion-api
     newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
