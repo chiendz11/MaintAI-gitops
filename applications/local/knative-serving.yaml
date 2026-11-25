@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: maintai-local-knative-serving
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '-40'
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  project: maintai-local
+  source:
+    repoURL: https://github.com/chiendz11/MaintAI-gitops.git
+    targetRevision: main
+    path: environments/local/ml-serving/core
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: knative-serving
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+    - RespectIgnoreDifferences=true
+    - FailOnSharedResource=true
+    retry:
+      limit: 5
+  ignoreDifferences:
+  - group: admissionregistration.k8s.io
+    kind: ValidatingWebhookConfiguration
+    jsonPointers:
+    - /webhooks
+  - group: admissionregistration.k8s.io
+    kind: MutatingWebhookConfiguration
+    jsonPointers:
+    - /webhooks
+  - group: ""
+    kind: Secret
+    name: webhook-certs
+    namespace: knative-serving
+    jsonPointers:
+    - /data

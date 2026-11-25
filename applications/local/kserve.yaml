@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: maintai-local-kserve
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '-30'
+  labels:
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  project: maintai-local
+  source:
+    repoURL: ghcr.io/kserve/charts
+    chart: kserve-resources
+    targetRevision: v0.18.1
+    helm:
+      releaseName: kserve
+      valuesObject:
+        kserve:
+          controller:
+            deploymentMode: Knative
+            gateway:
+              disableIstioVirtualHost: true
+              localGateway:
+                gateway: knative-serving/knative-local-gateway
+                gatewayService: kourier-internal.kourier-system.svc.cluster.local
+              ingressGateway:
+                className: kourier.ingress.networking.knative.dev
+          localmodel:
+            enabled: false
+          inferenceservice:
+            resources:
+              requests:
+                cpu: 250m
+                memory: 256Mi
+              limits:
+                cpu: "1"
+                memory: 512Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kserve
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+    - RespectIgnoreDifferences=true
+    retry:
+      limit: 5
+  ignoreDifferences:
+  - group: admissionregistration.k8s.io
+    kind: ValidatingWebhookConfiguration
+    jqPathExpressions:
+    - .webhooks[].clientConfig.caBundle
+  - group: admissionregistration.k8s.io
+    kind: MutatingWebhookConfiguration
+    jqPathExpressions:
+    - .webhooks[].clientConfig.caBundle
+  - group: ""
+    kind: Secret
+    name: kserve-webhook-server-secret
+    namespace: kserve
+    jsonPointers:
+    - /data

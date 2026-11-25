@@ -4,9 +4,9 @@ namespace: maintai-local
 resources:
   - ../../../base
   - sensor-pvc.yaml
+  - ingestion-mqtt-bridge.yaml
   - mlflow.yaml
   - ml-service-shadow.yaml
-  - ml-traffic-mirror.yaml
   - drift-worker.yaml
   - hooks/drift-migration.yaml
   - hooks/processing-migration.yaml
@@ -60,6 +60,8 @@ configMapGenerator:
       - BUSINESS_PROCESSING_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
       - BUSINESS_PROCESSING_READ_URL=http://processing-read-api:8004
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_COMMIT_BATCH_SIZE=16
+      - KAFKA_COMMIT_MAX_WAIT_MS=50
       - KAFKA_GROUP_PREFIX=local-
       - KAFKA_LOCAL_MODE=true
       - KAFKA_POLL_INTERVAL_SECONDS=0.01
@@ -80,7 +82,9 @@ configMapGenerator:
       - INGESTION_MAX_INFLIGHT=64
       - INGESTION_PORT=8000
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_COMPRESSION_TYPE=lz4
       - KAFKA_GROUP_PREFIX=local-
+      - KAFKA_LINGER_MS=2
       - KAFKA_LOCAL_MODE=true
       - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
       - OIDC_AUDIENCE=ingestion
@@ -114,15 +118,19 @@ configMapGenerator:
       - MAINTAI_LOCAL_ONLY=1
       - MLFLOW_TRACKING_URI=http://mlflow:5000
       - MODEL_DIR=/local/models/hgb-interactions-candidate-v1
+      - MKL_NUM_THREADS=1
       - OMP_NUM_THREADS=1
       - OPENBLAS_NUM_THREADS=1
       - SERVICE_ROLE=shadow
+      - UVICORN_WORKERS=1
       - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
       - S3_ENDPOINT_URL=http://minio:9000
   - name: processing-outbox-relay-config
     literals:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_COMPRESSION_TYPE=lz4
       - KAFKA_GROUP_PREFIX=local-
+      - KAFKA_LINGER_MS=2
       - KAFKA_LOCAL_MODE=true
       - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
       - OUTBOX_BATCH_SIZE=64
@@ -164,7 +172,9 @@ configMapGenerator:
       - BUSINESS_OAUTH_SECRET_FILE=/credentials/registry/client_secret
       - BUSINESS_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_COMPRESSION_TYPE=lz4
       - KAFKA_GROUP_PREFIX=local-
+      - KAFKA_LINGER_MS=2
       - KAFKA_LOCAL_MODE=true
       - KAFKA_POLL_INTERVAL_SECONDS=0.01
       - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
@@ -172,13 +182,18 @@ configMapGenerator:
       - PROCESSING_EXECUTION_MODE=keyed
       - PROCESSING_HEALTH_HOST=0.0.0.0
       - PROCESSING_HEALTH_PORT=8081
+      - PROCESSING_HYBRID_ORDERING_ENABLED=false
       - PROCESSING_MAX_ACTIVE_KEYS=8
+      - PROCESSING_MAX_BATCH_PER_KEY=16
+      - PROCESSING_MAX_INFLIGHT_PER_KEY=1
+      - PROCESSING_MAX_TOTAL_INFLIGHT=8
       - PROCESSING_MAX_UNCOMMITTED_PER_PARTITION=256
       - PROCESSING_MODEL_IDENTITY_FIXTURE=/local/fixtures/model-identity.json
       - PROCESSING_PROFILE=local-fixture
       - PROCESSING_REGISTRY_CACHE_SECONDS=30
       - PROCESSING_RISK_POLICY_FILE=/local/config/risk-policy.json
       - PROCESSING_SCHEMA_DIRECTORY=/app/http-contracts
+      - PROCESSING_UNAVAILABLE_ALERT_DISPOSITION=BLOCKED
       - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
   - name: rag-service-config
     literals:
@@ -217,14 +232,20 @@ configMapGenerator:
       - SIM_LOOP_DATASET=true
       - SIM_MACHINES_CLAIM=machine_ids
       - SIM_MACHINE_COUNT=50
+      - SIM_MQTT_HOST=mosquitto
+      - SIM_MQTT_PORT=1883
       - SIM_OAUTH_CLIENT_ID=maintai-sensor
       - SIM_OAUTH_SCOPE=sensor:write
       - SIM_OAUTH_SECRET_FILE=/credentials/sensor/client_secret
       - SIM_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
       - SIM_PORT=8005
+      - SIM_QUARANTINE_MAX_RECORDS=10000
       - SIM_ROLES_CLAIM=roles
       - SIM_SEND_WORKERS=32
+      - SIM_SPOOL_MAX_BYTES=134217728
+      - SIM_SPOOL_MAX_RECORDS=100000
       - SIM_STATE_PATH=/state/state.sqlite3
+      - SIM_TRANSPORT_MODE=mqtt
       - SSL_CERT_FILE=/tls/ca.crt
   - name: simulator-ui-config
     literals:
@@ -237,6 +258,7 @@ configMapGenerator:
   - name: storage-consumer-config
     literals:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_COMMIT_BATCH_SIZE=1
       - KAFKA_GROUP_PREFIX=local-m6-c8c61d245736-
       - KAFKA_LOCAL_MODE=true
       - KAFKA_POLL_INTERVAL_SECONDS=0.01
@@ -278,7 +300,7 @@ images:
     newTag: sha-f7f389d64a91ffba93dede9e9e1174b81613675f
   - name: registry.invalid/maintai-local/business-consumer
     newName: ghcr.io/chiendz11/maintai-business-consumer
-    newTag: sha-f7f389d64a91ffba93dede9e9e1174b81613675f
+    newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
   - name: registry.invalid/maintai-local/drift-worker
     newName: ghcr.io/chiendz11/maintai-drift-worker
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
@@ -287,28 +309,28 @@ images:
     newTag: sha-57169209bd959156e1c923c79b672b4d98a871ce
   - name: registry.invalid/maintai-local/ingestion-api
     newName: ghcr.io/chiendz11/maintai-ingestion-api
-    newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
+    newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
   - name: registry.invalid/maintai-local/ml-service
     newName: ghcr.io/chiendz11/maintai-ml-service
-    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
+    newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
   - name: registry.invalid/maintai-local/ml-service-shadow
     newName: ghcr.io/chiendz11/maintai-ml-service
-    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
+    newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
   - name: registry.invalid/maintai-local/processing-outbox-relay
     newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
-    newTag: sha-3b47520ef87cbed0f8f567696ef43db86206306b
+    newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
   - name: registry.invalid/maintai-local/processing-read-api
     newName: ghcr.io/chiendz11/maintai-processing-read-api
     newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
   - name: registry.invalid/maintai-local/processing-worker
     newName: ghcr.io/chiendz11/maintai-processing-worker
-    newTag: sha-648f1ef36bc8181b59bd4ebec44bef5d76cf96f8
+    newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
   - name: registry.invalid/maintai-local/rag-service
     newName: maintai-local/rag-service
     newTag: image-1e5c3fe741a5e45d73a0dd500f6717f2f7a5b7574f809fc74b8e3b9a260d3759
   - name: registry.invalid/maintai-local/sensor
     newName: ghcr.io/chiendz11/maintai-sensor
-    newTag: sha-9f22aa37f1affe82568cc60894db225de62a2c2c
+    newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
   - name: registry.invalid/maintai-local/simulator-ui
     newName: ghcr.io/chiendz11/maintai-simulator-ui
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
@@ -319,6 +341,18 @@ images:
     newName: ghcr.io/chiendz11/maintai-automation
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
 patches:
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: ml-service
+      $patch: delete
+  - patch: |-
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: ml-service
+      $patch: delete
   - target:
       kind: Deployment
     patch:

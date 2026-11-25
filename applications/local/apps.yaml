@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: maintai-local-apps
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '0'
   labels:
     app.kubernetes.io/part-of: maintai-local
 spec:
@@ -19,6 +21,7 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
+    - ServerSideApply=true
     - FailOnSharedResource=true
     - PruneLast=true
     - RespectIgnoreDifferences=true
@@ -41,11 +44,6 @@ spec:
   - group: apps
     kind: Deployment
     name: ingestion-api
-    jsonPointers:
-    - /spec/replicas
-  - group: apps
-    kind: Deployment
-    name: ml-service
     jsonPointers:
     - /spec/replicas
   - group: apps

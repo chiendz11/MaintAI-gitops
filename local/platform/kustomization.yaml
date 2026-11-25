@@ -9,6 +9,7 @@ resources:
 - postgres.yaml
 - rag-cache.yaml
 - kafka.yaml
+- mosquitto.yaml
 - minio.yaml
 - keycloak.yaml
 - bootstrap.yaml
@@ -23,6 +24,9 @@ configMapGenerator:
 - name: local-kafka-topics
   files:
   - topics.sh
+- name: local-mosquitto-config
+  files:
+  - mosquitto.conf
 - name: local-minio-bootstrap
   files:
   - minio.sh

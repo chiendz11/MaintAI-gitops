@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingestion-mqtt-bridge
+  namespace: maintai-local
+  labels:
+    app.kubernetes.io/name: ingestion-mqtt-bridge
+    app.kubernetes.io/part-of: maintai-local
+spec:
+  # Single replica preserves MQTT QoS 1 per-machine source order without $share.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingestion-mqtt-bridge
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ingestion-mqtt-bridge
+        app.kubernetes.io/part-of: maintai-local
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8000'
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 90
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: ingestion-mqtt-bridge
+        image: registry.invalid/maintai-local/ingestion-api:NOT_BUILT
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: ingestion-api-config
+        env:
+        - name: INGESTION_MQTT_ENABLED
+          value: 'true'
+        - name: INGESTION_MQTT_HOST
+          value: mosquitto
+        - name: INGESTION_MQTT_PORT
+          value: '1883'
+        - name: INGESTION_MQTT_TOPIC_FILTER
+          value: maintai/v1/site/+/machines/+/readings
+        - name: INGESTION_MQTT_CLIENT_ID
+          value: maintai-ingestion-mqtt-bridge
+        - name: INGESTION_MQTT_BATCH_SIZE
+          value: '32'
+        - name: INGESTION_MQTT_BATCH_WAIT_MS
+          value: '5'
+        - name: INGESTION_MQTT_MAX_INFLIGHT
+          value: '256'
+        - name: INGESTION_MQTT_SOURCE_SUBJECT
+          value: maintai-sensor
+        - name: INGESTION_MQTT_ALLOWED_MACHINE_IDS
+          value: M-001,M-002,M-003,M-004,M-005,M-006,M-007,M-008,M-009,M-010,M-011,M-012,M-013,M-014,M-015,M-016,M-017,M-018,M-019,M-020,M-021,M-022,M-023,M-024,M-025,M-026,M-027,M-028,M-029,M-030,M-031,M-032,M-033,M-034,M-035,M-036,M-037,M-038,M-039,M-040,M-041,M-042,M-043,M-044,M-045,M-046,M-047,M-048,M-049,M-050
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: tokens
+          mountPath: /tokens
+          readOnly: true
+        command:
+        - maintai-ingestion
+        ports:
+        - containerPort: 8000
+          name: http
+        startupProbe:
+          httpGet:
+            path: /health/ready
+            port: 8000
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8000
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8000
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: tokens
+        secret:
+          secretName: local-service-tokens
+          defaultMode: 288

@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: maintai-local
+generatorOptions:
+  disableNameSuffixHash: true
+resources:
+- ml-service-kserve.yaml
+- ml-serving-network-policies.yaml
+- ml-service-champion-pdb.yaml
+- ml-traffic-mirror.yaml
+configMapGenerator:
+- name: ml-service-champion-artifacts
+  literals:
+  - 'artifacts.json=[{"bucket": "maintai-models", "key": "models/logreg-baseline-v0/pipeline.joblib", "version_id": "943ae35a-5b6c-4266-8778-1d3cd24ebfab", "path": "/local/models/logreg-baseline-v0/pipeline.joblib", "sha256": "163967932a2c4774c55539cad4bb64099baa7d252e8f472261b6f672ade91f44"}, {"bucket": "maintai-models", "key": "models/logreg-baseline-v0/metadata.json", "version_id": "c2d85b19-f805-42b6-ae23-d603f8f8f0e3", "path": "/local/models/logreg-baseline-v0/metadata.json", "sha256": "821b32a0f9db0ffe79dbc196c160732a3802eb349e48f52d905bd3713be1b9c8"}, {"bucket": "maintai-models", "key": "models/logreg-baseline-v0/evaluation.json", "version_id": "d580bd3f-c3d3-466a-8149-6504d32cfc37", "path": "/local/models/logreg-baseline-v0/evaluation.json", "sha256": "5c797c56ad4faeb84d3b2d44cb910c36242c20aa8bbdd501cb1f3b4b835038db"}, {"bucket": "maintai-models", "key": "models/logreg-baseline-v0/drift_reference.json", "version_id": "ad15daee-5a49-4cb9-9299-e81cd8314525", "path": "/local/models/logreg-baseline-v0/drift_reference.json", "sha256": "ba9cac5d5ebae48cd5b68fe8710758d53e3b976af4131bd2ea2e2d843d3fea71"}]'
+- name: ml-service-champion-config
+  literals:
+  - AWS_DEFAULT_REGION=us-east-1
+  - AWS_REGION=us-east-1
+  - MAINTAI_LOCAL_ONLY=1
+  - MKL_NUM_THREADS=1
+  - MLFLOW_TRACKING_URI=http://mlflow:5000
+  - MODEL_DIR=/local/models/logreg-baseline-v0
+  - OMP_NUM_THREADS=1
+  - OPENBLAS_NUM_THREADS=1
+  - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
+  - S3_ENDPOINT_URL=http://minio:9000
+  - SERVICE_ROLE=champion
+  - UVICORN_WORKERS=1
