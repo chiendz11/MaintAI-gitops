@@ -30,8 +30,8 @@ Grafana / MLflow                ──► Native upstream UIs (:13000 / :15000)
 ## 3. Luồng Dữ liệu Ứng dụng & Quyền Sở hữu Dữ liệu
 
 ```text
-Sensor (MQTT QoS 1 + Spool v2) ──► Mosquitto (:1883) ──► ingestion-mqtt-bridge (1 pod, no $share) ──┐
-HTTP Clients ──► ingestion-api (:8000, /api/v1/sensor-readings) ───────────────────────────────────┴─► sensor.readings (12 partitions, lz4)
+Sensor (MQTT QoS 1 + Spool v2) ──► Mosquitto (:1883/:8883) ──┐
+HTTP Clients (/api/v1/sensor-readings) ───────────────────────┴─► Unified ingestion-api (1 pod Recreate) ─► sensor.readings (12 partitions, lz4)
   ├──► Processing Worker (keyed FIFO per_key=1, micro-batch <=16) ──► DQ ──► ml-service-mirror (:8001)
   │        ├──(95%/100% primary)──► Kourier (:80) ──► KServe ml-service-champion (KPA min=2/max=6, UVICORN_WORKERS=1)
   │        └──(5% async mirror)────► ml-service-shadow (UVICORN_WORKERS=1)
@@ -63,8 +63,7 @@ Một cụm PostgreSQL 17 logic chứa 5 databases độc lập, mỗi owner có
 | Runtime | Loại Kubernetes | Image Name | Database / Storage |
 | :--- | :--- | :--- | :--- |
 | `mosquitto` (local) | Deployment (`Recreate`, 1 replica) + Service `:1883` | `eclipse-mosquitto:2` (`2.1.4`) | PVC `local-mosquitto-data` (1Gi, `sync-wave: '-30'`) |
-| `ingestion-api` | Deployment (2 replicas) | `maintai-ingestion-api` | Kafka producer (`publish_batch` + `lz4`, no DB) |
-| `ingestion-mqtt-bridge` | Deployment (`Recreate`, 1 replica, không `$share`) | `maintai-ingestion-api` | MQTT QoS 1 → Kafka producer (`publish_batch` + `lz4`) |
+| `ingestion-api` | Deployment (`Recreate`, 1 replica, HTTP `:8000` + MQTT QoS 1 bridge) | `maintai-ingestion-api` | Non-`$share` MQTT + HTTP fallback → Kafka (`publish_batch`, `poll(0.005)`, `lz4`), TLS/mTLS ready |
 | `processing-worker` / `read-api` / `outbox-relay` | 3 Deployments | `maintai-processing` | `processing_db` |
 | `storage-consumer` | Deployment | `maintai-storage-consumer` | S3 / MinIO (`maintai-raw*`) |
 | `business-api` / `business-consumer` | 2 Deployments | `maintai-business-backend` | `business_db` |
@@ -84,6 +83,6 @@ Một cụm PostgreSQL 17 logic chứa 5 databases độc lập, mỗi owner có
 
 ## 5. Failure Semantics & Processing Concurrency (`PROC-ORDER-01`)
 
-- **At-least-once & Idempotency:** `sensor` chỉ xóa Spool v2 sau MQTT `PUBACK`; `ingestion-mqtt-bridge` chỉ `PUBACK` sau Kafka durable ACK; Worker commit `processing_db` + outbox trước khi commit safe-prefix Kafka offset; Relay chỉ đánh dấu published sau broker ACK; Business inbox + projection/alert + audit commit trước offset (gom commit đồng bộ theo `KAFKA_COMMIT_BATCH_SIZE=16`, `KAFKA_COMMIT_MAX_WAIT_MS=50`); Storage commit sau khi object + manifest bền vững. SSE reconnect dùng REST snapshot resync (PG NOTIFY không phải replay log).
+- **At-least-once & Idempotency:** `sensor` chỉ xóa Spool v2 sau MQTT `PUBACK`; unified `ingestion-api` chỉ `PUBACK` sau Kafka durable ACK; Worker commit `processing_db` + outbox trước khi commit safe-prefix Kafka offset; Relay chỉ đánh dấu published sau broker ACK; Business inbox + projection/alert + audit commit trước offset (gom commit đồng bộ theo `KAFKA_COMMIT_BATCH_SIZE=16`, `KAFKA_COMMIT_MAX_WAIT_MS=50`); Storage commit sau khi object + manifest bền vững. SSE reconnect dùng REST snapshot resync (PG NOTIFY không phải replay log).
 - **HTTP & Probes:** Mọi HTTP service có `readinessProbe`/`startupProbe`/`livenessProbe`, rolling update `maxUnavailable: 0, maxSurge: 1` kết hợp `PodDisruptionBudget` và Zero-Trust `NetworkPolicy` (gồm `allow-sensor-ingestion-to-mosquitto`, `allow-mirror-to-kourier-internal`, `allow-knative-kourier-to-kserve-predictor`).
 - **Keyed Processing (`PROC-ORDER-01`):** Worker giữ `per_key=1` FIFO nghiêm ngặt theo từng `machine_id`, bật per-key micro-batching (`PROCESSING_MAX_BATCH_PER_KEY=16`) gọi `/api/v1/predict/batch`, song song nhiều máy trong budget cấu hình và chỉ commit safe completed prefix mỗi partition; Relay chỉ gửi head chưa published theo key/topic với `publish_batch()` + `lz4` (`KAFKA_LINGER_MS=2`). Chi tiết cutover cấu hình `PROC-ORDER-01` xem [PROCESSING_ORDERING_HANDOFF.md](../handoffs/PROCESSING_ORDERING_HANDOFF.md).

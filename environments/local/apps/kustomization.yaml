@@ -4,7 +4,6 @@ namespace: maintai-local
 resources:
   - ../../../base
   - sensor-pvc.yaml
-  - ingestion-mqtt-bridge.yaml
   - mlflow.yaml
   - ml-service-shadow.yaml
   - drift-worker.yaml
@@ -80,6 +79,16 @@ configMapGenerator:
       - INGESTION_ENV=local
       - INGESTION_HOST=0.0.0.0
       - INGESTION_MAX_INFLIGHT=64
+      - INGESTION_MQTT_ALLOWED_MACHINE_IDS=M-001,M-002,M-003,M-004,M-005,M-006,M-007,M-008,M-009,M-010,M-011,M-012,M-013,M-014,M-015,M-016,M-017,M-018,M-019,M-020,M-021,M-022,M-023,M-024,M-025,M-026,M-027,M-028,M-029,M-030,M-031,M-032,M-033,M-034,M-035,M-036,M-037,M-038,M-039,M-040,M-041,M-042,M-043,M-044,M-045,M-046,M-047,M-048,M-049,M-050
+      - INGESTION_MQTT_BATCH_SIZE=32
+      - INGESTION_MQTT_BATCH_WAIT_MS=5
+      - INGESTION_MQTT_CLIENT_ID=maintai-ingestion-mqtt-bridge
+      - INGESTION_MQTT_ENABLED=true
+      - INGESTION_MQTT_HOST=mosquitto
+      - INGESTION_MQTT_MAX_INFLIGHT=256
+      - INGESTION_MQTT_PORT=1883
+      - INGESTION_MQTT_SOURCE_SUBJECT=maintai-sensor
+      - INGESTION_MQTT_TOPIC_FILTER=maintai/v1/site/+/machines/+/telemetry
       - INGESTION_PORT=8000
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - KAFKA_COMPRESSION_TYPE=lz4
@@ -300,7 +309,7 @@ images:
     newTag: sha-f7f389d64a91ffba93dede9e9e1174b81613675f
   - name: registry.invalid/maintai-local/business-consumer
     newName: ghcr.io/chiendz11/maintai-business-consumer
-    newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
+    newTag: sha-ac6fc794ac12c2886d695683c0f26bf5a00f23d2
   - name: registry.invalid/maintai-local/drift-worker
     newName: ghcr.io/chiendz11/maintai-drift-worker
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
@@ -309,7 +318,7 @@ images:
     newTag: sha-57169209bd959156e1c923c79b672b4d98a871ce
   - name: registry.invalid/maintai-local/ingestion-api
     newName: ghcr.io/chiendz11/maintai-ingestion-api
-    newTag: sha-7f79d8d49041f339fe2fb98170534d1685e783ca
+    newTag: sha-ac6fc794ac12c2886d695683c0f26bf5a00f23d2
   - name: registry.invalid/maintai-local/ml-service
     newName: ghcr.io/chiendz11/maintai-ml-service
     newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
@@ -318,19 +327,19 @@ images:
     newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
   - name: registry.invalid/maintai-local/processing-outbox-relay
     newName: ghcr.io/chiendz11/maintai-processing-outbox-relay
-    newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
+    newTag: sha-ac6fc794ac12c2886d695683c0f26bf5a00f23d2
   - name: registry.invalid/maintai-local/processing-read-api
     newName: ghcr.io/chiendz11/maintai-processing-read-api
     newTag: sha-c2bce0081dfef67345d81f1edf58996a603681ac
   - name: registry.invalid/maintai-local/processing-worker
     newName: ghcr.io/chiendz11/maintai-processing-worker
-    newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
+    newTag: sha-ac6fc794ac12c2886d695683c0f26bf5a00f23d2
   - name: registry.invalid/maintai-local/rag-service
     newName: maintai-local/rag-service
     newTag: image-1e5c3fe741a5e45d73a0dd500f6717f2f7a5b7574f809fc74b8e3b9a260d3759
   - name: registry.invalid/maintai-local/sensor
     newName: ghcr.io/chiendz11/maintai-sensor
-    newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
+    newTag: sha-ac6fc794ac12c2886d695683c0f26bf5a00f23d2
   - name: registry.invalid/maintai-local/simulator-ui
     newName: ghcr.io/chiendz11/maintai-simulator-ui
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
@@ -358,6 +367,17 @@ patches:
     patch:
       "- op: replace\n  path: /spec/template/spec/containers/0/imagePullPolicy\n\
       \  value: IfNotPresent"
+  - target:
+      kind: Deployment
+      name: ingestion-api
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/strategy
+        value:
+          type: Recreate
   - target:
       kind: Deployment
       name: processing-worker
