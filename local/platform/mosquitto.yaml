@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/part-of: maintai-local
   annotations:
-    argocd.argoproj.io/sync-wave: '-35'
+    argocd.argoproj.io/sync-wave: '-30'
 spec:
   accessModes: [ReadWriteOnce]
   storageClassName: local-path
@@ -23,7 +23,7 @@ metadata:
     app.kubernetes.io/name: mosquitto
     app.kubernetes.io/part-of: maintai-local
   annotations:
-    argocd.argoproj.io/sync-wave: '-35'
+    argocd.argoproj.io/sync-wave: '-30'
 spec:
   selector:
     app.kubernetes.io/name: mosquitto
