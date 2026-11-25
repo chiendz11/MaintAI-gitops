@@ -43,11 +43,6 @@ spec:
     - /spec/replicas
   - group: apps
     kind: Deployment
-    name: ingestion-api
-    jsonPointers:
-    - /spec/replicas
-  - group: apps
-    kind: Deployment
     name: ml-service-shadow
     jsonPointers:
     - /spec/replicas
