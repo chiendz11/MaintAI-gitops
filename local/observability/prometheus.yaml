@@ -26,7 +26,7 @@ scrape_configs:
   - source_labels:
     - __meta_kubernetes_pod_container_name
     action: drop
-    regex: local-adapter
+    regex: (local-adapter|queue-proxy)
   - source_labels:
     - __address__
     - __meta_kubernetes_pod_annotation_prometheus_io_port
@@ -37,3 +37,45 @@ scrape_configs:
   - source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_name
     target_label: service
+- job_name: knative-queue-proxy
+  kubernetes_sd_configs:
+  - role: pod
+    namespaces:
+      names:
+      - maintai-local
+  relabel_configs:
+  - source_labels:
+    - __meta_kubernetes_pod_label_serving_knative_dev_service
+    action: keep
+    regex: .+
+  - source_labels:
+    - __meta_kubernetes_pod_container_name
+    action: keep
+    regex: queue-proxy
+  - source_labels:
+    - __meta_kubernetes_pod_container_port_number
+    action: keep
+    regex: '9091'
+  - source_labels:
+    - __meta_kubernetes_pod_label_serving_knative_dev_service
+    target_label: knative_service
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod
+- job_name: knative-serving
+  kubernetes_sd_configs:
+  - role: pod
+    namespaces:
+      names:
+      - knative-serving
+  relabel_configs:
+  - source_labels:
+    - __meta_kubernetes_pod_container_port_name
+    action: keep
+    regex: metrics
+  - source_labels:
+    - __meta_kubernetes_pod_label_app
+    target_label: component
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod

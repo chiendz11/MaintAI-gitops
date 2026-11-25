@@ -8,6 +8,7 @@ spec:
   sourceRepos:
   - https://github.com/chiendz11/MaintAI-gitops.git
   - https://argoproj.github.io/argo-helm
+  - ghcr.io/kserve/charts
   destinations:
   - namespace: maintai-local
     server: https://kubernetes.default.svc
@@ -16,6 +17,12 @@ spec:
   - namespace: argo
     server: https://kubernetes.default.svc
   - namespace: argo-events
+    server: https://kubernetes.default.svc
+  - namespace: knative-serving
+    server: https://kubernetes.default.svc
+  - namespace: kourier-system
+    server: https://kubernetes.default.svc
+  - namespace: kserve
     server: https://kubernetes.default.svc
   clusterResourceWhitelist:
   - group: ""
@@ -30,6 +37,10 @@ spec:
     kind: ValidatingWebhookConfiguration
   - group: admissionregistration.k8s.io
     kind: MutatingWebhookConfiguration
+  - group: serving.kserve.io
+    kind: ClusterStorageContainer
+  - group: serving.kserve.io
+    kind: ClusterServingRuntime
   namespaceResourceBlacklist:
   - group: argoproj.io
     kind: Application

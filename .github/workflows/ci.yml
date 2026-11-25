@@ -37,6 +37,9 @@ jobs:
           applications
           environments/local/platform
           environments/local/observability
+          environments/local/ml-serving/crds
+          environments/local/ml-serving/core
+          environments/local/ml-serving/workloads
           environments/local/applications
           environments/local/apps
           environments/local/training
