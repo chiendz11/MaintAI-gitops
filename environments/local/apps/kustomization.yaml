@@ -303,7 +303,7 @@ configMapGenerator:
 images:
   - name: registry.invalid/maintai-local/dev-tools
     newName: maintai-local/dev-tools
-    newTag: image-49caa80f93c6ac68ed249619e474eb4fdfe627ddf582753c4d6bc4b1fb8004a3
+    newTag: image-e652aeaa23867cabcdb6e6018fbbc1e6d8cae965340c44ee9a7c81208d84c6cb
   - name: registry.invalid/maintai-local/business-api
     newName: ghcr.io/chiendz11/maintai-business-api
     newTag: sha-f7f389d64a91ffba93dede9e9e1174b81613675f
