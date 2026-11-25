@@ -47,7 +47,7 @@ spec:
         - name: INGESTION_MQTT_PORT
           value: '1883'
         - name: INGESTION_MQTT_TOPIC_FILTER
-          value: maintai/v1/site/+/machines/+/readings
+          value: maintai/v1/site/+/machines/+/telemetry
         - name: INGESTION_MQTT_CLIENT_ID
           value: maintai-ingestion-mqtt-bridge
         - name: INGESTION_MQTT_BATCH_SIZE
