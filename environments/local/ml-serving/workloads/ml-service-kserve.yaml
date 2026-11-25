@@ -73,7 +73,7 @@ spec:
           memory: 256Mi
     containers:
     - name: kserve-container
-      image: ghcr.io/chiendz11/maintai-ml-service:sha-a1fec6bdeb648cbade23ee49846cf580b374ea2e
+      image: ghcr.io/chiendz11/maintai-ml-service:sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
       imagePullPolicy: IfNotPresent
       ports:
       - containerPort: 8001
