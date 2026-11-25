@@ -34,17 +34,6 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: ingestion-api-pdb
-  namespace: maintai-local
-spec:
-  maxUnavailable: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: ingestion-api
----
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
   name: frontend-pdb
   namespace: maintai-local
 spec:

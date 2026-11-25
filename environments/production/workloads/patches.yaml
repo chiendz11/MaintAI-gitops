@@ -1,5 +1,5 @@
 # Production overlay patches replacing local-only secrets, hostPaths, and initContainers.
-# Review and wire real ConfigMaps, IRSA serviceAccounts, and EFS/EBS PVCs before setting replicas > 0.
+# Review and wire real ConfigMaps, IRSA serviceAccounts, EFS/EBS PVCs, and MQTT TLS (8883 + auth/mTLS) Secrets before setting replicas > 0.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -37,10 +37,20 @@ metadata:
 spec:
   template:
     spec:
+      containers:
+      - name: ingestion-api
+        volumeMounts:
+        - name: mqtt-tls
+          mountPath: /certs/mqtt
+          readOnly: true
       volumes:
       - name: tokens
         secret:
           secretName: REPLACE_WITH_SERVICE_TOKENS_SECRET
+          defaultMode: 288
+      - name: mqtt-tls
+        secret:
+          secretName: REPLACE_WITH_MQTT_TLS_SECRET
           defaultMode: 288
 ---
 apiVersion: apps/v1
@@ -144,6 +154,12 @@ spec:
   template:
     spec:
       initContainers: null
+      containers:
+      - name: sensor
+        volumeMounts:
+        - name: mqtt-tls
+          mountPath: /certs/mqtt
+          readOnly: true
       volumes:
       - name: tls
         secret:
@@ -159,6 +175,10 @@ spec:
       - name: sensor-client
         secret:
           secretName: REPLACE_WITH_OIDC_SENSOR_SECRET
+          defaultMode: 288
+      - name: mqtt-tls
+        secret:
+          secretName: REPLACE_WITH_MQTT_TLS_SECRET
           defaultMode: 288
       - name: state
         persistentVolumeClaim: null

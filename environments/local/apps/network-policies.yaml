@@ -214,7 +214,7 @@ spec:
           operator: In
           values:
           - sensor
-          - ingestion-mqtt-bridge
+          - ingestion-api
     ports:
     - protocol: TCP
       port: 1883

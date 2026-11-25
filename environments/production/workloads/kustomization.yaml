@@ -52,12 +52,23 @@ images:
   newTag: REPLACE_WITH_RELEASE_TAG
 patches:
 # Keep production workloads disabled until ECR digests, ConfigMaps, Secrets, and DB migrations are reviewed.
+# Production MQTT TLS (port 8883 + username/password or mTLS) requires INGESTION_MQTT_ENABLED=true,
+# INGESTION_MQTT_PORT=8883, INGESTION_MQTT_TLS_ENABLED=true, INGESTION_MQTT_CA_CERTS=/certs/mqtt/ca.crt
+# (plus INGESTION_MQTT_USERNAME / PASSWORD_FILE or CERTFILE/KEYFILE) and matching SIM_MQTT_* vars on sensor.
 - target:
     kind: Deployment
   patch: |-
     - op: replace
       path: /spec/replicas
       value: 0
+- target:
+    kind: Deployment
+    name: ingestion-api
+  patch: |-
+    - op: replace
+      path: /spec/strategy
+      value:
+        type: Recreate
 - target:
     kind: Deployment
     name: business-api
