@@ -13,6 +13,8 @@ App owners follow [`MaintAI/docs/subsystems/KAFKA_DEVELOPMENT_GUIDE.md`](../../.
 
 - Topic configuration: `12` partitions across both environments (`3` replicas / `minISR=2` production; `1` replica / `minISR=1` local `k3d`), `7 days` retention, `1 MiB` broker max message size.
 - Wire `OUTCOME-14-ONLY` reads/writes canonical `kind` (`1.4.0`) only — no legacy reader adapter or probability-to-risk fallback.
-- Producers keep `acks=all` + `idempotence=true`; consumers disable auto-commit and commit offsets only after durable persistence.
+- Producers use `KafkaPublisher.publish_batch()` pipelining (`acks=all` + `idempotence=true`, `KAFKA_LINGER_MS=2` local, `KAFKA_COMPRESSION_TYPE=lz4`) without holding the publisher lock across broker RTT.
+- **Single-Pod MQTT→Kafka Bridge (`ingestion-mqtt-bridge`):** Consumes `maintai/v1/site/+/machines/+/telemetry` (accepts `("/telemetry", "/readings")`, filters `/status`) as `replicas: 1` (`Recreate`, forbids `$share/`) to preserve per-machine QoS 1 order, batches `32` / `5 ms`, and ACKs MQTT only after Kafka durability (retaining un-ACKed on `503/504`). HTTP `POST /api/v1/sensor-readings` remains parallel.
+- Consumers disable auto-commit and commit offsets only after durable persistence; `business-consumer` keeps bounded prefetch (`64/32`) with synchronous commit batching (`KAFKA_COMMIT_BATCH_SIZE=16`, `KAFKA_COMMIT_MAX_WAIT_MS=50` local).
 
-See [PROCESSING_ORDERING_HANDOFF.md](PROCESSING_ORDERING_HANDOFF.md) for keyed concurrency (`PROC-ORDER-01`), safe-prefix offset coordination, and SQL fencing semantics.
+See [PROCESSING_ORDERING_HANDOFF.md](PROCESSING_ORDERING_HANDOFF.md) for keyed concurrency (`PROC-ORDER-01`), per-key micro-batching, safe-prefix offset coordination, and SQL fencing semantics.

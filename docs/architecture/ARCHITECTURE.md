@@ -17,7 +17,7 @@ Tài liệu này mô tả kiến trúc trạng thái khai báo (Kubernetes Desir
 Hệ thống tách biệt **4 giao diện độc lập** thay vì gộp proxy điều khiển simulator qua Business API:
 
 ```text
-Simulator UI (frontend độc lập) ──► Sensor Control API (:8005) + scheduler ──► Ingestion API (:8000) ──► Kafka
+Simulator UI (frontend độc lập) ──► Sensor Control API (:8005) + Spool v2 ──► Mosquitto (:1883) / Ingestion HTTP (:8000) ──► Kafka
 Main Frontend (Business UI)     ──► Business REST/SSE API (:8003)
 Grafana / MLflow                ──► Native upstream UIs (:13000 / :15000)
 ```
@@ -30,13 +30,17 @@ Grafana / MLflow                ──► Native upstream UIs (:13000 / :15000)
 ## 3. Luồng Dữ liệu Ứng dụng & Quyền Sở hữu Dữ liệu
 
 ```text
-Sensor ──► Ingestion API ──► sensor.readings (12 partitions)
-  ├──► Processing Worker ──► DQ ──► ML /api/v1/predict (Champion + Shadow mirroring) ──► Risk ──► processing_db + Outbox
+Sensor (MQTT QoS 1 + Spool v2) ──► Mosquitto (:1883) ──► ingestion-mqtt-bridge (1 pod, no $share) ──┐
+HTTP Clients ──► ingestion-api (:8000, /api/v1/sensor-readings) ───────────────────────────────────┴─► sensor.readings (12 partitions, lz4)
+  ├──► Processing Worker (keyed FIFO per_key=1, micro-batch <=16) ──► DQ ──► ml-service-mirror (:8001)
+  │        ├──(95%/100% primary)──► Kourier (:80) ──► KServe ml-service-champion (KPA min=2/max=6, UVICORN_WORKERS=1)
+  │        └──(5% async mirror)────► ml-service-shadow (UVICORN_WORKERS=1)
+  │      ──► Risk ──► processing_db + Outbox
   ├──► Storage Consumer ──► Immutable raw JSONL.gz + manifests (S3/MinIO) + storage catalog
   └──► Business Telemetry Consumer ──► latest unverified telemetry (business_db)
 
-Processing Outbox Relay ──► inference.results / alert.signals
-  └──► Business Prediction/Alert Consumers ──► business_db ──► PG NOTIFY ──► tất cả Business API replicas ──► SSE ──► Main UI
+Processing Outbox Relay (ordered mode + publish_batch lz4) ──► inference.results / alert.signals
+  └──► Business Consumer (serial 64/32 + commit batch 16/50ms) ──► business_db ──► PG NOTIFY ──► tất cả Business API replicas ──► SSE ──► Main UI
 
 Business API ──► Processing Read API (JWT delegation M6: history, evidence, export)
 Business API ──► RAG Service (knowledge_db pgvector + Groq LLM; lỗi LLM không chặn Alert)
@@ -58,25 +62,28 @@ Một cụm PostgreSQL 17 logic chứa 5 databases độc lập, mỗi owner có
 
 | Runtime | Loại Kubernetes | Image Name | Database / Storage |
 | :--- | :--- | :--- | :--- |
-| `ingestion-api` | Deployment | `maintai-ingestion-api` | Kafka producer (no DB) |
+| `mosquitto` (local) | Deployment (`Recreate`, 1 replica) + Service `:1883` | `eclipse-mosquitto:2` (`2.1.4`) | PVC `local-mosquitto-data` (1Gi, `sync-wave: '-30'`) |
+| `ingestion-api` | Deployment (2 replicas) | `maintai-ingestion-api` | Kafka producer (`publish_batch` + `lz4`, no DB) |
+| `ingestion-mqtt-bridge` | Deployment (`Recreate`, 1 replica, không `$share`) | `maintai-ingestion-api` | MQTT QoS 1 → Kafka producer (`publish_batch` + `lz4`) |
 | `processing-worker` / `read-api` / `outbox-relay` | 3 Deployments | `maintai-processing` | `processing_db` |
 | `storage-consumer` | Deployment | `maintai-storage-consumer` | S3 / MinIO (`maintai-raw*`) |
 | `business-api` / `business-consumer` | 2 Deployments | `maintai-business-backend` | `business_db` |
-| `ml-service` & `ml-service-shadow` | 2 Deployments | `maintai-ml-service` | Local/S3 bundle (`logreg-baseline-v0` / `hgb-candidate`) |
+| `ml-service-champion` | KServe `InferenceService` (KPA `min=2/max=6`, `UVICORN_WORKERS=1`) | `maintai-ml-service` | Local/S3 bundle (`logreg-baseline-v0`, vectorized fast path) |
+| `ml-service-mirror` & `ml-service-shadow` | 2 Deployments (Nginx mirror 5% + Shadow `UVICORN_WORKERS=1`) | `nginx-unprivileged` / `maintai-ml-service` | Routing Kourier + shadow bundle (`hgb-candidate`) |
 | `rag-service` | Deployment | `maintai-rag-service` | `knowledge_db` (`pgvector`) + cache PVC |
 | `frontend` | Deployment | `maintai-frontend` | Static Nginx + runtime config |
 | `simulator-ui` | Deployment | `maintai-simulator-ui` | Static Nginx + runtime config |
-| `sensor` | Deployment (`Recreate`, 1 replica) | `maintai-sensor` | Durable PVC (SQLite state/spool) |
+| `sensor` | Deployment (`Recreate`, 1 replica) | `maintai-sensor` | Durable PVC (SQLite Spool v2 `100k`/`128 MiB`, MQTT/HTTP) |
 | `drift-worker` | CronJob | `maintai-drift-worker` | `drift_db` + S3 |
 | `training` | Argo Workflow Task | `maintai-training` | MLflow HTTP API + S3 |
 
-- **Kiến trúc Shadow Rollout (`ml-service-shadow`):** Triển khai pod shadow (`SERVICE_ROLE=shadow`) song song với Champion; Processing/proxy nhân bản traffic (`Traffic Mirroring`) để đánh giá thực nghiệm mà không ảnh hưởng kết quả dự báo chính và cảnh báo người dùng.
+- **Kiến trúc KServe KPA & Shadow Rollout:** `ml-service-champion` chạy qua **KServe `v0.18.1` + Knative Serving `v1.21.3` + Kourier `v1.21.1`** (`scaleMetric: concurrency`, `scaleTarget: 4`, `containerConcurrency: 8`, `minReplicas: 2`, `maxReplicas: 6`, `UVICORN_WORKERS=1`). `ml-service-mirror` (`2` pods) chuyển traffic chính qua Kourier internal và nhân bản `5%` bất đồng bộ sang `ml-service-shadow` (`1` pod).
 - **MLflow Image Ownership:** Source Dockerfile thuộc `MaintAI/ml-service/mlflow/`; GitOps quản lý Deployment/IRSA/config dưới `platform/mlops/` (production) và `environments/local/apps/mlflow.yaml` (local). Chi tiết xem [MLFLOW_IMAGE_MIGRATION.md](../handoffs/MLFLOW_IMAGE_MIGRATION.md).
 
 ---
 
 ## 5. Failure Semantics & Processing Concurrency (`PROC-ORDER-01`)
 
-- **At-least-once & Idempotency:** Worker commit `processing_db` + outbox trước khi commit Kafka offset; Relay chỉ đánh dấu published sau broker ACK; Business inbox + projection/alert + audit commit trước offset; Storage commit sau khi object + manifest bền vững. SSE reconnect dùng REST snapshot resync (PG NOTIFY không phải replay log).
-- **HTTP & Probes:** Mọi HTTP service có `readinessProbe`/`startupProbe`/`livenessProbe`, rolling update `maxUnavailable: 0, maxSurge: 1` kết hợp `PodDisruptionBudget` và Zero-Trust `NetworkPolicy`.
-- **Keyed Processing (`PROC-ORDER-01`):** Worker xử lý FIFO theo từng `machine_id`, song song nhiều máy trong budget cấu hình và chỉ commit safe completed prefix mỗi partition; Relay chỉ gửi head chưa published theo key/topic. Chi tiết cutover cấu hình `PROC-ORDER-01` xem [PROCESSING_ORDERING_HANDOFF.md](../handoffs/PROCESSING_ORDERING_HANDOFF.md).
+- **At-least-once & Idempotency:** `sensor` chỉ xóa Spool v2 sau MQTT `PUBACK`; `ingestion-mqtt-bridge` chỉ `PUBACK` sau Kafka durable ACK; Worker commit `processing_db` + outbox trước khi commit safe-prefix Kafka offset; Relay chỉ đánh dấu published sau broker ACK; Business inbox + projection/alert + audit commit trước offset (gom commit đồng bộ theo `KAFKA_COMMIT_BATCH_SIZE=16`, `KAFKA_COMMIT_MAX_WAIT_MS=50`); Storage commit sau khi object + manifest bền vững. SSE reconnect dùng REST snapshot resync (PG NOTIFY không phải replay log).
+- **HTTP & Probes:** Mọi HTTP service có `readinessProbe`/`startupProbe`/`livenessProbe`, rolling update `maxUnavailable: 0, maxSurge: 1` kết hợp `PodDisruptionBudget` và Zero-Trust `NetworkPolicy` (gồm `allow-sensor-ingestion-to-mosquitto`, `allow-mirror-to-kourier-internal`, `allow-knative-kourier-to-kserve-predictor`).
+- **Keyed Processing (`PROC-ORDER-01`):** Worker giữ `per_key=1` FIFO nghiêm ngặt theo từng `machine_id`, bật per-key micro-batching (`PROCESSING_MAX_BATCH_PER_KEY=16`) gọi `/api/v1/predict/batch`, song song nhiều máy trong budget cấu hình và chỉ commit safe completed prefix mỗi partition; Relay chỉ gửi head chưa published theo key/topic với `publish_batch()` + `lz4` (`KAFKA_LINGER_MS=2`). Chi tiết cutover cấu hình `PROC-ORDER-01` xem [PROCESSING_ORDERING_HANDOFF.md](../handoffs/PROCESSING_ORDERING_HANDOFF.md).
