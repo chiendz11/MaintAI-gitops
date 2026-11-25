@@ -13,7 +13,7 @@ resources:
 images:
   - name: registry.invalid/maintai/training
     newName: ghcr.io/chiendz11/maintai-training
-    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
+    newTag: sha-7f79d8d49041f339fe2fb98170534d1685e783ca
   - name: registry.invalid/maintai/automation
     newName: ghcr.io/chiendz11/maintai-automation
-    newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
+    newTag: sha-7f79d8d49041f339fe2fb98170534d1685e783ca
