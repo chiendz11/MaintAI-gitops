@@ -309,7 +309,7 @@ images:
     newTag: sha-57169209bd959156e1c923c79b672b4d98a871ce
   - name: registry.invalid/maintai-local/ingestion-api
     newName: ghcr.io/chiendz11/maintai-ingestion-api
-    newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
+    newTag: sha-7f79d8d49041f339fe2fb98170534d1685e783ca
   - name: registry.invalid/maintai-local/ml-service
     newName: ghcr.io/chiendz11/maintai-ml-service
     newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
