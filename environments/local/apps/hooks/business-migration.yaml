@@ -24,6 +24,15 @@ spec:
         - /bin/sh
         - -c
         - |
+          python -c "import socket, time
+          for _ in range(20):
+              try:
+                  socket.create_connection(('postgres', 5432), timeout=1).close()
+                  break
+              except OSError:
+                  time.sleep(1)
+          else:
+              raise SystemExit('postgres:5432 unreachable after 20s')" && \
           maintai-business-migrate upgrade && \
           python -c "import os,psycopg; from psycopg.rows import dict_row; from backend.shared.persistence.permissions import grant_business_permissions as grant
           with psycopg.connect(os.environ['BUSINESS_DATABASE_URL'], row_factory=dict_row) as c:
