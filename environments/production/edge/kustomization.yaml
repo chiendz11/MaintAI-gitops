@@ -1,3 +1,54 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-resources: []
+resources:
+- ../params
+- app.yaml
+- simulator.yaml
+replacements:
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.CERTIFICATE_ARN
+  targets:
+  - select:
+      kind: Ingress
+      name: maintai-app
+    fieldPaths:
+    - metadata.annotations.[alb.ingress.kubernetes.io/certificate-arn]
+  - select:
+      kind: Ingress
+      name: maintai-simulator
+    fieldPaths:
+    - metadata.annotations.[alb.ingress.kubernetes.io/certificate-arn]
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.APP_HOST
+  targets:
+  - select:
+      kind: Ingress
+      name: maintai-app
+    fieldPaths:
+    - metadata.annotations.[external-dns.alpha.kubernetes.io/hostname]
+    - spec.rules.0.host
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.SIMULATOR_HOST
+  targets:
+  - select:
+      kind: Ingress
+      name: maintai-simulator
+    fieldPaths:
+    - metadata.annotations.[external-dns.alpha.kubernetes.io/hostname]
+    - spec.rules.0.host
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.OPERATOR_CIDRS
+  targets:
+  - select:
+      kind: Ingress
+      name: maintai-simulator
+    fieldPaths:
+    - metadata.annotations.[alb.ingress.kubernetes.io/inbound-cidrs]

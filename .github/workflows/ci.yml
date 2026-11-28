@@ -45,6 +45,7 @@ jobs:
           environments/local/training
           environments/production/config
           environments/production/edge
+          environments/production/ml-serving
           environments/production/mlops
           environments/production/training
           environments/production/workloads

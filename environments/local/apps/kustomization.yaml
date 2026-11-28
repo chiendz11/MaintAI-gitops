@@ -33,7 +33,12 @@ configMapGenerator:
       - BUSINESS_HISTORY_SERVICE_SUBJECT=1aa95d50-1576-407f-97ff-46048198b1d6
       - BUSINESS_HISTORY_SIGNING_KEY_FILE=/history/signing-key.pem
       - BUSINESS_HISTORY_SIGNING_KEY_ID=history-66da4408f7354908
+      - BUSINESS_DRIFT_BUCKET=maintai-drift
+      - BUSINESS_DRIFT_CURSOR_KEY_FILE=/m7/drift-cursor-key
+      - BUSINESS_DRIFT_S3_ENDPOINT=http://minio:9000
+      - BUSINESS_DRIFT_S3_REGION=us-east-1
       - BUSINESS_HOST=0.0.0.0
+      - BUSINESS_M7_ENABLED=true
       - BUSINESS_MACHINES_CLAIM=machine_ids
       - BUSINESS_NOTIFY_CHANNEL=maintai_business_live_v1
       - BUSINESS_OIDC_AUDIENCE=maintai-business-local
@@ -45,6 +50,11 @@ configMapGenerator:
       - BUSINESS_PROCESSING_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
       - BUSINESS_PROCESSING_READ_URL=http://processing-read-api:8004
       - BUSINESS_PROFILE=local-test
+      - BUSINESS_RAG_OAUTH_CLIENT_ID=maintai-business-worker
+      - BUSINESS_RAG_OAUTH_SCOPE=rag:brief
+      - BUSINESS_RAG_OAUTH_SECRET_FILE=/credentials/rag-oauth/client_secret
+      - BUSINESS_RAG_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
+      - BUSINESS_RAG_URL=http://rag-service:8002
       - BUSINESS_ROLES_CLAIM=roles
       - PRODUCER_GIT_SHA=2df0a914287a86f3500731ba05a2ba866bbee160
   - name: business-consumer-config
@@ -53,6 +63,7 @@ configMapGenerator:
       - BUSINESS_CONSUMER_HOST=0.0.0.0
       - BUSINESS_CONSUMER_PORT=8083
       - BUSINESS_CONSUMER_PROFILE=local-test
+      - BUSINESS_CONSUMER_RUN_WORKERS=false
       - BUSINESS_NOTIFY_CHANNEL=maintai_business_live_v1
       - BUSINESS_PROCESSING_OAUTH_CLIENT_ID=maintai-processing
       - BUSINESS_PROCESSING_OAUTH_SECRET_FILE=/credentials/processing/client_secret
@@ -66,45 +77,40 @@ configMapGenerator:
       - KAFKA_POLL_INTERVAL_SECONDS=0.01
       - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
       - PRODUCER_GIT_SHA=2df0a914287a86f3500731ba05a2ba866bbee160
+  - name: business-worker-config
+    literals:
+      - BUSINESS_DRIFT_BUCKET=maintai-drift
+      - BUSINESS_DRIFT_CURSOR_KEY_FILE=/m7/drift-cursor-key
+      - BUSINESS_DRIFT_S3_ENDPOINT=http://minio:9000
+      - BUSINESS_DRIFT_S3_REGION=us-east-1
+      - BUSINESS_M7_ENABLED=true
+      - BUSINESS_PROCESSING_OAUTH_CLIENT_ID=maintai-processing
+      - BUSINESS_PROCESSING_OAUTH_SECRET_FILE=/credentials/processing/client_secret
+      - BUSINESS_PROCESSING_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
+      - BUSINESS_PROCESSING_READ_URL=http://processing-read-api:8004
+      - BUSINESS_RAG_OAUTH_CLIENT_ID=maintai-business-worker
+      - BUSINESS_RAG_OAUTH_SCOPE=rag:brief
+      - BUSINESS_RAG_OAUTH_SECRET_FILE=/credentials/rag-oauth/client_secret
+      - BUSINESS_RAG_OAUTH_TOKEN_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/token
+      - BUSINESS_RAG_URL=http://rag-service:8002
+      - BUSINESS_WORKER_HOST=0.0.0.0
+      - BUSINESS_WORKER_PORT=8084
+      - BUSINESS_WORKER_PROFILE=local-test
+      - PRODUCER_GIT_SHA=2df0a914287a86f3500731ba05a2ba866bbee160
+  - name: redpanda-connect-config
+    literals:
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_TOPIC_READINGS=sensor.readings
+      - KAFKA_TOPIC_REJECTED=sensor.rejected
+      - MQTT_TOPIC_FILTER=maintai/v1/site/+/machines/+/telemetry
+      - MQTT_URL=tcp://emqx:1883
+      - PRODUCER_GIT_SHA=2df0a914287a86f3500731ba05a2ba866bbee160
   - name: frontend-config
     literals:
       - 'runtime-config.json={"apiBaseUrl": "/api/v1", "auth": {"audience": "maintai-business-local",
         "authority": "https://auth.maintai.localhost/realms/maintai", "clientId": "maintai-business-ui",
         "rolesClaim": "roles", "scope": "openid profile"}, "freshMs": 2000, "mode": "live",
         "staleMs": 5000}'
-  - name: ingestion-api-config
-    literals:
-      - AUTH_MODE=oidc
-      - BUSINESS_PUBLIC_ORIGIN=https://app.maintai.localhost
-      - INGESTION_ENV=local
-      - INGESTION_HOST=0.0.0.0
-      - INGESTION_MAX_INFLIGHT=64
-      - INGESTION_MQTT_ALLOWED_MACHINE_IDS=M-001,M-002,M-003,M-004,M-005,M-006,M-007,M-008,M-009,M-010,M-011,M-012,M-013,M-014,M-015,M-016,M-017,M-018,M-019,M-020,M-021,M-022,M-023,M-024,M-025,M-026,M-027,M-028,M-029,M-030,M-031,M-032,M-033,M-034,M-035,M-036,M-037,M-038,M-039,M-040,M-041,M-042,M-043,M-044,M-045,M-046,M-047,M-048,M-049,M-050
-      - INGESTION_MQTT_BATCH_SIZE=32
-      - INGESTION_MQTT_BATCH_WAIT_MS=5
-      - INGESTION_MQTT_CLIENT_ID=maintai-ingestion-mqtt-bridge
-      - INGESTION_MQTT_ENABLED=true
-      - INGESTION_MQTT_HOST=mosquitto
-      - INGESTION_MQTT_MAX_INFLIGHT=256
-      - INGESTION_MQTT_PORT=1883
-      - INGESTION_MQTT_SOURCE_SUBJECT=maintai-sensor
-      - INGESTION_MQTT_TOPIC_FILTER=maintai/v1/site/+/machines/+/telemetry
-      - INGESTION_PORT=8000
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - KAFKA_COMPRESSION_TYPE=lz4
-      - KAFKA_GROUP_PREFIX=local-
-      - KAFKA_LINGER_MS=2
-      - KAFKA_LOCAL_MODE=true
-      - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
-      - OIDC_AUDIENCE=ingestion
-      - OIDC_ISSUER=https://auth.maintai.localhost/realms/maintai
-      - OIDC_JWKS_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/certs
-      - OIDC_MACHINES_CLAIM=machine_ids
-      - OIDC_ROLES_CLAIM=roles
-      - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
-  - name: ml-service-artifacts
-    literals:
-      - 'artifacts.json=[{"bucket": "maintai-models", "key": "models/logreg-baseline-v0/pipeline.joblib", "version_id": "943ae35a-5b6c-4266-8778-1d3cd24ebfab", "path": "/local/models/logreg-baseline-v0/pipeline.joblib", "sha256": "163967932a2c4774c55539cad4bb64099baa7d252e8f472261b6f672ade91f44"}, {"bucket": "maintai-models", "key": "models/logreg-baseline-v0/metadata.json", "version_id": "c2d85b19-f805-42b6-ae23-d603f8f8f0e3", "path": "/local/models/logreg-baseline-v0/metadata.json", "sha256": "821b32a0f9db0ffe79dbc196c160732a3802eb349e48f52d905bd3713be1b9c8"}, {"bucket": "maintai-models", "key": "models/logreg-baseline-v0/evaluation.json", "version_id": "d580bd3f-c3d3-466a-8149-6504d32cfc37", "path": "/local/models/logreg-baseline-v0/evaluation.json", "sha256": "5c797c56ad4faeb84d3b2d44cb910c36242c20aa8bbdd501cb1f3b4b835038db"}, {"bucket": "maintai-models", "key": "models/logreg-baseline-v0/drift_reference.json", "version_id": "ad15daee-5a49-4cb9-9299-e81cd8314525", "path": "/local/models/logreg-baseline-v0/drift_reference.json", "sha256": "ba9cac5d5ebae48cd5b68fe8710758d53e3b976af4131bd2ea2e2d843d3fea71"}]'
   - name: ml-service-config
     literals:
       - AWS_DEFAULT_REGION=us-east-1
@@ -117,9 +123,6 @@ configMapGenerator:
       - SERVICE_ROLE=champion
       - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
       - S3_ENDPOINT_URL=http://minio:9000
-  - name: ml-service-shadow-artifacts
-    literals:
-      - 'artifacts.json=[{"bucket": "maintai-models", "key": "models/hgb-interactions-candidate-v1/pipeline.joblib", "version_id": "a602aef0-f15f-46bf-bb20-89940ced5f87", "path": "/local/models/hgb-interactions-candidate-v1/pipeline.joblib", "sha256": "eb96429b8fa5896f8b4f43d23b2df7499a9e25a6f67ffcbaf272d8e6656f4599"}, {"bucket": "maintai-models", "key": "models/hgb-interactions-candidate-v1/metadata.json", "version_id": "9fdbbd54-7a37-4ef9-ab2b-6d3308cc4034", "path": "/local/models/hgb-interactions-candidate-v1/metadata.json", "sha256": "034c84233af9e2c3b1a0960deb66324259736f362ecb83aa4fa230998c976805"}, {"bucket": "maintai-models", "key": "models/hgb-interactions-candidate-v1/evaluation.json", "version_id": "c693d86c-a81b-4041-9ffa-67fb286266dd", "path": "/local/models/hgb-interactions-candidate-v1/evaluation.json", "sha256": "d09679f27a448d5aed5ed72af6256265afa68865e2e63192fdb5b44dbeb2c6ce"}, {"bucket": "maintai-models", "key": "models/hgb-interactions-candidate-v1/drift_reference.json", "version_id": "40d2b877-43db-4443-a12d-b49beb2b8179", "path": "/local/models/hgb-interactions-candidate-v1/drift_reference.json", "sha256": "76ce402c7c42c3267524bccc133d4383166f07d9f804b0aa650723574db46543"}]'
   - name: ml-service-shadow-config
     literals:
       - AWS_DEFAULT_REGION=us-east-1
@@ -219,6 +222,11 @@ configMapGenerator:
       - MODEL_LOCAL_FILES_ONLY=true
       - OMP_NUM_THREADS=2
       - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
+      - RAG_MAX_COSINE_DISTANCE=0.65
+      - RAG_OIDC_AUDIENCE=maintai-rag
+      - RAG_OIDC_ISSUER=https://auth.maintai.localhost/realms/maintai
+      - RAG_OIDC_JWKS_URL=http://keycloak:8080/realms/maintai/protocol/openid-connect/certs
+      - RAG_OIDC_REQUIRED_SCOPE=rag:brief
       - S3_ENDPOINT_URL=http://minio:9000
       - SENTENCE_TRANSFORMERS_HOME=/opt/maintai/model-cache
   - name: sensor-artifacts
@@ -226,7 +234,6 @@ configMapGenerator:
       - 'artifacts.json=[{"path": "/local/datasets/ai4i2020.csv", "sha256": "dc6630cd9b1f0f853922fad78a1b6436570d3f1ec863f1dd5c4340ac56bc8a8e"}]'
   - name: sensor-config
     literals:
-      - BACKEND_BASE_URL=http://ingestion-api:8000
       - PRODUCER_GIT_SHA=5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
       - SIM_AUTH_MODE=jwt
       - SIM_CONTROL_SCOPE=simulator:control
@@ -287,7 +294,7 @@ configMapGenerator:
       - STORAGE_HTTP_PORT=8008
   - name: local-app-release-status
     literals:
-      - enabled=business-api,business-consumer,drift-worker,frontend,ingestion-api,ml-service,ml-service-shadow,processing-outbox-relay,processing-read-api,processing-worker,rag-service,sensor,simulator-ui,storage-consumer
+      - enabled=business-api,business-consumer,drift-worker,frontend,ml-service,ml-service-shadow,processing-outbox-relay,processing-read-api,processing-worker,rag-service,sensor,simulator-ui,storage-consumer
       - profile-sha256=623e527d22e462628afb31913a0f2eb594d0ccbaa9ebc07fbd665063746f2b8a
   - name: local-history-jwks
     literals:
@@ -305,20 +312,20 @@ images:
     newName: maintai-local/dev-tools
     newTag: image-e652aeaa23867cabcdb6e6018fbbc1e6d8cae965340c44ee9a7c81208d84c6cb
   - name: registry.invalid/maintai-local/business-api
-    newName: ghcr.io/chiendz11/maintai-business-api
-    newTag: sha-f7f389d64a91ffba93dede9e9e1174b81613675f
+    newName: maintai-local/business-api
+    newTag: image-11b06adf09d6cc6d73449a0ee270968467d42a7d00c6d8e105545c6192abfbec
   - name: registry.invalid/maintai-local/business-consumer
-    newName: ghcr.io/chiendz11/maintai-business-consumer
-    newTag: sha-ac6fc794ac12c2886d695683c0f26bf5a00f23d2
+    newName: maintai-local/business-consumer
+    newTag: image-6cbccbe183af71f47b19faef177dec7a425cb16cf244fe9bd82177a2ed1069c1
   - name: registry.invalid/maintai-local/drift-worker
     newName: ghcr.io/chiendz11/maintai-drift-worker
     newTag: sha-94248e49bd84b112162244f62b25fd466cbf82f4
   - name: registry.invalid/maintai-local/frontend
     newName: ghcr.io/chiendz11/maintai-frontend
     newTag: sha-57169209bd959156e1c923c79b672b4d98a871ce
-  - name: registry.invalid/maintai-local/ingestion-api
-    newName: ghcr.io/chiendz11/maintai-ingestion-api
-    newTag: sha-ac6fc794ac12c2886d695683c0f26bf5a00f23d2
+  - name: registry.invalid/maintai-local/ingestion-connect
+    newName: maintai-local/ingestion-connect
+    newTag: image-21b7b4a6e205a623346354aa3177bff68554f500ee8244c5de79842006106951
   - name: registry.invalid/maintai-local/ml-service
     newName: ghcr.io/chiendz11/maintai-ml-service
     newTag: sha-89aae6d410c2ee57a8f39073571ca124bb2f5238
@@ -336,7 +343,7 @@ images:
     newTag: sha-ac6fc794ac12c2886d695683c0f26bf5a00f23d2
   - name: registry.invalid/maintai-local/rag-service
     newName: maintai-local/rag-service
-    newTag: image-1e5c3fe741a5e45d73a0dd500f6717f2f7a5b7574f809fc74b8e3b9a260d3759
+    newTag: image-a24d173a751a1e16267942c9e1785a5c7fb92bdec74b1632736242dd0c96d984
   - name: registry.invalid/maintai-local/sensor
     newName: ghcr.io/chiendz11/maintai-sensor
     newTag: sha-ac6fc794ac12c2886d695683c0f26bf5a00f23d2
@@ -369,17 +376,6 @@ patches:
       \  value: IfNotPresent"
   - target:
       kind: Deployment
-      name: ingestion-api
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
-      - op: replace
-        path: /spec/strategy
-        value:
-          type: Recreate
-  - target:
-      kind: Deployment
       name: processing-worker
     patch: |-
       - op: add
@@ -400,11 +396,42 @@ patches:
             secretName: local-oidc-processing
             defaultMode: 288
       - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: oidc-rag
+          secret:
+            secretName: local-oidc-business-worker
+            defaultMode: 288
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: m7-tokens
+          secret:
+            secretName: local-m7-tokens
+            defaultMode: 288
+      - op: add
         path: /spec/template/spec/containers/0/volumeMounts/-
         value:
           name: oidc-processing
           mountPath: /credentials/processing
           readOnly: true
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: oidc-rag
+          mountPath: /credentials/rag-oauth
+          readOnly: true
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: m7-tokens
+          mountPath: /m7
+          readOnly: true
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom/-
+        value:
+          secretRef:
+            name: local-drift-s3-env
   - target:
       kind: Deployment
       name: business-consumer
@@ -422,6 +449,61 @@ patches:
           name: oidc-processing
           mountPath: /credentials/processing
           readOnly: true
+  - target:
+      kind: Deployment
+      name: business-worker
+    patch: |-
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: oidc-processing
+          secret:
+            secretName: local-oidc-processing
+            defaultMode: 288
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: oidc-rag
+          secret:
+            secretName: local-oidc-business-worker
+            defaultMode: 288
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: m7-tokens
+          secret:
+            secretName: local-m7-tokens
+            defaultMode: 288
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: oidc-processing
+          mountPath: /credentials/processing
+          readOnly: true
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: oidc-rag
+          mountPath: /credentials/rag-oauth
+          readOnly: true
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: m7-tokens
+          mountPath: /m7
+          readOnly: true
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom/-
+        value:
+          secretRef:
+            name: local-drift-s3-env
+  - target:
+      kind: Deployment
+      name: rag-service
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
   - target:
       kind: Deployment
       name: processing-outbox-relay

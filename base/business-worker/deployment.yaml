@@ -1,34 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ingestion-api
+  name: business-worker
   labels:
-    app.kubernetes.io/name: ingestion-api
+    app.kubernetes.io/name: business-worker
     app.kubernetes.io/part-of: maintai-local
 spec:
   replicas: 1
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
   selector:
     matchLabels:
-      app.kubernetes.io/name: ingestion-api
+      app.kubernetes.io/name: business-worker
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: ingestion-api
+        app.kubernetes.io/name: business-worker
         app.kubernetes.io/part-of: maintai-local
       annotations:
-        maintai.io/source-sha: 5b4664bb24e9f107c00a83e1faffb72fc5c1f4e3
-        maintai.io/source-snapshot: e449b3c92f7ee1e6ca34504d9d5a6db947e45f2600a2d59861409587c9c41fcc
-        maintai.io/source-dirty: 'false'
         prometheus.io/scrape: 'true'
-        prometheus.io/port: '8000'
+        prometheus.io/path: /metrics
+        prometheus.io/port: '8084'
     spec:
       automountServiceAccountToken: false
-      terminationGracePeriodSeconds: 90
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001
@@ -37,18 +29,23 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: ingestion-api
-        image: registry.invalid/maintai-local/ingestion-api:NOT_BUILT
+      - name: business-worker
+        image: registry.invalid/maintai-local/business-consumer:NOT_BUILT
         imagePullPolicy: IfNotPresent
+        command:
+        - maintai-business-worker
         envFrom:
         - configMapRef:
-            name: ingestion-api-config
+            name: business-worker-config
+        - secretRef:
+            name: local-business-consumer-env
         resources:
           requests:
             cpu: 100m
-            memory: 128Mi
+            memory: 256Mi
           limits:
-            memory: 1Gi
+            cpu: 500m
+            memory: 512Mi
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
@@ -61,30 +58,28 @@ spec:
         - name: tokens
           mountPath: /tokens
           readOnly: true
-        command:
-        - maintai-ingestion
         ports:
-        - containerPort: 8000
+        - containerPort: 8084
           name: http
         startupProbe:
           httpGet:
-            path: /health/ready
-            port: 8000
+            path: /health/live
+            port: 8084
           periodSeconds: 5
           timeoutSeconds: 2
-          failureThreshold: 60
+          failureThreshold: 12
         readinessProbe:
           httpGet:
             path: /health/ready
-            port: 8000
-          periodSeconds: 5
+            port: 8084
+          periodSeconds: 10
           timeoutSeconds: 2
           failureThreshold: 3
         livenessProbe:
           httpGet:
             path: /health/live
-            port: 8000
-          periodSeconds: 5
+            port: 8084
+          periodSeconds: 20
           timeoutSeconds: 2
           failureThreshold: 3
       volumes:

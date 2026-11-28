@@ -23,6 +23,8 @@ spec:
       value: '{}'
     - name: retry-release
       value: 'false'
+    - name: publish-dry-run
+      value: 'false'
   volumes:
   - name: context
     configMap:
@@ -251,6 +253,8 @@ spec:
         mountPath: /release
         readOnly: true
       env:
+      - name: PUBLISH_DRY_RUN
+        value: '{{workflow.parameters.publish-dry-run}}'
       - name: GITHUB_APP_ID
         valueFrom:
           secretKeyRef:

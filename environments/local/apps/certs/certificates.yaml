@@ -27,10 +27,6 @@ spec:
   - keycloak.maintai-local
   - keycloak.maintai-local.svc
   - keycloak.maintai-local.svc.cluster.local
-  - ingestion-api
-  - ingestion-api.maintai-local
-  - ingestion-api.maintai-local.svc
-  - ingestion-api.maintai-local.svc.cluster.local
   - sensor
   - sensor.maintai-local
   - sensor.maintai-local.svc
@@ -57,7 +53,6 @@ spec:
   - simulator.maintai.localhost
   - auth.maintai.localhost
   - api.maintai.localhost
-  - ingest.maintai.localhost
   - processing.maintai.localhost
   - grafana.maintai.localhost
   - mlflow.maintai.localhost
@@ -68,7 +63,6 @@ spec:
   - simulator.maintai.local
   - auth.maintai.local
   - api.maintai.local
-  - ingest.maintai.local
   - processing.maintai.local
   - grafana.maintai.local
   - mlflow.maintai.local

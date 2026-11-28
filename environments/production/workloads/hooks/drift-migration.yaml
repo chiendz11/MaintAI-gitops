@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: drift-db-migration
+  namespace: maintai
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 300
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      name: drift-db-migration
+      labels:
+        app.kubernetes.io/name: drift-db-migration
+        app.kubernetes.io/part-of: maintai
+    spec:
+      serviceAccountName: drift-worker
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: migration
+        image: registry.invalid/maintai-local/drift-worker:NOT_BUILT
+        imagePullPolicy: IfNotPresent
+        args:
+        - init-db
+        env:
+        - name: DRIFT_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: drift-database
+              key: url
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}

@@ -1,0 +1,126 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: business-api-config
+  namespace: maintai
+data:
+  BUSINESS_PROFILE: shared
+  BUSINESS_HOST: 0.0.0.0
+  BUSINESS_PORT: '8003'
+  BUSINESS_NOTIFY_CHANNEL: maintai_business_live_v1
+  BUSINESS_ALERT_NOTIFY_CHANNEL: maintai_business_alert_v1
+  BUSINESS_M7_ENABLED: 'true'
+  BUSINESS_RAG_URL: https://rag.REPLACE_WITH_DOMAIN
+  BUSINESS_RAG_OAUTH_TOKEN_URL: REPLACE_WITH_COGNITO_TOKEN_URL
+  BUSINESS_RAG_OAUTH_CLIENT_ID: REPLACE_WITH_COGNITO_M2M_BUSINESS_WORKER_CLIENT_ID
+  BUSINESS_RAG_OAUTH_SECRET_FILE: /credentials/rag-oauth/client_secret
+  BUSINESS_RAG_OAUTH_SCOPE: https://api.REPLACE_WITH_DOMAIN/rag:brief
+  BUSINESS_DRIFT_CURSOR_KEY_FILE: /m7/drift-cursor-key
+  BUSINESS_DRIFT_BUCKET: REPLACE_WITH_DRIFT_BUCKET
+  BUSINESS_DRIFT_S3_REGION: REPLACE_WITH_REGION
+  BUSINESS_PROCESSING_READ_URL: https://processing.REPLACE_WITH_DOMAIN
+  BUSINESS_OIDC_ISSUER: https://cognito-idp.REPLACE_WITH_REGION.amazonaws.com/REPLACE_WITH_COGNITO_POOL_ID
+  BUSINESS_OIDC_AUDIENCE: REPLACE_WITH_BUSINESS_UI_CLIENT_ID
+  BUSINESS_OIDC_JWKS_URL: https://cognito-idp.REPLACE_WITH_REGION.amazonaws.com/REPLACE_WITH_COGNITO_POOL_ID/.well-known/jwks.json
+  BUSINESS_ROLES_CLAIM: cognito:groups
+  BUSINESS_MACHINES_CLAIM: machine_ids
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: business-consumer-config
+  namespace: maintai
+data:
+  BUSINESS_CONSUMER_PROFILE: shared
+  BUSINESS_CONSUMER_RUN_WORKERS: 'false'
+  BUSINESS_CONSUMER_HOST: 0.0.0.0
+  BUSINESS_CONSUMER_PORT: '8083'
+  BUSINESS_NOTIFY_CHANNEL: maintai_business_live_v1
+  BUSINESS_ALERT_NOTIFY_CHANNEL: maintai_business_alert_v1
+  BUSINESS_PROCESSING_READ_URL: https://processing.REPLACE_WITH_DOMAIN
+  KAFKA_BOOTSTRAP_SERVERS: REPLACE_WITH_MSK_BOOTSTRAP_BROKERS
+  KAFKA_SECURITY_PROTOCOL: SASL_SSL
+  KAFKA_SASL_MECHANISM: SCRAM-SHA-512
+  KAFKA_GROUP_PREFIX: prod-
+  KAFKA_COMMIT_BATCH_SIZE: '16'
+  KAFKA_COMMIT_MAX_WAIT_MS: '50'
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: business-worker-config
+  namespace: maintai
+data:
+  BUSINESS_WORKER_PROFILE: shared
+  BUSINESS_WORKER_HOST: 0.0.0.0
+  BUSINESS_WORKER_PORT: '8084'
+  BUSINESS_M7_ENABLED: 'true'
+  BUSINESS_RAG_URL: https://rag.REPLACE_WITH_DOMAIN
+  BUSINESS_RAG_OAUTH_TOKEN_URL: REPLACE_WITH_COGNITO_TOKEN_URL
+  BUSINESS_RAG_OAUTH_CLIENT_ID: REPLACE_WITH_COGNITO_M2M_BUSINESS_WORKER_CLIENT_ID
+  BUSINESS_RAG_OAUTH_SECRET_FILE: /credentials/rag-oauth/client_secret
+  BUSINESS_RAG_OAUTH_SCOPE: https://api.REPLACE_WITH_DOMAIN/rag:brief
+  BUSINESS_DRIFT_CURSOR_KEY_FILE: /m7/drift-cursor-key
+  BUSINESS_DRIFT_BUCKET: REPLACE_WITH_DRIFT_BUCKET
+  BUSINESS_DRIFT_S3_REGION: REPLACE_WITH_REGION
+  BUSINESS_PROCESSING_READ_URL: https://processing.REPLACE_WITH_DOMAIN
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rag-service-config
+  namespace: maintai
+data:
+  ENVIRONMENT: production
+  AWS_REGION: REPLACE_WITH_REGION
+  AWS_DEFAULT_REGION: REPLACE_WITH_REGION
+  RAG_OIDC_ISSUER: https://cognito-idp.REPLACE_WITH_REGION.amazonaws.com/REPLACE_WITH_COGNITO_POOL_ID
+  RAG_OIDC_JWKS_URL: https://cognito-idp.REPLACE_WITH_REGION.amazonaws.com/REPLACE_WITH_COGNITO_POOL_ID/.well-known/jwks.json
+  RAG_OIDC_REQUIRED_SCOPE: https://api.REPLACE_WITH_DOMAIN/rag:brief
+  RAG_MAX_COSINE_DISTANCE: '0.65'
+  FALLBACK_ENABLED: 'true'
+  GROQ_MODEL: openai/gpt-oss-20b
+  GROQ_MAX_COMPLETION_TOKENS: '4096'
+  GROQ_TIMEOUT_SECONDS: '60'
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redpanda-connect-config
+  namespace: maintai
+data:
+  MQTT_URL: ssl://emqx-nlb.maintai.svc.cluster.local:8883
+  MQTT_TOPIC_FILTER: maintai/v1/site/+/machines/+/telemetry
+  KAFKA_BROKERS: REPLACE_WITH_MSK_BOOTSTRAP_BROKERS
+  KAFKA_TOPIC_READINGS: sensor.readings
+  KAFKA_TOPIC_REJECTED: sensor.rejected
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: drift-worker-config
+  namespace: maintai
+data:
+  ENVIRONMENT: production
+  DRIFT_S3_BUCKET: REPLACE_WITH_DRIFT_BUCKET
+  DRIFT_S3_REGION: REPLACE_WITH_REGION
+  DRIFT_S3_REQUIRED: 'true'
+  DRIFT_PROCESSING_READ_URL: https://processing.REPLACE_WITH_DOMAIN
+  DRIFT_OIDC_TOKEN_URL: REPLACE_WITH_COGNITO_TOKEN_URL
+  DRIFT_OIDC_CLIENT_ID: REPLACE_WITH_COGNITO_M2M_BUSINESS_WORKER_CLIENT_ID
+  DRIFT_PUSHGATEWAY_REQUIRED: 'true'
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ml-service-shadow-config
+  namespace: maintai
+data:
+  AWS_DEFAULT_REGION: REPLACE_WITH_REGION
+  AWS_REGION: REPLACE_WITH_REGION
+  MKL_NUM_THREADS: '1'
+  MODEL_DIR: /models/candidate
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  SERVICE_ROLE: shadow
+  UVICORN_WORKERS: '1'

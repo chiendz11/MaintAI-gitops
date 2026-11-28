@@ -242,6 +242,83 @@
           "min": 0
         }
       }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "KServe / Knative Revision Active Pods",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 0, "y": 30, "w": 8, "h": 8},
+      "targets": [
+        {
+          "expr": "sum by (kn_configuration_name) (kn_revision_pods_count{k8s_namespace_name=\"maintai-local\"})",
+          "legendFormat": "{{kn_configuration_name}} actual pods",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (kn_configuration_name) (kn_revision_pods_desired{k8s_namespace_name=\"maintai-local\"})",
+          "legendFormat": "{{kn_configuration_name}} desired pods",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "KServe / Knative Queue Proxy Concurrency",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 8, "y": 30, "w": 8, "h": 8},
+      "targets": [
+        {
+          "expr": "sum by (kn_configuration_name) (kn_revision_concurrency_stable{k8s_namespace_name=\"maintai-local\"})",
+          "legendFormat": "{{kn_configuration_name}} stable concurrency",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (knative_service) (kn_serving_queue_depth{job=\"knative-queue-proxy\"})",
+          "legendFormat": "{{knative_service}} queue depth",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "KServe / Knative Revision Request Latency p95 (ms)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "maintai-prometheus"
+      },
+      "gridPos": {"x": 16, "y": 30, "w": 8, "h": 8},
+      "targets": [
+        {
+          "expr": "1000 * histogram_quantile(0.95, sum by (le, knative_service) (rate(kn_serving_invocation_duration_seconds_bucket{job=\"knative-queue-proxy\"}[5m])))",
+          "legendFormat": "{{knative_service}} p95 (ms)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "min": 0
+        }
+      }
     }
   ]
 }

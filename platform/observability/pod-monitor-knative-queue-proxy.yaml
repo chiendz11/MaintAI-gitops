@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: knative-queue-proxy
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+    - kserve
+    - knative-serving
+  selector:
+    matchLabels:
+      serving.knative.dev/service: maintai-ml-champion
+  podMetricsEndpoints:
+  - port: http-usermetric
+    path: /metrics
+    interval: 15s

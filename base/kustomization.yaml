@@ -3,13 +3,14 @@ kind: Kustomization
 resources:
 - business-api
 - business-consumer
+- business-worker
 - frontend
-- ingestion-api
 - ml-service
 - processing-outbox-relay
 - processing-read-api
 - processing-worker
 - rag-service
+- redpanda-connect
 - sensor
 - simulator-ui
 - storage-consumer

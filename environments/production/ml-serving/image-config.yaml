@@ -1,0 +1,9 @@
+images:
+- path: spec/predictor/containers/image
+  create: false
+  kind: InferenceService
+  group: serving.kserve.io
+- path: spec/predictor/initContainers/image
+  create: false
+  kind: InferenceService
+  group: serving.kserve.io

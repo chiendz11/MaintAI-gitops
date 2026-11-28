@@ -100,6 +100,11 @@ spec:
             secretKeyRef:
               name: local-oidc-ml
               key: client_secret
+        - name: BUSINESS_WORKER_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: local-oidc-business-worker
+              key: client_secret
         ports:
         - containerPort: 8080
         - containerPort: 9000

@@ -1,0 +1,109 @@
+# Production EMQX MQTT Broker with MQTTS (8883) behind AWS NLB and hash_topic shared subscriptions.
+# Paused at 0 replicas until production MQTT TLS secret and NLB ingress CIDRs are reviewed.
+apiVersion: v1
+kind: Service
+metadata:
+  name: emqx-nlb
+  namespace: maintai
+  labels:
+    app.kubernetes.io/name: emqx
+    app.kubernetes.io/part-of: maintai
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: emqx
+  ports:
+  - name: mqtts
+    port: 8883
+    targetPort: 8883
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: emqx
+  namespace: maintai
+  labels:
+    app.kubernetes.io/name: emqx
+    app.kubernetes.io/part-of: maintai
+spec:
+  serviceName: emqx-nlb
+  replicas: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: emqx
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: emqx
+        app.kubernetes.io/part-of: maintai
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: emqx
+        image: emqx/emqx:5.8.6
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: EMQX_NODE__NAME
+          value: emqx@127.0.0.1
+        - name: EMQX_BROKER__SHARED_SUBSCRIPTION_STRATEGY
+          value: hash_topic
+        - name: EMQX_LISTENERS__TCP__DEFAULT__ENABLE
+          value: 'false'
+        - name: EMQX_LISTENERS__SSL__DEFAULT__BIND
+          value: 0.0.0.0:8883
+        - name: EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CERTFILE
+          value: /certs/mqtt/tls.crt
+        - name: EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__KEYFILE
+          value: /certs/mqtt/tls.key
+        - name: EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CACERTFILE
+          value: /certs/mqtt/ca.crt
+        ports:
+        - name: mqtts
+          containerPort: 8883
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: mqtt-tls
+          mountPath: /certs/mqtt
+          readOnly: true
+        - name: data
+          mountPath: /opt/emqx/data
+        - name: log
+          mountPath: /opt/emqx/log
+        readinessProbe:
+          tcpSocket:
+            port: 8883
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 6
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: '1'
+            memory: 1Gi
+      volumes:
+      - name: mqtt-tls
+        secret:
+          secretName: mqtt-tls
+          defaultMode: 288
+      - name: data
+        emptyDir: {}
+      - name: log
+        emptyDir: {}

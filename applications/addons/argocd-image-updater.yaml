@@ -17,8 +17,6 @@ spec:
         serviceAccount:
           create: true
           name: argocd-image-updater-controller
-          annotations:
-            eks.amazonaws.com/role-arn: REPLACE_WITH_IMAGE_UPDATER_ROLE
         config:
           gitUser: argocd-image-updater[bot]
           gitEmail: argocd-image-updater@maintai.invalid

@@ -1,7 +1,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: ingestion-api
+  name: redpanda-connect
   namespace: monitoring
 spec:
   namespaceSelector:
@@ -9,7 +9,7 @@ spec:
     - maintai
   selector:
     matchLabels:
-      app.kubernetes.io/name: ingestion-api
+      app.kubernetes.io/name: redpanda-connect
   endpoints:
   - port: http
     path: /metrics

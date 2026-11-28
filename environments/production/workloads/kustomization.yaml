@@ -2,8 +2,22 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: maintai
 resources:
+- ../params
 - ../../../base
+- emqx.yaml
+- external-secrets.yaml
+- service-accounts.yaml
+- configmaps.yaml
 - keda.yaml
+- hpa.yaml
+- pdb.yaml
+- network-policies.yaml
+- drift-worker.yaml
+- ml-service-shadow.yaml
+- hooks/business-migration.yaml
+- hooks/processing-migration.yaml
+- hooks/drift-migration.yaml
+- hooks/rag-knowledge-init.yaml
 configMapGenerator:
 - name: keda-kafka-auth-config
   options:
@@ -23,11 +37,17 @@ images:
 - name: registry.invalid/maintai-local/frontend
   newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-frontend
   newTag: REPLACE_WITH_RELEASE_TAG
-- name: registry.invalid/maintai-local/ingestion-api
-  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-ingestion-api
+- name: registry.invalid/maintai-local/drift-worker
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-drift-worker
   newTag: REPLACE_WITH_RELEASE_TAG
 - name: registry.invalid/maintai-local/ml-service
   newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-ml-service
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/ml-service-shadow
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-ml-service
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai/automation
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-automation
   newTag: REPLACE_WITH_RELEASE_TAG
 - name: registry.invalid/maintai-local/processing-outbox-relay
   newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-processing-outbox-relay
@@ -40,6 +60,9 @@ images:
   newTag: REPLACE_WITH_RELEASE_TAG
 - name: registry.invalid/maintai-local/rag-service
   newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-rag-service
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai-local/ingestion-connect
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-ingestion-connect
   newTag: REPLACE_WITH_RELEASE_TAG
 - name: registry.invalid/maintai-local/sensor
   newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-sensor
@@ -63,14 +86,6 @@ patches:
       value: 0
 - target:
     kind: Deployment
-    name: ingestion-api
-  patch: |-
-    - op: replace
-      path: /spec/strategy
-      value:
-        type: Recreate
-- target:
-    kind: Deployment
     name: business-api
   patch: |-
     - op: replace
@@ -91,6 +106,30 @@ patches:
             name: business-consumer-config
         - secretRef:
             name: business-database
+        - secretRef:
+            name: msk-scram-business
+- target:
+    kind: Deployment
+    name: business-worker
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/envFrom
+      value:
+        - configMapRef:
+            name: business-worker-config
+        - secretRef:
+            name: business-database
+- target:
+    kind: Deployment
+    name: redpanda-connect
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/envFrom
+      value:
+        - configMapRef:
+            name: redpanda-connect-config
+        - secretRef:
+            name: msk-scram-ingestion
 - target:
     kind: Deployment
     name: ml-service
@@ -160,3 +199,216 @@ patches:
         - secretRef:
             name: REPLACE_WITH_STORAGE_AWS_SECRET
 - path: patches.yaml
+replacements:
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.RAG_API_URL
+  targets:
+  - select:
+      kind: ConfigMap
+      name: business-api-config
+    fieldPaths:
+    - data.BUSINESS_RAG_URL
+  - select:
+      kind: ConfigMap
+      name: business-worker-config
+    fieldPaths:
+    - data.BUSINESS_RAG_URL
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.COGNITO_TOKEN_URL
+  targets:
+  - select:
+      kind: ConfigMap
+      name: business-api-config
+    fieldPaths:
+    - data.BUSINESS_RAG_OAUTH_TOKEN_URL
+  - select:
+      kind: ConfigMap
+      name: business-worker-config
+    fieldPaths:
+    - data.BUSINESS_RAG_OAUTH_TOKEN_URL
+  - select:
+      kind: ConfigMap
+      name: drift-worker-config
+    fieldPaths:
+    - data.DRIFT_OIDC_TOKEN_URL
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.COGNITO_M2M_BUSINESS_WORKER_CLIENT_ID
+  targets:
+  - select:
+      kind: ConfigMap
+      name: business-api-config
+    fieldPaths:
+    - data.BUSINESS_RAG_OAUTH_CLIENT_ID
+  - select:
+      kind: ConfigMap
+      name: business-worker-config
+    fieldPaths:
+    - data.BUSINESS_RAG_OAUTH_CLIENT_ID
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.RAG_OAUTH_SCOPE
+  targets:
+  - select:
+      kind: ConfigMap
+      name: business-api-config
+    fieldPaths:
+    - data.BUSINESS_RAG_OAUTH_SCOPE
+  - select:
+      kind: ConfigMap
+      name: business-worker-config
+    fieldPaths:
+    - data.BUSINESS_RAG_OAUTH_SCOPE
+  - select:
+      kind: ConfigMap
+      name: rag-service-config
+    fieldPaths:
+    - data.RAG_OIDC_REQUIRED_SCOPE
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.DRIFT_BUCKET
+  targets:
+  - select:
+      kind: ConfigMap
+      name: business-api-config
+    fieldPaths:
+    - data.BUSINESS_DRIFT_BUCKET
+  - select:
+      kind: ConfigMap
+      name: business-worker-config
+    fieldPaths:
+    - data.BUSINESS_DRIFT_BUCKET
+  - select:
+      kind: ConfigMap
+      name: drift-worker-config
+    fieldPaths:
+    - data.DRIFT_S3_BUCKET
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.AWS_REGION
+  targets:
+  - select:
+      kind: ConfigMap
+      name: business-api-config
+    fieldPaths:
+    - data.BUSINESS_DRIFT_S3_REGION
+  - select:
+      kind: ConfigMap
+      name: business-worker-config
+    fieldPaths:
+    - data.BUSINESS_DRIFT_S3_REGION
+  - select:
+      kind: ConfigMap
+      name: rag-service-config
+    fieldPaths:
+    - data.AWS_REGION
+    - data.AWS_DEFAULT_REGION
+  - select:
+      kind: ConfigMap
+      name: drift-worker-config
+    fieldPaths:
+    - data.DRIFT_S3_REGION
+  - select:
+      kind: ConfigMap
+      name: ml-service-shadow-config
+    fieldPaths:
+    - data.AWS_REGION
+    - data.AWS_DEFAULT_REGION
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.PROCESSING_READ_API_URL
+  targets:
+  - select:
+      kind: ConfigMap
+      name: business-api-config
+    fieldPaths:
+    - data.BUSINESS_PROCESSING_READ_URL
+  - select:
+      kind: ConfigMap
+      name: business-consumer-config
+    fieldPaths:
+    - data.BUSINESS_PROCESSING_READ_URL
+  - select:
+      kind: ConfigMap
+      name: business-worker-config
+    fieldPaths:
+    - data.BUSINESS_PROCESSING_READ_URL
+  - select:
+      kind: ConfigMap
+      name: drift-worker-config
+    fieldPaths:
+    - data.DRIFT_PROCESSING_READ_URL
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.COGNITO_ISSUER
+  targets:
+  - select:
+      kind: ConfigMap
+      name: business-api-config
+    fieldPaths:
+    - data.BUSINESS_OIDC_ISSUER
+  - select:
+      kind: ConfigMap
+      name: rag-service-config
+    fieldPaths:
+    - data.RAG_OIDC_ISSUER
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.COGNITO_JWKS_URL
+  targets:
+  - select:
+      kind: ConfigMap
+      name: business-api-config
+    fieldPaths:
+    - data.BUSINESS_OIDC_JWKS_URL
+  - select:
+      kind: ConfigMap
+      name: rag-service-config
+    fieldPaths:
+    - data.RAG_OIDC_JWKS_URL
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.COGNITO_BUSINESS_UI_CLIENT_ID
+  targets:
+  - select:
+      kind: ConfigMap
+      name: business-api-config
+    fieldPaths:
+    - data.BUSINESS_OIDC_AUDIENCE
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.MSK_BOOTSTRAP_BROKERS
+  targets:
+  - select:
+      kind: ConfigMap
+      name: business-consumer-config
+    fieldPaths:
+    - data.KAFKA_BOOTSTRAP_SERVERS
+  - select:
+      kind: ConfigMap
+      name: redpanda-connect-config
+    fieldPaths:
+    - data.KAFKA_BROKERS
+  - select:
+      kind: ScaledObject
+      name: processing-worker-scaledobject
+    fieldPaths:
+    - spec.triggers.0.metadata.bootstrapServers
+  - select:
+      kind: ScaledObject
+      name: business-consumer-scaledobject
+    fieldPaths:
+    - spec.triggers.0.metadata.bootstrapServers

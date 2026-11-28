@@ -30,8 +30,8 @@ spec:
       imageName: ghcr.io/chiendz11/maintai-business-consumer
     - alias: frontend
       imageName: ghcr.io/chiendz11/maintai-frontend
-    - alias: ingestion-api
-      imageName: ghcr.io/chiendz11/maintai-ingestion-api
+    - alias: ingestion-connect
+      imageName: ghcr.io/chiendz11/maintai-ingestion-connect
     - alias: ml-service
       imageName: ghcr.io/chiendz11/maintai-ml-service
     - alias: ml-service-shadow

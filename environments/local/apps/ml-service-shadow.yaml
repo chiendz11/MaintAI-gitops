@@ -91,8 +91,9 @@ spec:
       - name: models
         emptyDir: {}
       - name: artifact-lock
-        configMap:
-          name: ml-service-shadow-artifacts
+        secret:
+          secretName: ml-service-shadow-artifacts
+          defaultMode: 288
       initContainers:
       - name: fetch-and-verify-models
         image: registry.invalid/maintai/automation:NOT_BUILT

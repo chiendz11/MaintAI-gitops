@@ -30,6 +30,8 @@ spec:
       value: '0.85'
     - name: min-precision
       value: '0.50'
+    - name: publish-dry-run
+      value: 'true'
   volumes:
   - name: context
     configMap:
@@ -284,6 +286,9 @@ spec:
       - /workspace/{{inputs.parameters.slot}}
       - --context
       - /release/context.json
+      env:
+      - name: PUBLISH_DRY_RUN
+        value: '{{workflow.parameters.publish-dry-run}}'
       envFrom:
       - secretRef:
           name: local-gitops-pat

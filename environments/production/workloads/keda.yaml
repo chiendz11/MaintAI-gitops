@@ -18,7 +18,7 @@ spec:
     key: PROCESSING_KAFKA_USERNAME
   secretTargetRef:
   - parameter: password
-    name: maintai-processing
+    name: msk-scram-processing
     key: password
   - parameter: ca
     name: maintai-kafka-cluster-ca-cert
@@ -42,7 +42,7 @@ spec:
     key: BUSINESS_KAFKA_USERNAME
   secretTargetRef:
   - parameter: password
-    name: maintai-business
+    name: msk-scram-business
     key: password
   - parameter: ca
     name: maintai-kafka-cluster-ca-cert
@@ -87,7 +87,7 @@ spec:
   triggers:
   - type: kafka
     metadata:
-      bootstrapServers: maintai-kafka-kafka-bootstrap.maintai.svc.cluster.local:9093
+      bootstrapServers: REPLACE_WITH_MSK_BOOTSTRAP_BROKERS
       consumerGroup: processing-v1
       topic: sensor.readings
       lagThreshold: '50'
@@ -139,7 +139,7 @@ spec:
   triggers:
   - type: kafka
     metadata:
-      bootstrapServers: maintai-kafka-kafka-bootstrap.maintai.svc.cluster.local:9093
+      bootstrapServers: REPLACE_WITH_MSK_BOOTSTRAP_BROKERS
       consumerGroup: business-prediction-v1
       topic: inference.results
       lagThreshold: '50'

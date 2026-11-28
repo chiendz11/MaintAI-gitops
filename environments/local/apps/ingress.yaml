@@ -18,7 +18,6 @@ spec:
     - simulator.maintai.localhost
     - auth.maintai.localhost
     - api.maintai.localhost
-    - ingest.maintai.localhost
     - processing.maintai.localhost
     - grafana.maintai.localhost
     - mlflow.maintai.localhost
@@ -29,7 +28,6 @@ spec:
     - simulator.maintai.local
     - auth.maintai.local
     - api.maintai.local
-    - ingest.maintai.local
     - processing.maintai.local
     - grafana.maintai.local
     - mlflow.maintai.local
@@ -146,26 +144,6 @@ spec:
             name: business-api
             port:
               number: 8003
-  - host: ingest.maintai.localhost
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: ingestion-api
-            port:
-              number: 8000
-  - host: ingest.maintai.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: ingestion-api
-            port:
-              number: 8000
   - host: processing.maintai.localhost
     http:
       paths:

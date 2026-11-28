@@ -45,11 +45,11 @@ spec:
       manifestTargets:
         kustomize:
           name: registry.invalid/maintai-local/frontend
-    - alias: ingestion-api
-      imageName: ghcr.io/chiendz11/maintai-ingestion-api
+    - alias: ingestion-connect
+      imageName: ghcr.io/chiendz11/maintai-ingestion-connect
       manifestTargets:
         kustomize:
-          name: registry.invalid/maintai-local/ingestion-api
+          name: registry.invalid/maintai-local/ingestion-connect
     - alias: ml-service
       imageName: ghcr.io/chiendz11/maintai-ml-service
       manifestTargets:

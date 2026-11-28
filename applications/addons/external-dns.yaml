@@ -23,8 +23,8 @@ spec:
         - REPLACE_WITH_DOMAIN
         txtOwnerId: maintai-v13-production
         serviceAccount:
-          annotations:
-            eks.amazonaws.com/role-arn: REPLACE_WITH_EXTERNAL_DNS_ROLE
+          create: true
+          name: external-dns
   destination:
     server: https://kubernetes.default.svc
     namespace: external-dns

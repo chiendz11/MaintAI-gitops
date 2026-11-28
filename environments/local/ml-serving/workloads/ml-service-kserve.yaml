@@ -130,5 +130,6 @@ spec:
     - name: models
       emptyDir: {}
     - name: artifact-lock
-      configMap:
-        name: ml-service-champion-artifacts
+      secret:
+        secretName: ml-service-champion-artifacts
+        defaultMode: 288

@@ -3,6 +3,8 @@ kind: Issuer
 metadata:
   name: selfsigned-issuer
   namespace: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-40'
 spec:
   selfSigned: {}
 ---
@@ -11,6 +13,8 @@ kind: Certificate
 metadata:
   name: maintai-root-ca
   namespace: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-40'
 spec:
   isCA: true
   commonName: maintai-root-ca
@@ -28,6 +32,35 @@ kind: Issuer
 metadata:
   name: maintai-ca-issuer
   namespace: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-40'
 spec:
   ca:
     secretName: maintai-root-ca-secret
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: local-mqtt-tls
+  namespace: maintai-local
+  annotations:
+    argocd.argoproj.io/sync-wave: '-40'
+spec:
+  secretName: local-mqtt-tls
+  privateKey:
+    rotationPolicy: Always
+  issuerRef:
+    name: maintai-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+  commonName: mqtt.maintai.localhost
+  dnsNames:
+  - emqx
+  - emqx.maintai-local
+  - emqx.maintai-local.svc
+  - emqx.maintai-local.svc.cluster.local
+  - mqtt.maintai.localhost
+  - host.docker.internal
+  - localhost
+  ipAddresses:
+  - 127.0.0.1

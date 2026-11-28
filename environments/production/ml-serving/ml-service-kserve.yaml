@@ -1,0 +1,135 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: ml-service-champion
+  namespace: maintai
+  labels:
+    app.kubernetes.io/name: ml-service-champion
+    app.kubernetes.io/part-of: maintai
+    networking.knative.dev/visibility: cluster-local
+  annotations:
+    serving.kserve.io/deploymentMode: Knative
+    autoscaling.knative.dev/class: kpa.autoscaling.knative.dev
+    autoscaling.knative.dev/target-utilization-percentage: "70"
+    autoscaling.knative.dev/window: "60s"
+    autoscaling.knative.dev/panic-window-percentage: "10.0"
+    autoscaling.knative.dev/panic-threshold-percentage: "200.0"
+    autoscaling.knative.dev/scale-down-delay: "30s"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8001"
+    prometheus.io/path: "/metrics"
+spec:
+  predictor:
+    serviceAccountName: ml-service
+    automountServiceAccountToken: true
+    minReplicas: 2
+    maxReplicas: 8
+    scaleMetric: concurrency
+    scaleTarget: 4
+    containerConcurrency: 8
+    timeout: 10
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 10001
+      runAsGroup: 10001
+      fsGroup: 10001
+      seccompProfile:
+        type: RuntimeDefault
+    initContainers:
+    - name: fetch-and-verify-models
+      image: registry.invalid/maintai/automation:NOT_BUILT
+      imagePullPolicy: IfNotPresent
+      command:
+      - python
+      - -m
+      - maintai_automation
+      args:
+      - fetch-artifacts
+      - --config
+      - /artifact-lock/artifacts.json
+      envFrom:
+      - configMapRef:
+          name: ml-service-champion-config
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: tmp
+        mountPath: /tmp
+      - name: models
+        mountPath: /models
+      - name: artifact-lock
+        mountPath: /artifact-lock
+        readOnly: true
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+    containers:
+    - name: kserve-container
+      image: registry.invalid/maintai-local/ml-service:NOT_BUILT
+      imagePullPolicy: IfNotPresent
+      ports:
+      - containerPort: 8001
+        name: http1
+        protocol: TCP
+      envFrom:
+      - configMapRef:
+          name: ml-service-champion-config
+      - secretRef:
+          name: ml-api-auth
+      resources:
+        requests:
+          cpu: 250m
+          memory: 256Mi
+        limits:
+          cpu: "1"
+          memory: 512Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+          - ALL
+      volumeMounts:
+      - name: tmp
+        mountPath: /tmp
+      - name: models
+        mountPath: /models
+        readOnly: true
+      startupProbe:
+        httpGet:
+          path: /health/ready
+          port: 8001
+        periodSeconds: 5
+        timeoutSeconds: 2
+        failureThreshold: 60
+      readinessProbe:
+        httpGet:
+          path: /health/ready
+          port: 8001
+        periodSeconds: 5
+        timeoutSeconds: 2
+        failureThreshold: 3
+      livenessProbe:
+        httpGet:
+          path: /health/live
+          port: 8001
+        periodSeconds: 5
+        timeoutSeconds: 2
+        failureThreshold: 3
+    volumes:
+    - name: tmp
+      emptyDir: {}
+    - name: models
+      emptyDir: {}
+    - name: artifact-lock
+      secret:
+        secretName: ml-service-champion-artifacts
+        defaultMode: 288

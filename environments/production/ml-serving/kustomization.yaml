@@ -1,0 +1,44 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: maintai
+configurations:
+- image-config.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+resources:
+- ../params
+- external-secrets.yaml
+- ml-service-kserve.yaml
+- ml-traffic-mirror.yaml
+- ml-service-champion-pdb.yaml
+- ml-serving-network-policies.yaml
+configMapGenerator:
+- name: ml-service-champion-config
+  literals:
+  - AWS_DEFAULT_REGION=REPLACE_WITH_REGION
+  - AWS_REGION=REPLACE_WITH_REGION
+  - MKL_NUM_THREADS=1
+  - MODEL_DIR=/models/champion
+  - OMP_NUM_THREADS=1
+  - OPENBLAS_NUM_THREADS=1
+  - SERVICE_ROLE=champion
+  - UVICORN_WORKERS=1
+images:
+- name: registry.invalid/maintai-local/ml-service
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-ml-service
+  newTag: REPLACE_WITH_RELEASE_TAG
+- name: registry.invalid/maintai/automation
+  newName: REPLACE_WITH_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_WITH_REGION.amazonaws.com/maintai-automation
+  newTag: REPLACE_WITH_RELEASE_TAG
+replacements:
+- source:
+    kind: ConfigMap
+    name: maintai-production-params
+    fieldPath: data.AWS_REGION
+  targets:
+  - select:
+      kind: ConfigMap
+      name: ml-service-champion-config
+    fieldPaths:
+    - data.AWS_REGION
+    - data.AWS_DEFAULT_REGION

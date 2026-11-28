@@ -393,6 +393,37 @@
       "defaultClientScopes": [
         "basic"
       ]
+    },
+    {
+      "clientId": "maintai-business-worker",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": true,
+      "attributes": {},
+      "protocolMappers": [
+        {
+          "name": "audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "maintai-rag",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "secret": "${BUSINESS_WORKER_CLIENT_SECRET}",
+      "optionalClientScopes": [
+        "rag:brief"
+      ],
+      "defaultClientScopes": [
+        "basic"
+      ]
     }
   ],
   "users": [
@@ -503,6 +534,13 @@
     },
     {
       "name": "sensor:write",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "rag:brief",
       "protocol": "openid-connect",
       "attributes": {
         "include.in.token.scope": "true"

@@ -7,6 +7,16 @@ metadata:
 spec:
   template:
     spec:
+      serviceAccountName: business-api
+      containers:
+      - name: business-api
+        volumeMounts:
+        - name: m7-tokens
+          mountPath: /m7
+          readOnly: true
+        - name: oidc-rag
+          mountPath: /credentials/rag-oauth
+          readOnly: true
       volumes:
       - name: tokens
         secret:
@@ -16,6 +26,14 @@ spec:
         secret:
           secretName: processing-api-auth
           defaultMode: 288
+      - name: m7-tokens
+        secret:
+          secretName: m7-tokens
+          defaultMode: 288
+      - name: oidc-rag
+        secret:
+          secretName: oidc-rag
+          defaultMode: 288
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -24,6 +42,7 @@ metadata:
 spec:
   template:
     spec:
+      serviceAccountName: business-consumer
       volumes:
       - name: tokens
         secret:
@@ -33,25 +52,42 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ingestion-api
+  name: business-worker
 spec:
   template:
     spec:
+      serviceAccountName: business-worker
       containers:
-      - name: ingestion-api
+      - name: business-worker
         volumeMounts:
-        - name: mqtt-tls
-          mountPath: /certs/mqtt
+        - name: m7-tokens
+          mountPath: /m7
+          readOnly: true
+        - name: oidc-rag
+          mountPath: /credentials/rag-oauth
           readOnly: true
       volumes:
       - name: tokens
         secret:
           secretName: REPLACE_WITH_SERVICE_TOKENS_SECRET
           defaultMode: 288
-      - name: mqtt-tls
+      - name: m7-tokens
         secret:
-          secretName: REPLACE_WITH_MQTT_TLS_SECRET
+          secretName: m7-tokens
           defaultMode: 288
+      - name: oidc-rag
+        secret:
+          secretName: oidc-rag
+          defaultMode: 288
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redpanda-connect
+spec:
+  template:
+    spec:
+      serviceAccountName: redpanda-connect
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -127,6 +163,7 @@ metadata:
 spec:
   template:
     spec:
+      serviceAccountName: rag-service
       containers:
       - name: rag-service
         env:

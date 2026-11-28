@@ -20,8 +20,6 @@ spec:
         serviceAccount:
           create: true
           name: aws-load-balancer-controller
-          annotations:
-            eks.amazonaws.com/role-arn: REPLACE_WITH_LOAD_BALANCER_ROLE
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system

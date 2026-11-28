@@ -5,7 +5,6 @@ No real secret values, passwords, PATs, or TLS private keys are committed in `Ma
 | Secret suffix | Required JSON properties | Consumers |
 |---|---|---|
 | `processing/business/drift/mlflow/knowledge-database` | `url`, `username`, `password`, `credential_json` | matching owner DB client only |
-| `ingestion-auth` | `api_key` | Sensor and Ingestion |
 | `processing-api-auth` | `api_key` | Business, Drift and Processing Read API |
 | `ml-api-auth` | `api_key` | Processing Worker and ML |
 | `rag-api-auth` | `api_key` | Business and RAG |
